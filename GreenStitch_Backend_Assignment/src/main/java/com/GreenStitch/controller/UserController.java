@@ -39,8 +39,8 @@ public class UserController {
     @GetMapping("/signIn")
     public ResponseEntity<UserData> getLoggedInCustomerDetailsHandler(@RequestBody UserData loginData) throws BadCredentialsException {
         UserData customer = userRepository.findByEmail(loginData.getEmail());
-        if (// **Fix: Added password validation**
-        customer != null && passwordEncoder.matches(loginData.getPassword(), customer.getPassword())) {
+        if (customer != null && passwordEncoder.matches(loginData.getPassword(), customer.getPassword())) {
+            // **Fix: Added password validation**
             return new ResponseEntity<>(customer, HttpStatus.ACCEPTED);
         }
         throw new BadCredentialsException("Invalid Username or password");
