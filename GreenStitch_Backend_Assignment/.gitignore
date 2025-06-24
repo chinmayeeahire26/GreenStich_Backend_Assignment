@@ -1,33 +1,23 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.By;
+import org.testng.annotations.Test;
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+public class LoginTest {
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+    WebDriver driver;
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+    @Test
+    public void loginTest() {
+        driver.get("http://example.com/login");
+        WebElement username = driver.findElement(By.id("username"));
+        WebElement password = driver.findElement(By.id("password"));
+        WebElement loginButton = driver.findElement(By.id("loginButton"));
 
-### VS Code ###
-.vscode/
+        username.sendKeys("testuser");
+        password.sendKeys("password");
+        loginButton.click();
+
+        // Add assertions to verify login success
+    }
+}
