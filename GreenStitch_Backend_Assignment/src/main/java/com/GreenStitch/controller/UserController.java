@@ -40,7 +40,7 @@ public class UserController {
     public ResponseEntity<UserData> getLoggedInCustomerDetailsHandler(@RequestBody UserData loginData) throws BadCredentialsException {
         UserData customer = userRepository.findByEmail(loginData.getEmail());
         if (customer != null && passwordEncoder.matches(loginData.getPassword(), customer.getPassword())) {
-            // **Fix: Added password validation**
+            // **Fix: Correct password validation logic**
             return new ResponseEntity<>(customer, HttpStatus.ACCEPTED);
         }
         throw new BadCredentialsException("Invalid Username or password");
