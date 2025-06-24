@@ -1,28 +1,41 @@
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileElement;
+import io.appium.java_client.android.AndroidDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import java.net.URL;
 
 public class MobileLoginTest {
 
-    private WebDriver driver;
-    private WebDriverWait wait;
+    private AppiumDriver<MobileElement> driver;
 
-    public MobileLoginTest(WebDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, 10);
-    }
+    public void loginToMobileApplication() {
+        try {
+            DesiredCapabilities capabilities = new DesiredCapabilities();
+            capabilities.setCapability("platformName", "Android");
+            capabilities.setCapability("deviceName", "emulator-5554");
+            capabilities.setCapability("appPackage", "com.example.app");
+            capabilities.setCapability("appActivity", "com.example.app.MainActivity");
 
-    public void loginToMobileApp(String username, String password) {
-        WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("usernameFieldId")));
-        WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("passwordFieldId")));
-        WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("loginButtonId")));
+            driver = new AndroidDriver<>(new URL("http://127.0.0.1:4723/wd/hub"), capabilities);
 
-        usernameField.sendKeys(username);
-        passwordField.sendKeys(password);
-        loginButton.click();
+            MobileElement usernameField = driver.findElementById("com.example.app:id/username");
+            MobileElement passwordField = driver.findElementById("com.example.app:id/password");
+            MobileElement loginButton = driver.findElementById("com.example.app:id/loginButton");
 
-        // Add assertions or further steps as needed
+            usernameField.sendKeys("testuser");
+            passwordField.sendKeys("password123");
+            loginButton.click();
+
+            // Add assertions to verify successful login
+            MobileElement homeScreen = driver.findElementById("com.example.app:id/homeScreen");
+            assert homeScreen.isDisplayed();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
     }
 }
