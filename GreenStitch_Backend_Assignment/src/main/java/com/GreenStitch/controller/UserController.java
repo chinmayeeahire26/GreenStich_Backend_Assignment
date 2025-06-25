@@ -37,13 +37,14 @@ public class UserController {
     }
 
     @GetMapping("/signIn")
-public ResponseEntity<UserData> getLoggedInCustomerDetailsHandler(@RequestBody UserData loginData) throws BadCredentialsException {
-    UserData customer = userRepository.findByEmail(loginData.getEmail());
-    if (customer != null && passwordEncoder.matches(loginData.getPassword(), customer.getPassword())) {
-        return new ResponseEntity<>(customer, HttpStatus.ACCEPTED);
+    public ResponseEntity<UserData> getLoggedInCustomerDetailsHandler(@RequestBody UserData loginData) throws BadCredentialsException {
+        UserData customer = userRepository.findByEmail(loginData.getEmail());
+        if (customer != null && passwordEncoder.matches(loginData.getPassword(), customer.getPassword())) {
+            // **Fix: Correct password validation logic**
+            return new ResponseEntity<>(customer, HttpStatus.ACCEPTED);
+        }
+        throw new BadCredentialsException("Invalid Username or password");
     }
-    throw new BadCredentialsException("Invalid Username or password");
-}
 
     // first time user login with Email and password and got JWT token
     // Authentication with JWT token
