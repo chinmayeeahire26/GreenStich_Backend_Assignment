@@ -1,0 +1,14 @@
+@Override
+public UserData loginUser(String inputPassword) throws UserException {
+    SecurityContext sc  = SecurityContextHolder.getContext();
+    Authentication auth  = sc.getAuthentication();
+    String userName = auth.getName();
+    UserData user = userRepo.findByEmail(userName);
+    
+    // **Password validation logic**
+    if (user == null || !user.getPassword().equals(inputPassword)) {
+        throw new UserException("Invalid username or password");
+    }
+    
+    return user;
+}
