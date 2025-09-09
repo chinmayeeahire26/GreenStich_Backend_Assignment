@@ -1,0 +1,20 @@
+@Override
+   public UserData loginUser() {
+       SecurityContext sc  = SecurityContextHolder.getContext();
+       Authentication auth  = sc.getAuthentication();
+       String userName = auth.getName();
+       
+       // Validate username format
+       if (!isValidUsername(userName)) {
+           throw new UserException("Invalid username format");
+       }
+       
+       UserData user = userRepo.findByEmail(userName);
+       return user;
+   }
+
+   // New method to validate username
+   private boolean isValidUsername(String userName) {
+       // Add logic to validate username format, e.g., regex check
+       return userName != null && userName.matches("^[a-zA-Z0-9._-]{3,}$");
+   }
