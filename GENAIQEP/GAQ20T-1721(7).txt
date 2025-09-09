@@ -1,0 +1,8 @@
+@Override
+   public UserData loginUser(String email, String password) throws UserException {
+       UserData user = userRepo.findByEmail(email);
+       if (user == null || !user.getPassword().equals(password)) {
+           throw new UserException("Invalid email or password");
+       }
+       return user;
+   }
