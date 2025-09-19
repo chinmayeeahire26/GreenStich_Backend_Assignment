@@ -1,0 +1,25 @@
+@Override
+   public UserData loginUser(String password) throws UserException {
+       SecurityContext sc  = SecurityContextHolder.getContext();
+       Authentication auth  = sc.getAuthentication();
+       String userName = auth.getName();
+       UserData user = userRepo.findByEmail(userName);
+
+       // **Password validation logic**
+       if (!isValidPassword(password)) {
+           throw new UserException("Invalid password format.");
+       }
+
+       // **Check password matches**
+       if (!user.getPassword().equals(password)) {
+           throw new UserException("Incorrect password.");
+       }
+
+       return user;
+   }
+
+   // **New method for password validation**
+   private boolean isValidPassword(String password) {
+       // Implement password policy check here, e.g., length, special characters, etc.
+       return password.length() >= 8; // Example check
+   }
