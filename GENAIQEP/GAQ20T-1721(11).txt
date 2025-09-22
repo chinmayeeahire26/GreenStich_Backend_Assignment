@@ -1,0 +1,16 @@
+WebElement passwordField = driver.findElement(By.cssSelector("input._2IX_2-._3mctLh"));
+     passwordField.sendKeys("your_password");  // Ensure correct password handling
+
+     // Submit the login form
+     WebElement submitButton = driver.findElement(By.cssSelector("button._2KpZ6l._2HKlqd._3AWRsL"));
+     submitButton.click();
+
+     // Verify login success
+     try {
+         WebElement accountName = driver.findElement(By.cssSelector("div._1ruvv2"));
+         if (accountName.isDisplayed()) {
+             System.out.println("Login successful");
+         }
+     } catch (Exception e) {
+         System.out.println("Login failed");
+     }
