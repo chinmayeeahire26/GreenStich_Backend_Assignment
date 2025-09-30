@@ -1,7 +1,0 @@
-Title,Description,Action,Expected Result
-"Verify Application Name Selection Before Prompt Type","Ensure that the user must select an Application Name before choosing a Prompt Type when adding a new public prompt.","Action: Navigate to the 'Add New Public Prompt' section.","Expected Result: The section is displayed with fields for Application Name and Prompt Type. ",
-,,"Action: Attempt to select a Prompt Type without selecting an Application Name.","Expected Result: The system prevents selection of Prompt Type and prompts the user to select an Application Name first. ",
-,,"Action: Select an Application Name from the available options.","Expected Result: The Application Name is successfully selected and the Prompt Type field becomes active."
-"Verify Appropriate Prompt Type Display Based on Solution's Data Model","Ensure that only the appropriate Prompt Types are displayed based on the selected Application Name and the Solution's data model.","Action: Select an Application Name from the list.","Expected Result: The Application Name is selected and the Prompt Type field is activated. ",
-,,"Action: View the available Prompt Types after selecting an Application Name.","Expected Result: Only the Prompt Types relevant to the selected Application Name and Solution's data model are displayed. ",
-,,"Action: Select a Prompt Type from the displayed options.","Expected Result: The Prompt Type is successfully selected and corresponds to the Solution's data model."
