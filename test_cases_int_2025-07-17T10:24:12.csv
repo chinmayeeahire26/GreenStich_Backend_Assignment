@@ -1,0 +1,82 @@
+TestPlan ID,TestPlan Title,TestSuite ID,TestSuite Title,TestCase ID,TestCase Title,Assigned To,Description,Priority,Criticality,Reason,State,Test Steps,Other Field,Project Name
+GenAI-TP001,Login Plan,GenAI-TS001,Login Suite,GenAI-TC001,Successful Login,John Doe,Test login functionality,2,High,Valid user credentials,Passed,"StepNumber: 1
+Action: Open the browser and browse the @URL
+Expected Result: Genai Page should open.
+
+StepNumber: 2
+Action: Click on registration tab.
+Expected Result: Registration model page should open.
+
+StepNumber: 3
+Action: Leave email address field unfilled
+Expected Result: Error message should display.
+
+StepNumber: 4
+Action: Leave Password address field unfilled
+Expected Result: Error message should display.
+
+StepNumber: 5
+Action: Click the ""Register"" button.
+Expected Result: The popup message should display like Please fill all the mandatory fields.",Ensure credentials are correct before testing,Project Alpha
+GenAI-TP001,Login Plan,GenAI-TS002,Signup Suite,GenAI-TC002,Signup New User,Jane Smith,Test signup for new user,3,Medium,New user registration,Passed,"StepNumber: 1
+Action: Open the browser and browse the @URL
+Expected Result: Genai Page should open.
+
+StepNumber: 2
+Action: Click on registration tab.
+Expected Result: Registration model page should open.
+
+StepNumber: 3
+Action: Leave email address field unfilled
+Expected Result: Error message should display.
+
+StepNumber: 4
+Action: Leave Password address field unfilled
+Expected Result: Error message should display.
+
+StepNumber: 5
+Action: Click the ""Register"" button.
+Expected Result: The popup message should display like Please fill all the mandatory fields.",Check for email validation,Project Alpha
+GenAI-TP002,Signup Plan,GenAI-TS003,Profile Suite,GenAI-TC003,Profile Update,Emily White,Test profile update functionality,2,High,User updates profile information,Failed,"StepNumber: 1
+Action: Open the browser and browse the @URL
+Expected Result: Genai Page should open.
+
+StepNumber: 2
+Action: Click on registration tab.
+Expected Result: Registration model page should open.
+
+StepNumber: 3
+Action: Leave email address field unfilled
+Expected Result: Error message should display.
+
+StepNumber: 4
+Action: Leave Password address field unfilled
+Expected Result: Error message should display.
+
+StepNumber: 5
+Action: Click the ""Register"" button.
+Expected Result: The popup message should display like Please fill all the mandatory fields.",Ensure new data is saved,Project Alpha
+GenAI-TP003,Password Reset Plan,GenAI-TS004,Password Suite,GenAI-TC004,Reset Password,David Lee,Test password reset functionality,3,High,Resetting forgotten password,Passed,"step1: Enter email address, step2: Click reset password, step3: Follow email instructions",Check email delivery,Project Alpha
+GenAI-TP001,Login Plan,GenAI-TS005,Cart Suite,GenAI-TC005,Add to Cart,Olivia Green,Test adding item to cart,4,Medium,Add item to shopping cart,Passed,"step1: Select item, step2: Click add to cart, step3: Verify item in cart",Ensure cart updates,Project Alpha
+GenAI-TP004,Logout Plan,GenAI-TS001,Login Suite,GenAI-TC006,Verify Login,John Doe,Test login after logout,2,Critical,Login after session expiration,Passed,"step1: Enter username, step2: Enter password, step3: Click login",Check session reset,Project Alpha
+GenAI-TP003,Password Reset Plan,GenAI-TS006,Password Suite,GenAI-TC007,Password Reset via Email,James Harris,Test email-based password reset,2,Critical,Reset password via email link,Passed,"step1: Enter email, step2: Click reset password, step3: Follow email link",Test for correct email delivery,Project Alpha
+GenAI-TP002,Signup Plan,GenAI-TS007,Profile Suite,GenAI-TC008,User Profile Deletion,Michael Brown,Test deleting user profile,4,Medium,User deletes profile,Failed,"step1: Go to profile, step2: Click delete account, step3: Confirm deletion",Ensure confirmation prompt,Project Alpha
+GenAI-TP003,Password Reset Plan,GenAI-TS004,Password Suite,GenAI-TC009,Change Password,Emily White,Test changing password,2,High,User changes password after login,Passed,"step1: Enter old password, step2: Enter new password, step3: Confirm new password",Ensure password update,Project Alpha
+GenAI-TP005,Profile Update Plan,GenAI-TS002,Profile Suite,GenAI-TC010,Update Profile Picture,David Lee,Test updating profile picture,3,Low,Change user profile picture,Passed,"step1: Select image, step2: Upload image, step3: Save changes",Ensure image upload is successful,Project Alpha
+GenAI-TP006,Cart Plan,GenAI-TS003,Cart Suite,GenAI-TC011,Add Multiple Items to Cart,Olivia Green,Test adding multiple items to cart,3,Medium,Multiple item addition to cart,Passed,"step1: Select multiple items, step2: Click add to cart, step3: Verify items in cart",Check total price,Project Alpha
+GenAI-TP002,Signup Plan,GenAI-TS008,Signup Suite,GenAI-TC012,Email Confirmation,Emily White,Test email confirmation after signup,2,High,Check email verification,Passed,"step1: Enter email, step2: Click signup, step3: Verify email received",Ensure email is correctly received,Project Alpha
+GenAI-TP007,Checkout Plan,GenAI-TS002,Checkout Suite,GenAI-TC013,Complete Purchase,Sophia Adams,Test completing a purchase,2,High,Complete payment for a product,Passed,"step1: Enter payment details, step2: Confirm purchase, step3: Verify order confirmation",Check order confirmation,Project Alpha
+GenAI-TP008,Search Plan,GenAI-TS003,Search Suite,GenAI-TC014,Search for Product,James Harris,Test product search functionality,4,Medium,Search for item in catalog,Passed,"step1: Enter search term, step2: Click search, step3: Verify results",Ensure search results are accurate,Project Alpha
+GenAI-TP009,Payment Plan,GenAI-TS004,Payment Suite,GenAI-TC015,Payment Gateway Test,Liam Clark,Test processing payment with a gateway,2,Critical,Payment processing,Failed,"step1: Enter payment details, step2: Confirm payment, step3: Verify payment success",Check for gateway response,Project Alpha
+GenAI-TP005,Profile Update Plan,GenAI-TS003,Profile Suite,GenAI-TC016,Update Contact Information,David Lee,Test updating contact info in profile,2,Medium,User updates phone number,Passed,"step1: Enter new phone number, step2: Click update, step3: Verify update",Ensure number is saved correctly,Project Alpha
+GenAI-TP001,Login Plan,GenAI-TS003,Profile Suite,GenAI-TC017,Login with Social Media,Olivia Green,Test login via social media integration,3,High,Social media login,Failed,"step1: Click social media login, step2: Enter credentials, step3: Click login",Test social media authentication,Project Alpha
+GenAI-TP002,Signup Plan,GenAI-TS005,Signup Suite,GenAI-TC018,Signup with Google,James Harris,Test sign-up via Google,3,Medium,Sign up via Google,Passed,"step1: Click Google signup, step2: Enter Google credentials, step3: Confirm sign up",Ensure Google credentials are linked,Project Alpha
+GenAI-TP003,Password Reset Plan,GenAI-TS002,Password Suite,GenAI-TC019,Reset Password via SMS,David Lee,Test password reset via SMS,4,High,Reset via SMS link,Passed,"step1: Enter phone number, step2: Click reset password, step3: Follow SMS link",Ensure SMS link works,Project Alpha
+GenAI-TP001,Login Plan,GenAI-TS001,Login Suite,GenAI-TC020,Logout,Michael Brown,Test logout after session,4,Low,Logging out,Passed,"step1: Click logout, step2: Verify logout",Ensure user is logged out,Project Alpha
+GenAI-TP004,Logout Plan,GenAI-TS002,Logout Suite,GenAI-TC021,Logout Process,Olivia Green,Test logout process from different devices,4,Low,Logout after session timeout,Passed,"step1: Logout from one device, step2: Logout from another, step3: Confirm both sessions are cleared",Ensure all sessions are logged out,Project Alpha
+GenAI-TP007,Checkout Plan,GenAI-TS001,Checkout Suite,GenAI-TC022,Order Summary,David Lee,Test order summary after checkout,3,Medium,Verify the order details,Passed,"step1: Complete checkout, step2: Verify items in summary, step3: Confirm total amount",Ensure order details are correct,Project Alpha
+GenAI-TP008,Search Plan,GenAI-TS004,Search Suite,GenAI-TC023,Advanced Search,Michael Brown,Test advanced product search filters,4,Low,Advanced search functionality,Passed,"step1: Apply filter, step2: Enter search term, step3: Verify filtered results",Ensure advanced filters work correctly,Project beta
+GenAI-TP009,Payment Plan,GenAI-TS003,Payment Suite,GenAI-TC024,Payment Retry,Emily White,Test retrying payment on failure,2,High,Payment retry process,Failed,"step1: Enter invalid payment details, step2: Retry payment, step3: Verify success on retry",Ensure retry is successful after fixing errors,Project beta
+GenAI-TP010,Payment Plan,GenAI-TS004,Payment Suite,GenAI-TC025,Login with Invalid Credentials,Olivia Green,Test invalid login credentials,2,Critical,Invalid username/password,Failed,"step1: Enter invalid username, step2: Enter invalid password, step3: Click login",Ensure error message is displayed,Project beta
+GenAI-TP011,Payment Plan,GenAI-TS005,Payment Suite,GenAI-TC026,Profile Info Update,David Lee,Test profile info update without credentials,2,High,Update profile without login,Failed,"step1: Go to profile, step2: Try to update info without login, step3: Verify error message",Ensure error for unauthorized access,Project Alpha
+GenAI-TP012,Payment Plan,GenAI-TS006,Payment Suite,GenAI-TC027,Checkout without Payment,Emily White,Test checkout process without payment,2,Critical,Checkout without paying,Failed,"step1: Add items to cart, step2: Proceed to checkout, step3: Confirm order without entering payment details",Ensure order is not processed,Project Alpha
