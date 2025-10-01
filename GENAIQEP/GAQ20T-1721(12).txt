@@ -1,0 +1,2 @@
+WebElement passwordField = driver.findElement(By.cssSelector("input[type='password']"));
+   passwordField.sendKeys("your_password");
