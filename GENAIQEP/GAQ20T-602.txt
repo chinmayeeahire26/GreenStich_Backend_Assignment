@@ -1,0 +1,7 @@
+// Hypothetical API response code with X-XSS-Protection header
+   @GetMapping("/api/example")
+   public ResponseEntity<String> exampleApi() {
+       return ResponseEntity.ok()
+           .header("X-XSS-Protection", "1; mode=block")  // <-- Added line
+           .body("API Response");
+   }
