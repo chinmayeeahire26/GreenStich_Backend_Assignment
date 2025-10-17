@@ -1,0 +1,6 @@
+public interface UserService {
+    public UserData registerUser(UserData user) throws UserException;
+
+    // Removed @Override annotation from interface method
+    public UserData loginUser();
+}
