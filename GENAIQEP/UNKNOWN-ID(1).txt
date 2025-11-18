@@ -1,0 +1,4 @@
+// Error handling for file upload
+if (!isSupportedFormat(file)) {
+    return "The uploaded file format is not supported. Please use the correct template format.";
+}
