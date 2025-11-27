@@ -1,0 +1,21 @@
+WebElement username = driver.findElement(By.id("username"));
+if (username == null) {
+    throw new RuntimeException("Username field not found. Please check the 'id' configuration.");
+}
+
+// Validate username input
+String inputUsername = "testuser";
+if (!isValidUsername(inputUsername)) {
+    throw new IllegalArgumentException("Invalid username format. Please enter a valid username.");
+}
+username.sendKeys(inputUsername);
+
+WebElement password = driver.findElement(By.id("password"));
+password.sendKeys("testpassword");
+driver.findElement(By.id("loginButton")).click();
+
+// Helper method for username validation
+private boolean isValidUsername(String username) {
+    // Example validation: Check if username is alphanumeric and between 5-15 characters
+    return username.matches("^[a-zA-Z0-9]{5,15}$");
+}
