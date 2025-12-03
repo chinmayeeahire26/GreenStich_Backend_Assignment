@@ -1,0 +1,55 @@
+{
+  "Defect Analysis": {
+    "Defects": [
+      {
+        "Feature": "Login Functionality",
+        "Defects": ["D001", "D002"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.6,
+        "Impact Analysis": {
+          "Impact": "Critical",
+          "Reason": "Users are unable to log in, causing major disruptions."
+        }
+      },
+      {
+        "Feature": "Payment Gateway",
+        "Defects": ["D003", "D004"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.8,
+        "Impact Analysis": {
+          "Impact": "Critical",
+          "Reason": "Payment failures lead to loss of sales and customer trust."
+        }
+      },
+      {
+        "Feature": "User Profile Management",
+        "Defects": ["D005"],
+        "Feature Sentiment": "Neutral",
+        "Sentiment Score": 0.0,
+        "Impact Analysis": {
+          "Impact": "Medium",
+          "Reason": "Minor issues with profile updates, but not critical."
+        }
+      },
+      {
+        "Feature": "Search Functionality",
+        "Defects": ["D006"],
+        "Feature Sentiment": "Positive",
+        "Sentiment Score": 0.7,
+        "Impact Analysis": {
+          "Impact": "High",
+          "Reason": "Users find the search feature efficient and helpful."
+        }
+      }
+    ]
+  },
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Search Functionality is performing well with positive feedback.",
+    "Patterns of Frustration or Satisfaction": "Users express frustration over Login and Payment Gateway issues.",
+    "Feature Priority": "Payment Gateway should be prioritized due to critical impact.",
+    "Trends": "Increasing reports of login issues (D001, D002) indicate a trend in user dissatisfaction.",
+    "Performance/Security Concerns": "Payment Gateway defects (D003, D004) pose significant business risks.",
+    "Response Time for negative areas": "Response time for closed defects in Login Functionality was 48 hours.",
+    "Identify Sentiment Trends Over Time": "Negative sentiment is rising, particularly in critical features."
+  }
+}
