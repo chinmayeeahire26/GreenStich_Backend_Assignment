@@ -1,0 +1,55 @@
+{
+  "Defect Analysis": {
+    "Defects": [
+      {
+        "Feature": "Login Functionality",
+        "Defects": ["D001", "D002"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.7,
+        "Impact Analysis": {
+          "Impact": "Critical",
+          "Reason": "Users are unable to log in, causing significant disruption."
+        }
+      },
+      {
+        "Feature": "Payment Gateway",
+        "Defects": ["D003", "D004"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.6,
+        "Impact Analysis": {
+          "Impact": "High",
+          "Reason": "Issues with processing payments lead to loss of sales."
+        }
+      },
+      {
+        "Feature": "User Profile Management",
+        "Defects": ["D005"],
+        "Feature Sentiment": "Neutral",
+        "Sentiment Score": 0.0,
+        "Impact Analysis": {
+          "Impact": "Medium",
+          "Reason": "Minor issues that do not significantly affect user experience."
+        }
+      },
+      {
+        "Feature": "Search Functionality",
+        "Defects": ["D006"],
+        "Feature Sentiment": "Positive",
+        "Sentiment Score": 0.8,
+        "Impact Analysis": {
+          "Impact": "Low",
+          "Reason": "Users find the search feature effective and easy to use."
+        }
+      }
+    ]
+  },
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Search Functionality is performing well with positive feedback.",
+    "Patterns of Frustration or Satisfaction": "Users express frustration with Login and Payment Gateway defects.",
+    "Feature Priority": "Login Functionality should be prioritized due to critical impact.",
+    "Trends": "Negative sentiment is trending for Payment Gateway issues, particularly defects D003 and D004.",
+    "Performance/Security Concerns": "Defects D001 and D003 are performance sensitive and can impact business adversely.",
+    "Response Time for negative areas": "Response time for closed defects in Login Functionality was 48 hours.",
+    "Identify Sentiment Trends Over Time": "Overall sentiment is declining, especially in critical features."
+  }
+}
