@@ -1,0 +1,55 @@
+{
+  "Defect Analysis": {
+    "Defects": [
+      {
+        "Feature": "Login Functionality",
+        "Defects": ["D001", "D002"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.6,
+        "Impact Analysis": {
+          "Impact": "Critical",
+          "Reason": "Users are unable to log in, causing a complete halt in access to the application."
+        }
+      },
+      {
+        "Feature": "Payment Gateway",
+        "Defects": ["D003", "D004"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.8,
+        "Impact Analysis": {
+          "Impact": "High",
+          "Reason": "Transactions are failing, leading to loss of revenue and user trust."
+        }
+      },
+      {
+        "Feature": "User Profile Management",
+        "Defects": ["D005"],
+        "Feature Sentiment": "Neutral",
+        "Sentiment Score": 0.0,
+        "Impact Analysis": {
+          "Impact": "Medium",
+          "Reason": "Minor issues with profile updates that do not significantly affect user experience."
+        }
+      },
+      {
+        "Feature": "Search Functionality",
+        "Defects": ["D006"],
+        "Feature Sentiment": "Positive",
+        "Sentiment Score": 0.7,
+        "Impact Analysis": {
+          "Impact": "Low",
+          "Reason": "Users find the search feature effective and easy to use."
+        }
+      }
+    ]
+  },
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Search Functionality is performing well with positive feedback from users.",
+    "Patterns of Frustration or Satisfaction": "Users express frustration with the Payment Gateway and Login Functionality due to failures.",
+    "Feature Priority": "Login Functionality and Payment Gateway should be prioritized for immediate attention.",
+    "Trends": "The trend shows increasing dissatisfaction with payment processes, particularly defects D003 and D004.",
+    "Performance/Security Concerns": "Defects D003 and D004 are performance-sensitive as they directly affect transaction processing.",
+    "Response Time for negative areas": "Response time for resolving negative sentiment defects is currently averaging 3 days for closed defects.",
+    "Identify Sentiment Trends Over Time": "Overall sentiment is declining, particularly in critical features like Login and Payment."
+  }
+}
