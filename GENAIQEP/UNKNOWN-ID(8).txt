@@ -1,0 +1,55 @@
+{
+  "Defect Analysis": {
+    "Table": [
+      {
+        "Feature": "Login",
+        "Defects": ["D001", "D002"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.6,
+        "Impact Analysis": {
+          "Impact": "Critical",
+          "Reason": "Users are unable to log in, leading to loss of access to essential features."
+        }
+      },
+      {
+        "Feature": "Payment Processing",
+        "Defects": ["D003", "D004"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.8,
+        "Impact Analysis": {
+          "Impact": "Critical",
+          "Reason": "Payment failures are causing significant revenue loss and user dissatisfaction."
+        }
+      },
+      {
+        "Feature": "User Interface",
+        "Defects": ["D005"],
+        "Feature Sentiment": "Neutral",
+        "Sentiment Score": 0.0,
+        "Impact Analysis": {
+          "Impact": "Medium",
+          "Reason": "Minor UI glitches that do not affect overall functionality."
+        }
+      },
+      {
+        "Feature": "Search Functionality",
+        "Defects": ["D006"],
+        "Feature Sentiment": "Positive",
+        "Sentiment Score": 0.7,
+        "Impact Analysis": {
+          "Impact": "High",
+          "Reason": "Users find the search feature effective and easy to use."
+        }
+      }
+    ]
+  },
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Search Functionality is performing well with positive feedback.",
+    "Patterns of Frustration or Satisfaction": "Users express frustration with Login and Payment Processing defects.",
+    "Feature Priority": "Payment Processing should be prioritized due to its critical impact on revenue.",
+    "Trends": "The trend shows increasing dissatisfaction with Login and Payment Processing features.",
+    "Performance/Security Concerns": "Defects D003 and D004 are critical for business due to payment processing failures.",
+    "Response Time for negative areas": "Response time for closed defects in Login and Payment Processing was 3 days.",
+    "Identify Sentiment Trends Over Time": "Overall sentiment is declining, particularly in critical features."
+  }
+}
