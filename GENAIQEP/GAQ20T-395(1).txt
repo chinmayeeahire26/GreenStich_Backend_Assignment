@@ -1,0 +1,2 @@
+1) Description on code fix:  
+The issue with the modal dialogue box not fitting the screen during resizing is likely due to a lack of responsive design in the CSS or JavaScript handling the modal. The fix involves implementing dynamic resizing logic to ensure that the modal adjusts its size and position based on the viewport dimensions.
