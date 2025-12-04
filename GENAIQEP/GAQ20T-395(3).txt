@@ -1,0 +1,11 @@
+### 1) Description on code fix:
+The issue with the blueprint modal dialogue box not fitting the screen when resized is likely due to a lack of responsive design in the modal's CSS. To fix this, we need to ensure that the modal scales appropriately with the window size and that all elements remain accessible during resizing. This can be achieved by adjusting the CSS properties of the modal.
+
+### 2) Code fix:
+Relevant Code NOT Found  
+The provided code does not contain any UI components or modal dialogue box implementations. Therefore, there is no specific code to fix related to the bug described. The issue seems to be related to the front-end implementation, which is not included in the provided code snippets.
+
+### 3) Other Relevant details:
+- The bug is categorized under UI Design and Usability, indicating that it affects user interaction and experience.
+- To address the issue, the front-end code (HTML/CSS/JavaScript) responsible for rendering the modal should be reviewed and modified to ensure responsiveness.
+- Consider using CSS frameworks like Bootstrap or implementing CSS media queries to enhance the modal's adaptability to different screen sizes.
