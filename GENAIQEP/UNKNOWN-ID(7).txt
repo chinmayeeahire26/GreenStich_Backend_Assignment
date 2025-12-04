@@ -1,0 +1,26 @@
+### 1) Description on code fix:
+The issue arises from the lack of validation for duplicate organization names during the registration process. The fix involves adding a check in the `registerUser` method to ensure that the organization name is unique before saving it to the database.
+
+### 2) Code fix:
+
+```java
+// Original Code
+@Override
+public UserData registerUser(UserData user) {
+    return userRepo.save(user);
+}
+
+// New Code with Fix
+@Override
+public UserData registerUser(UserData user) throws UserException {
+    // Check for duplicate organization name
+    if (userRepo.existsByOrganizationName(user.getOrganizationName())) {
+        throw new UserException("Organization name must be unique.");
+    }
+    return userRepo.save(user);
+}
+```
+
+### 3) Other Relevant details:
+- The `UserRepository` interface should have a method `existsByOrganizationName(String organizationName)` to check for existing organization names.
+- This fix addresses both the code issue and the configuration issue by ensuring that the application logic enforces the uniqueness constraint on organization names.
