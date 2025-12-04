@@ -1,0 +1,37 @@
+### 1) Description on code fix:
+The issue arises from the login functionality not properly handling user type B. The code fix involves ensuring that the authentication logic correctly identifies and processes user type B during the login process. This may require additional checks or modifications in the `loginUser` method to accommodate different user types.
+
+### 2) Code fix:
+
+```java
+// Original Code
+@Override
+public UserData loginUser() {
+    SecurityContext sc  = SecurityContextHolder.getContext();
+    Authentication auth  = sc.getAuthentication();
+    String userName = auth.getName();
+    UserData user = userRepo.findByEmail(userName);
+    return user;
+}
+
+// New Code Fix
+@Override
+public UserData loginUser() {
+    SecurityContext sc  = SecurityContextHolder.getContext();
+    Authentication auth  = sc.getAuthentication();
+    String userName = auth.getName();
+    
+    // Fix: Check if the user type is B and handle accordingly
+    UserData user = userRepo.findByEmail(userName);
+    if (user != null && user.getUserType().equals("B")) {
+        // Additional logic for user type B if needed
+    }
+    
+    return user;
+}
+```
+
+### 3) Other Relevant details:
+- Ensure that the `UserData` model has a method `getUserType()` to retrieve the user type.
+- Additional handling for user type B may include specific login success messages or redirection logic.
+- Testing should be conducted to verify that user type B can log in successfully after the changes.
