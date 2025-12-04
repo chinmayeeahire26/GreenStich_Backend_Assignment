@@ -1,25 +1,24 @@
-public class FlickcartLoginTest {
-    public void loginToFlickcart() {
+public class ApplicationLoginTest {
+    public void loginToApplication() {
         // Initialize WebDriver
         WebDriver driver = new ChromeDriver();
-        driver.get("https://www.flickcart.com");
+        driver.get("https://example.com/login");
 
-        // Locate and fill in the username field
+        // Locate username and password fields
         WebElement usernameField = driver.findElement(By.id("username"));
-        usernameField.sendKeys("testuser");
-
-        // Locate and fill in the password field
         WebElement passwordField = driver.findElement(By.id("password"));
-        passwordField.sendKeys("password123");
 
-        // Locate and click the login button
+        // Input credentials
+        usernameField.sendKeys("testUser");
+        passwordField.sendKeys("testPassword");
+
+        // Click login button
         WebElement loginButton = driver.findElement(By.id("loginButton"));
         loginButton.click();
 
-        // Validate successful login
-        String expectedUrl = "https://www.flickcart.com/home";
-        String actualUrl = driver.getCurrentUrl();
-        assertEquals(expectedUrl, actualUrl);
+        // Validate login success
+        String expectedUrl = "https://example.com/dashboard";
+        Assert.assertEquals(expectedUrl, driver.getCurrentUrl());
 
         // Close the driver
         driver.quit();
