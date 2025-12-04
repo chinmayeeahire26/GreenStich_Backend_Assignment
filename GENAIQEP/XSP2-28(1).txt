@@ -1,0 +1,39 @@
+### 1) Description on code fix:
+The issue identified in the RCA indicates a configuration error related to user type B, which may prevent successful login. The code fix involves ensuring that the user type is correctly handled during the login process, particularly in the `loginUser` method of the `UserServiceImpl` class. This may include validating the user type before proceeding with the login.
+
+### 2) Code fix:
+
+Without Fix:
+```java
+@Override
+public UserData loginUser() {
+    SecurityContext sc  = SecurityContextHolder.getContext();
+    Authentication auth  = sc.getAuthentication();
+    String userName = auth.getName();
+    UserData user = userRepo.findByEmail(userName);
+    return user;
+}
+```
+
+With Fix:
+```java
+@Override
+public UserData loginUser() {
+    SecurityContext sc  = SecurityContextHolder.getContext();
+    Authentication auth  = sc.getAuthentication();
+    String userName = auth.getName();
+    
+    // Fix: Check if the user type is valid before proceeding
+    UserData user = userRepo.findByEmail(userName);
+    if (user == null || !user.getUserType().equals("B")) {
+        throw new UserException("Invalid user type or user not found.");
+    }
+    
+    return user;
+}
+```
+
+### 3) Other Relevant details:
+- The fix includes a validation step to ensure that the user type is correct before allowing the login to proceed.
+- This change helps prevent issues related to incorrect user type configurations that could lead to login failures.
+- Ensure that the `UserData` class has a method `getUserType()` that returns the user type for this fix to work correctly.
