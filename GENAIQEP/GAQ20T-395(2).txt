@@ -1,0 +1,12 @@
+### 1) Description on code fix:
+The issue identified in the RCA indicates that the modal dialogue box is not responsive to screen resizing, which leads to buttons and options being hidden. To fix this, we need to ensure that the modal dialogue box has appropriate CSS styles applied to make it responsive. This typically involves using CSS media queries or flexbox/grid layouts to adjust the modal's size and position based on the viewport dimensions.
+
+### 2) Code fix:
+Relevant Code NOT Found.
+
+The provided code snippets do not contain any implementation related to the modal dialogue box or its styling. The code primarily focuses on a Selenium test for logging into Flipkart and user service implementations in a Spring application. Therefore, the specific code related to the modal dialogue box is not present in the provided code.
+
+### 3) Other Relevant details:
+- The issue is likely related to the front-end implementation of the modal dialogue, which is not included in the provided code.
+- To resolve the issue, the front-end team should review the CSS and JavaScript responsible for rendering the modal dialogue box to ensure it is responsive.
+- Consider using frameworks like Bootstrap or CSS Grid/Flexbox for better responsiveness in modal dialogues.
