@@ -1,0 +1,31 @@
+### 1) Description on code fix:
+The issue arises from the repository selection not resetting its state when a new repository is selected. To fix this, we need to ensure that the state is properly reset and updated whenever a new repository is selected. This involves adding logic to clear the previous repository's state before fetching files from the newly selected repository.
+
+### 2) Code fix:
+
+```java
+// Code without the Fix
+public void selectRepository(Repository newRepository) {
+    // Assuming 'currentRepository' holds the currently selected repository
+    if (currentRepository != null) {
+        // Logic to fetch files from the current repository
+        fetchFiles(currentRepository);
+    }
+    // Logic to fetch files from the new repository
+    fetchFiles(newRepository);
+}
+
+// New Code fix
+public void selectRepository(Repository newRepository) {
+    // Clear previous state before selecting a new repository
+    clearPreviousState(); // Fix: Added line to reset state
+    
+    // Logic to fetch files from the new repository
+    fetchFiles(newRepository);
+}
+```
+
+### 3) Other Relevant details:
+- The `clearPreviousState()` method should be implemented to reset any variables or states related to the previously selected repository.
+- Ensure that the `fetchFiles()` method is only called after the state has been cleared to avoid fetching outdated data.
+- This fix addresses both the code issue and the process issue identified in the RCA by ensuring proper validation and state management.
