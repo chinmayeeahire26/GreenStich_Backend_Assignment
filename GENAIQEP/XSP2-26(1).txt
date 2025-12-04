@@ -1,0 +1,91 @@
+### 1) Description on code fix:
+The issue with the landing page not displaying correctly in Chrome may be related to the configuration or environment settings. To address this, we can ensure that the ChromeDriver is compatible with the installed version of Chrome and that any necessary configurations are set correctly before launching the browser.
+
+### 2) Code fix:
+
+Without Fix:
+```java
+public void loginToFlipkart() {
+    System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+    WebDriver driver = new ChromeDriver();
+    driver.get("https://www.flipkart.com");
+    
+    // Close the login popup if it appears
+    try {
+        WebElement closeButton = driver.findElement(By.cssSelector("button._2KpZ6l._2doB4z"));
+        closeButton.click();
+    } catch (Exception e) {
+        System.out.println("Login popup not displayed");
+    }
+
+    // Click on the login button
+    WebElement loginButton = driver.findElement(By.cssSelector("a._1_3w1N"));
+    loginButton.click();
+
+    // Enter username and password
+    WebElement usernameField = driver.findElement(By.cssSelector("input._2IX_2-._2LYh3d"));
+    usernameField.sendKeys("your_username");
+
+    WebElement passwordField = driver.findElement(By.cssSelector("input._2IX_2-._3mctLh"));
+    passwordField.sendKeys("your_password");
+
+    // Submit the login form
+    WebElement submitButton = driver.findElement(By.cssSelector("button._2KpZ6l._2HKlqd._3AWRsL"));
+    submitButton.click();
+
+    // Verify login success
+    // Add verification logic here
+
+    driver.quit();
+}
+```
+
+With Fix:
+```java
+public void loginToFlipkart() {
+    System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+    WebDriver driver = new ChromeDriver();
+    
+    // Ensure ChromeDriver is compatible with the installed Chrome version
+    // Add options to handle potential configuration issues
+    ChromeOptions options = new ChromeOptions();
+    options.addArguments("--start-maximized"); // Start maximized to avoid layout issues
+    options.addArguments("--disable-infobars"); // Disable infobars
+    driver = new ChromeDriver(options); // Use options in ChromeDriver
+
+    driver.get("https://www.flipkart.com");
+    
+    // Close the login popup if it appears
+    try {
+        WebElement closeButton = driver.findElement(By.cssSelector("button._2KpZ6l._2doB4z"));
+        closeButton.click();
+    } catch (Exception e) {
+        System.out.println("Login popup not displayed");
+    }
+
+    // Click on the login button
+    WebElement loginButton = driver.findElement(By.cssSelector("a._1_3w1N"));
+    loginButton.click();
+
+    // Enter username and password
+    WebElement usernameField = driver.findElement(By.cssSelector("input._2IX_2-._2LYh3d"));
+    usernameField.sendKeys("your_username");
+
+    WebElement passwordField = driver.findElement(By.cssSelector("input._2IX_2-._3mctLh"));
+    passwordField.sendKeys("your_password");
+
+    // Submit the login form
+    WebElement submitButton = driver.findElement(By.cssSelector("button._2KpZ6l._2HKlqd._3AWRsL"));
+    submitButton.click();
+
+    // Verify login success
+    // Add verification logic here
+
+    driver.quit();
+}
+```
+
+### 3) Other Relevant details:
+- Ensure that the ChromeDriver version matches the installed version of Chrome to avoid compatibility issues.
+- Consider adding error handling for cases where elements may not be found due to page load issues.
+- Test the application in different environments to confirm that the issue is resolved across all configurations.
