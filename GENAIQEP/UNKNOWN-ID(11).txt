@@ -1,0 +1,2 @@
+1) Description on code fix:  
+The issue arises from the API expecting specific keywords for artifact generation, which leads to user confusion. To address this, we need to ensure that the documentation clearly specifies the required keywords for prompts related to Epic artifacts. However, since the provided code does not directly relate to the Epic artifacts generation functionality, no code fix can be applied here.
