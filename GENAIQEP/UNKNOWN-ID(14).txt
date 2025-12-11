@@ -1,0 +1,25 @@
+### 1) Description on code fix:
+The code fix involves modifying the prompt validation logic to accept keywords specific to Epic artifacts, such as `{epic description}` and `{acceptance criteria}`, in addition to the existing keywords `{feature description}` and `{feature acceptance criteria}`. This will resolve the issue of users being unable to generate Epic artifacts when using the expected keywords for their prompts.
+
+### 2) Code fix:
+
+Code without the Fix:
+```python
+def generate_epic_artifacts(prompt):
+    if "{feature description}" not in prompt or "{feature acceptance criteria}" not in prompt:
+        raise ValueError("Invalid prompt keywords. Please use {feature description} and {feature acceptance criteria}.")
+    # Logic to generate epic artifacts
+```
+
+New Code Fix:
+```python
+def generate_epic_artifacts(prompt):
+    if ("{feature description}" not in prompt and "{epic description}" not in prompt) or 
+       ("{feature acceptance criteria}" not in prompt and "{acceptance criteria}" not in prompt):
+        raise ValueError("Invalid prompt keywords. Please use {feature description}, {feature acceptance criteria}, {epic description}, or {acceptance criteria}.")
+    # Logic to generate epic artifacts
+```
+
+### 3) Other Relevant details:
+- The fix enhances user experience by allowing flexibility in the keywords used for prompts, aligning with user expectations.
+- Documentation should be updated to reflect the new keywords that can be used for Epic artifacts generation to reduce confusion among users.
