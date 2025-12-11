@@ -1,0 +1,2 @@
+1) Description on code fix:  
+The code fix addresses the security vulnerability related to improper file path handling by ensuring that file paths in package filesystem tarballs start with `./` (dot slash). This prevents remote attackers from manipulating paths to gain unauthorized privileges.
