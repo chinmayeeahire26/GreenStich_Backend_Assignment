@@ -1,0 +1,10 @@
+### 1) Description on code fix:
+The issue of overlapping and misaligned feature names on the y-axis of the heat map can be addressed by adjusting the CSS styles responsible for rendering the labels. This may involve modifying the font size, line height, or margin settings to ensure proper spacing and alignment.
+
+### 2) Code fix:
+Relevant Code NOT Found.  
+The provided code snippets do not contain any functionality related to rendering the heat map or its y-axis labels. Therefore, no specific code fix can be identified from the given code.
+
+### 3) Other Relevant details:
+- The issue is primarily a UI/UX concern and would typically be addressed in the front-end code, possibly involving JavaScript and CSS.
+- It is advisable to review the heat map rendering logic and styles in the relevant front-end files to implement the necessary adjustments for label alignment.
