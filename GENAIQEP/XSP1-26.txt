@@ -1,0 +1,24 @@
+### 1) Description on code fix:
+The root cause of the defect is an incorrect configuration in the landing page settings, which is not directly related to the provided code. However, the code does not contain any logic to handle navigation to the store page or to verify the correct landing page. A potential fix would involve adding a method to verify that the correct landing page is displayed after navigation.
+
+### 2) Code fix:
+Code without the Fix:
+```java
+// Verify login success
+// Add verification logic here
+```
+
+New Code fix:
+```java
+// Verify login success
+String expectedUrl = "https://www.flipkart.com/store"; // Expected landing page URL
+String actualUrl = driver.getCurrentUrl();
+if (!actualUrl.equals(expectedUrl)) {
+    System.out.println("Landing page is incorrect. Expected: " + expectedUrl + ", but got: " + actualUrl);
+}
+```
+
+### 3) Other Relevant details:
+- The fix adds a verification step to check if the user is redirected to the correct landing page after logging in.
+- This code assumes that the expected landing page URL is known and can be compared against the actual URL after navigation.
+- Ensure that the expected URL is updated according to the actual landing page of the application.
