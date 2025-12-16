@@ -1,0 +1,11 @@
+### 1) Description on code fix:
+The issue arises from the handling of deleted and recreated epics in the Jira data model. The code needs to ensure that when an epic is deleted and then recreated, the system correctly processes the new epic without assuming it is still linked to the previous instance. This may involve adding checks to handle the state of the epic properly.
+
+### 2) Code fix:
+Relevant Code NOT Found.  
+The provided code snippets do not contain any logic related to importing or handling Jira epics. The code primarily focuses on user login functionality and does not address the specific issue of handling deleted and recreated epics in the Jira data model.
+
+### 3) Other Relevant details:
+- The bug report indicates that the issue is related to the import functionality of epics in a Jira context, which is not represented in the provided code.
+- The fix would likely involve changes in the service or repository layer that interacts with the Jira API or database to ensure proper handling of epic states.
+- It may be necessary to review the relevant classes or methods that deal with the import process for Jira epics to identify the exact code that requires modification.
