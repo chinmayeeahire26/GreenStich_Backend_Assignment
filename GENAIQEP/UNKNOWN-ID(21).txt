@@ -1,0 +1,12 @@
+### 1) Description on code fix:
+The issue arises from users misusing prompt keywords when generating Epic artifacts. To address this, we need to implement a validation mechanism that checks the keywords used in the prompts and provides feedback to the users if incorrect keywords are detected. This will help guide users to use the correct keywords such as `{feature description}` and `{feature acceptance criteria}`.
+
+### 2) Code fix:
+Relevant Code NOT Found.
+
+The provided code snippets do not relate to the Epic artifacts generation functionality or the handling of prompt keywords. The code primarily focuses on user login functionality and does not include any logic for generating Epic artifacts or validating prompt keywords.
+
+### 3) Other Relevant details:
+- The existing implementation relies on user input without validation, leading to confusion and errors.
+- A potential fix would involve adding a validation method in the relevant service or controller that processes the prompts for Epic artifacts generation.
+- Documentation should also be updated to clarify the expected keywords for users to avoid future confusion.
