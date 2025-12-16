@@ -1,0 +1,2 @@
+1) Description on code fix:  
+The code fix involves adding validation logic to check if the required inputs (account, project, role) are selected before submitting the form. If any of these inputs are missing, an error message will be displayed instead of the success message.
