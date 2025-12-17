@@ -1,0 +1,1 @@
+Based on the provided information, the defect CP-5380 is related to a code logic error and incorrect configuration settings. However, the provided code snippet does not contain any business logic or configuration settings; it only includes a basic test class for a Spring Boot application. Therefore, the relevant code for the defect is not present in the snippet provided.
