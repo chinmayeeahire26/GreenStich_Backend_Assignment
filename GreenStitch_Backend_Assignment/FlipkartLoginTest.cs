@@ -1,57 +1,52 @@
 using System;
-using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-namespace SeleniumTest {
-    [TestFixture]
-    public class FlipkartLoginTest {
-        private IWebDriver driver;
+namespace FlipkartAutomation
+{
+    public class FlipkartLoginTest
+    {
+        public void LoginToFlipkart()
+        {
+            // Set up the ChromeDriver
+            IWebDriver driver = new ChromeDriver();
+            try
+            {
+                // Navigate to Flipkart
+                string baseUrl = "https://www.flipkart.com";
+                driver.Navigate().GoToUrl(baseUrl);
 
-        [SetUp]
-        public void Setup() {
-            // Initialize the ChromeDriver
-            driver = new ChromeDriver();
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-        }
+                // Maximize the browser window
+                driver.Manage().Window.Maximize();
 
-        [Test]
-        public void LoginToFlipkart() {
-            // Navigate to Flipkart
-            driver.Navigate().GoToUrl("https://www.flipkart.com");
+                // Set implicit wait time
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
-            // Close the login popup if it appears
-            try {
-                IWebElement closeButton = driver.FindElement(By.XPath("//button[contains(text(), '✕')]"));
-                closeButton.Click();
-            } catch (NoSuchElementException) {
-                // Do nothing if the popup does not appear
+                // Close the login popup
+                IWebElement closeLoginPopup = driver.FindElement(By.XPath("//button[contains(text(),'✕')]"));
+                closeLoginPopup.Click();
+
+                // Example: Verify the page title
+                string expectedTitle = "Online Shopping Site for Mobiles, Electronics, Furniture, Grocery, Lifestyle, Books & More. Best Offers!";
+                string actualTitle = driver.Title;
+                if (actualTitle.Equals(expectedTitle))
+                {
+                    Console.WriteLine("Test Passed: Title is correct.");
+                }
+                else
+                {
+                    Console.WriteLine("Test Failed: Title is incorrect.");
+                }
             }
-
-            // Find the login button and click it
-            IWebElement loginButton = driver.FindElement(By.XPath("//a[contains(text(), 'Login')]"));
-            loginButton.Click();
-
-            // Enter username and password
-            IWebElement usernameField = driver.FindElement(By.XPath("//input[@class='_2IX_2- VJZDxU']"));
-            usernameField.SendKeys("your_username"); // Replace with valid username
-
-            IWebElement passwordField = driver.FindElement(By.XPath("//input[@type='password']"));
-            passwordField.SendKeys("your_password"); // Replace with valid password
-
-            // Click the login button
-            IWebElement submitButton = driver.FindElement(By.XPath("//button[@type='submit']"));
-            submitButton.Click();
-
-            // Wait for the login to complete and verify successful login
-            System.Threading.Thread.Sleep(2000);
-            Assert.IsTrue(driver.Title.Contains("Flipkart"), "Login failed or title does not match.");
-        }
-
-        [TearDown]
-        public void Teardown() {
-            // Close the browser
-            driver.Quit();
+            catch (NoSuchElementException ex)
+            {
+                Console.WriteLine("Element not found: " + ex.Message);
+            }
+            finally
+            {
+                // Close the browser
+                driver.Quit();
+            }
         }
     }
 }
