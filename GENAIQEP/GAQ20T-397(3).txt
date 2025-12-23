@@ -1,0 +1,2 @@
+1) Description on code fix:  
+The issue arises when attempting to delete an organization that is assigned to users. To fix this, we need to ensure that the deletion logic checks for any user associations before proceeding with the deletion. This requires adding a method to verify if the organization has any associated users and handle the deletion accordingly.
