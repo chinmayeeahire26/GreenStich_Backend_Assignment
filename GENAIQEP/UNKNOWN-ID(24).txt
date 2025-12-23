@@ -1,0 +1,1 @@
+The provided code snippets do not directly relate to the issue described in the RCA and Open Bug details, which pertain to Epic artifacts generation in a Jira-related application. The code snippets are related to a Flipkart login test and a user service implementation, neither of which are relevant to the described defect involving prompt keywords for Epic artifacts generation.
