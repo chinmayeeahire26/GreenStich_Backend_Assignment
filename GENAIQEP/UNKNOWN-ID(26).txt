@@ -1,0 +1,2 @@
+1) Description on code fix:  
+The issue identified in the RCA is related to incorrect prompt keywords used for generating Epic artifacts. The code provided does not directly relate to the Epic artifacts generation functionality. However, to address the user confusion regarding the keywords, we can implement a validation mechanism in the prompt handling logic to ensure that the correct keywords are used. This would help prevent the generation failure due to incorrect prompt keywords.
