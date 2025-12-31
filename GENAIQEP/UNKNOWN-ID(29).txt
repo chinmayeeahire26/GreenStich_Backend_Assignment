@@ -1,0 +1,45 @@
+{
+  "Defect Analysis": [
+    {
+      "Feature": "Login",
+      "Defects": ["D001", "D002"],
+      "Feature Sentiment": "Negative",
+      "Sentiment Score": -0.8,
+      "Impact Analysis": "Critical",
+      "Reason": "Users unable to login due to server timeout. Frequent login failures reported by users."
+    },
+    {
+      "Feature": "Payment Processing",
+      "Defects": ["D003"],
+      "Feature Sentiment": "Negative",
+      "Sentiment Score": -0.7,
+      "Impact Analysis": "High",
+      "Reason": "Payment gateway integration issues causing transaction failures. User complaints about payment not going through."
+    },
+    {
+      "Feature": "User Interface",
+      "Defects": ["D004", "D005"],
+      "Feature Sentiment": "Neutral",
+      "Sentiment Score": 0.2,
+      "Impact Analysis": "Medium",
+      "Reason": "Minor UI glitches affecting user experience. No major impact reported."
+    },
+    {
+      "Feature": "Notifications",
+      "Defects": ["D006"],
+      "Feature Sentiment": "Positive",
+      "Sentiment Score": 0.6,
+      "Impact Analysis": "Low",
+      "Reason": "Notifications working as expected with minor delays. Users appreciate timely alerts."
+    }
+  ],
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Notifications feature is performing well with positive user feedback.",
+    "Patterns of Frustration or Satisfaction": "Frustration observed in Login and Payment Processing due to technical failures.",
+    "Feature Priority": "Login and Payment Processing need immediate attention due to critical impact.",
+    "Trends": "Increase in negative sentiment for Login feature due to repeated server issues (D001, D002).",
+    "Performance/Security Concerns": "Login feature has performance issues causing server timeouts.",
+    "Response Time for negative areas": "Average response time for closing negative sentiment defects is 3 days.",
+    "Identify Sentiment Trends Over Time": "Negative sentiment increasing for Login and Payment Processing features."
+  }
+}
