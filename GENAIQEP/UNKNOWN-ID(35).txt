@@ -1,0 +1,33 @@
+Based on the information provided, the main issue is that the Epic artifacts generation fails due to incorrect prompt keywords. The current implementation uses keywords specific to features rather than epics, which causes confusion and errors. The RCA highlights that the root cause is the lack of proper guidelines and incorrect keywords used in prompts.
+
+However, the provided code snippet does not include any functionality related to the Epic artifacts generation or the handling of prompt keywords. The code is a simple Spring Boot test class without any business logic or relevant functionality related to the described issue.
+
+Given this context, here is the analysis:
+
+1) Description on code fix:
+   - The provided code snippet does not contain the relevant logic for handling Epic artifacts generation or prompt keyword processing. Therefore, no code fix can be applied to this snippet.
+
+2) Code fix:
+   - Existing Code:
+     ```java
+     package com.GreenStitch;
+
+     import org.junit.jupiter.api.Test;
+     import org.springframework.boot.test.context.SpringBootTest;
+
+     @SpringBootTest
+     class GreenStitchBackendAssignmentApplicationTests {
+
+         @Test
+         void contextLoads() {
+         }
+
+     }
+     ```
+   - New Code with Fix:
+     - Relevant Code NOT Found.
+
+3) Other Relevant details:
+   - The actual logic for Epic artifacts generation and prompt keyword processing is likely located in another part of the codebase, which was not provided.
+   - To address the issue, the relevant code should be updated to support keywords like `{epic description}` and `{acceptance criteria}` specifically for epics.
+   - Additionally, updating the documentation to provide clear guidelines on the correct usage of prompt keywords would help mitigate user confusion.
