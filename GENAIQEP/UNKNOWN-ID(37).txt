@@ -1,0 +1,11 @@
+### 1) Description on code fix:
+The issue with the overlapping and misaligned feature names on the y-axis of the heat map is likely due to incorrect data fetching logic or missing dependencies in the JavaScript responsible for rendering the UI. The fix involves ensuring that the data fetching logic is corrected and that all necessary JavaScript libraries are included to prevent rendering issues.
+
+### 2) Code fix:
+
+Relevant Code NOT Found
+
+### 3) Other Relevant details:
+- The bug is related to UI rendering, which is typically handled in the frontend code, possibly in JavaScript or CSS.
+- The provided code snippets are primarily backend Java and Selenium test code, which do not directly address the UI rendering issues described in the bug report.
+- Further investigation into the frontend codebase is necessary to identify the specific areas that require fixes for the heat map rendering.
