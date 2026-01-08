@@ -1,0 +1,18 @@
+Based on the information provided, it seems that the specific source code related to the defect "CP-5380" is not included in your request. Without the actual code, I cannot analyze or identify the specific fix needed for the defect. Therefore, I must conclude:
+
+Relevant Code NOT Found
+
+However, I can provide guidance on how to approach the situation:
+
+1) Description on code fix:
+   - Without the specific code, it's challenging to pinpoint the exact fix. Generally, the fix would involve identifying the erroneous logic or oversight in the code that is causing the defect and correcting it to ensure the application behaves as expected.
+
+2) Code fix:
+   - Since the code is not provided, I cannot display the code before and after the fix. Typically, this would involve showing the original code with the defect and the modified code with the fix highlighted.
+
+3) Other Relevant details:
+   - Review previous defects "CP-6628" and "CP-5427" for similar issues and resolutions.
+   - Collaborate with the assignee, Thirumoorthy Govindan, for insights on the defect and potential fixes.
+   - Ensure thorough testing after implementing the fix to prevent recurrence of similar issues.
+
+If you can provide the specific code snippet related to the defect, I would be able to assist further in identifying and suggesting a fix.
