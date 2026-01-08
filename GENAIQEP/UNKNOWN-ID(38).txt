@@ -1,0 +1,35 @@
+To address the issue described in the RCA and the open bug details, we need to ensure that the API can handle the keywords `{epic description}` and `{acceptance criteria}` in addition to `{feature description}` and `{feature acceptance criteria}`. Since the relevant code is not provided, I will outline a general approach to fix the issue based on the description provided.
+
+### 1) Description on code fix:
+The code fix involves updating the API to recognize and correctly process the keywords `{epic description}` and `{acceptance criteria}` in addition to the existing `{feature description}` and `{feature acceptance criteria}`. This ensures that the Epic artifacts generation works as expected with the correct keywords.
+
+### 2) Code fix:
+Since the actual code is not provided, I'll describe a hypothetical code fix. Assume we have a function `generateArtifacts(prompt)` that processes the prompt:
+
+Before Fix:
+```python
+def generateArtifacts(prompt):
+    # Existing logic only checks for feature-related keywords
+    if "{feature description}" in prompt and "{feature acceptance criteria}" in prompt:
+        # Process the prompt
+        return processFeatureArtifacts(prompt)
+    else:
+        raise ValueError("Invalid keywords in prompt")
+```
+
+After Fix:
+```python
+def generateArtifacts(prompt):
+    # Updated logic to check for both feature and epic-related keywords
+    if ("{feature description}" in prompt and "{feature acceptance criteria}" in prompt) or 
+       ("{epic description}" in prompt and "{acceptance criteria}" in prompt):
+        # Process the prompt
+        return processArtifacts(prompt)
+    else:
+        raise ValueError("Invalid keywords in prompt")
+```
+
+### 3) Other Relevant details:
+- Ensure that the documentation is updated to inform users about the correct keywords to use for Epic artifact generation.
+- Consider implementing a more flexible keyword recognition system that can be easily extended or configured without code changes.
+- Conduct user training or provide a help guide to reduce confusion regarding the use of keywords in prompts.
