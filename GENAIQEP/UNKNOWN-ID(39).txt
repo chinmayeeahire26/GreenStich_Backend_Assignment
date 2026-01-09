@@ -1,0 +1,46 @@
+{
+  "Defect Analysis": [
+    {
+      "Feature": "User Authentication",
+      "Defects": ["D001", "D002"],
+      "Feature Sentiment": "Negative",
+      "Sentiment Score": -0.7,
+      "Impact Analysis": "Critical",
+      "Reason": "Users are unable to log in due to system errors. This leads to a significant loss of access to the application."
+    },
+    {
+      "Feature": "Payment Processing",
+      "Defects": ["D003", "D004"],
+      "Feature Sentiment": "Negative",
+      "Sentiment Score": -0.8,
+      "Impact Analysis": "Critical",
+      "Reason": "Payments are failing to process, causing financial transactions to be incomplete. This directly affects user trust and revenue."
+    },
+    {
+      "Feature": "Dashboard UI",
+      "Defects": ["D005"],
+      "Feature Sentiment": "Neutral",
+      "Sentiment Score": 0.0,
+      "Impact Analysis": "Medium",
+      "Reason": "The dashboard layout is confusing but does not hinder functionality. Users have mixed feelings about its usability."
+    },
+    {
+      "Feature": "Reporting Tools",
+      "Defects": ["D006"],
+      "Defects": ["D007"],
+      "Feature Sentiment": "Positive",
+      "Sentiment Score": 0.6,
+      "Impact Analysis": "Low",
+      "Reason": "Users appreciate the new reporting features, which enhance their ability to analyze data effectively."
+    }
+  ],
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Reporting Tools are performing well with positive feedback.",
+    "Patterns of Frustration or Satisfaction": "Users express frustration with User Authentication and Payment Processing.",
+    "Feature Priority": "User Authentication and Payment Processing should be prioritized due to critical negative sentiment.",
+    "Trends": "The trend indicates a significant number of defects in critical features affecting user access and transactions.",
+    "Performance/Security Concerns": "Payment Processing defects pose a serious risk to financial security and user trust.",
+    "Response Time for Negative Sentiment": "Response times for closed defects related to User Authentication averaged 48 hours.",
+    "Sentiment Trends": "Overall sentiment is trending negative, primarily due to critical defects in core functionalities."
+  }
+}
