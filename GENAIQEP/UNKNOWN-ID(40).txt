@@ -1,0 +1,38 @@
+Based on the provided information, the issue is that the "File Storage name" input field is not being validated as a mandatory field, allowing the creation of a file storage connection with an empty or whitespace-only name. To address this, we need to add validation logic to ensure that the field is not empty or just whitespace.
+
+### 1) Description on code fix:
+The code fix involves adding validation logic to check if the "File Storage name" field is empty or contains only whitespace. If it does, the creation process should be halted, and an error message should be displayed to the user.
+
+### 2) Code fix:
+Assuming the relevant code is in a JavaScript function that handles the form submission, the fix would look something like this:
+
+Before Fix:
+```javascript
+function createFileStorageConnection(name, connectionString, organization) {
+    // Existing logic to create file storage connection
+    if (connectionString && organization) {
+        // Proceed with creation
+    }
+}
+```
+
+After Fix:
+```javascript
+function createFileStorageConnection(name, connectionString, organization) {
+    // Validation for mandatory field
+    if (!name || name.trim() === '') {
+        alert('File Storage name is mandatory and cannot be empty or whitespace.');
+        return; // Prevent creation if validation fails
+    }
+    
+    // Existing logic to create file storage connection
+    if (connectionString && organization) {
+        // Proceed with creation
+    }
+}
+```
+
+### 3) Other Relevant details:
+- Ensure that the user interface provides clear feedback when the validation fails, such as displaying an error message.
+- Consider adding unit tests to verify that the validation logic works as expected.
+- Review other parts of the application to ensure similar mandatory fields have appropriate validation.
