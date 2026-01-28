@@ -1,0 +1,55 @@
+{
+  "Defect Analysis": {
+    "Defects": [
+      {
+        "Feature": "Login",
+        "Defects": ["D001", "D002"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.6,
+        "Impact Analysis": {
+          "Impact": "Critical",
+          "Reason": "Users are unable to log in, leading to a complete halt in access to the application."
+        }
+      },
+      {
+        "Feature": "Payment Processing",
+        "Defects": ["D003", "D004"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.8,
+        "Impact Analysis": {
+          "Impact": "Critical",
+          "Reason": "Payment failures are causing significant revenue loss and user dissatisfaction."
+        }
+      },
+      {
+        "Feature": "User Profile",
+        "Defects": ["D005"],
+        "Feature Sentiment": "Neutral",
+        "Sentiment Score": 0.0,
+        "Impact Analysis": {
+          "Impact": "Medium",
+          "Reason": "Minor issues with profile updates that do not significantly affect user experience."
+        }
+      },
+      {
+        "Feature": "Search Functionality",
+        "Defects": ["D006"],
+        "Feature Sentiment": "Positive",
+        "Sentiment Score": 0.7,
+        "Impact Analysis": {
+          "Impact": "Low",
+          "Reason": "Users appreciate the improved search results and speed."
+        }
+      }
+    ]
+  },
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Search Functionality is performing well with positive feedback.",
+    "Patterns of Frustration or Satisfaction": "Users express frustration over login and payment processing issues.",
+    "Feature Priority": "Payment Processing should be prioritized due to its critical impact on revenue.",
+    "Trends": "The trend shows increasing dissatisfaction with login and payment features, particularly defects D001 and D003.",
+    "Performance/Security Concerns": "Defects D003 and D004 are performance sensitive as they directly affect payment processing.",
+    "Response Time for negative areas": "Closed defects related to login (D001) took an average of 5 days to resolve.",
+    "Identify Sentiment Trends Over Time": "Overall sentiment is declining, particularly in critical features like login and payment processing."
+  }
+}
