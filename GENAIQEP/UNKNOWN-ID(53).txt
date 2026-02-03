@@ -1,0 +1,10 @@
+### 1) Description on code fix:
+The issue arises from a mismatch in expected keywords for generating Epic artifacts. The fix involves updating the documentation and possibly the API to accept the correct keywords for Epic artifacts, specifically `{epic description}` and `{acceptance criteria}`. However, since the provided code does not directly relate to the Epic artifacts generation, no specific code fix can be made.
+
+### 2) Code fix:
+Relevant Code NOT Found
+
+### 3) Other Relevant details:
+- The current implementation uses the same API for both Epic and Feature artifacts, which leads to confusion due to differing terminology.
+- It is essential to update user documentation to clarify the correct keywords to be used for prompts related to Epic artifacts.
+- Consider implementing a validation mechanism in the API to provide clearer error messages when incorrect keywords are used.
