@@ -1,0 +1,12 @@
+1) Description on code fix: 
+The fix addresses the removal of unnecessary fields in the 'Set Jira Credentials' for Jira Zephyr Squad, as identified in the defect GAQ20T-479. The RCA indicates that these fields are impacting process setup efficiency and causing confusion due to misalignment. By ensuring only the mandatory fields are present and validated, the process becomes more streamlined and less prone to errors. This fix resolves the defect by aligning the field configuration with the actual requirements, thus improving efficiency and reducing confusion.
+
+2) Code fix: 
+Relevant Code NOT Found 
+The provided context does not include the specific code related to the 'Set Jira Credentials' field configuration for Jira Zephyr Squad. The affected code sections mentioned (UserServiceImpl and FlipkartLoginTest) do not directly relate to the configuration of Jira credentials. Therefore, the relevant code for this specific fix is not available in the provided context.
+
+3) Other Relevant details: 
+- Testing recommendations: Conduct thorough testing to ensure that only the mandatory fields (Jira Username, Jira API Token, Zephyr Access key, Zephyr Secret key) are present and validated. Test the process flow to confirm that unnecessary fields have been removed and that the configuration aligns with the requirements.
+- Configuration changes if needed: Review and update the configuration files or settings to ensure they reflect the removal of unnecessary fields. Ensure that any dependencies on these fields are also updated or removed.
+- Documentation updates: Update any user manuals, configuration guides, or internal documentation to reflect the changes in the field configuration. Clearly document the mandatory fields and their purpose.
+- Any other implementation notes: Ensure that any integrations or dependencies that rely on the previous field configuration are identified and updated accordingly. Communicate these changes to all relevant stakeholders to avoid confusion.
