@@ -1,0 +1,9 @@
+### 1) Description on code fix:
+The issue arises from a payload mapping error during the selection of an LLM, which leads to the incorrect update of a different LLM instead of the selected one. The fix involves ensuring that the payload is correctly mapped to the selected LLM, which may require adjustments in the code that handles the update logic.
+
+### 2) Code fix:
+Relevant Code NOT Found
+
+### 3) Other Relevant details:
+- The provided code snippets are related to Selenium tests for login functionality and do not contain any logic for updating LLMs.
+- The actual code responsible for handling LLM updates is likely located in a different part of the application, possibly in a service or controller class that manages LLM data.
