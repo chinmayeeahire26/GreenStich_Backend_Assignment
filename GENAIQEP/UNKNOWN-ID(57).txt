@@ -1,0 +1,12 @@
+1) Description on code fix: 
+The fix addresses the mismatch of expected keywords in the API integration for Epic artifacts generation. The current implementation expects keywords {feature description} and {feature acceptance criteria}, which are not aligned with user expectations of using {epic description} and {acceptance criteria}. This mismatch is due to the API being the same for both Epic and Feature artifacts. The fix involves updating the API to accept both sets of keywords, ensuring that it can correctly process prompts for Epic artifacts without user confusion. This resolves the defect by aligning the API's expectations with user practices and documentation.
+
+2) Code fix: 
+Relevant Code NOT Found 
+The provided context does not include the specific code related to the API integration for Epic artifacts generation. The affected code sections listed do not pertain to the keyword mismatch issue but rather to unrelated issues in user authentication and test exception handling.
+
+3) Other Relevant details: 
+- Testing recommendations: Conduct integration testing to ensure that the API correctly processes both {epic description} and {feature description} keywords. Verify that Epic artifacts are generated as expected with both sets of keywords.
+- Configuration changes if needed: Update the configuration to categorize prompts correctly in the dropdown, ensuring users can select the appropriate prompt type for Epic artifacts.
+- Documentation updates: Revise the help documentation to clearly instruct users on the correct keywords to use for Epic artifact generation. Include examples of prompts using both {epic description} and {feature description}.
+- Any other implementation notes: Consider implementing a fallback mechanism in the API to handle unknown keywords gracefully, providing informative error messages to guide users in correcting their prompts.
