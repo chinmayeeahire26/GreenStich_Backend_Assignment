@@ -1,24 +1,29 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using NUnit.Framework;
 
-public class LoginTest {
-    private IWebDriver driver;
+namespace AutomationTests {
+    public class LoginTest {
+        private IWebDriver driver;
 
-    public void LoginUser(string username, string password) {
-        driver = new ChromeDriver();
-        driver.Navigate().GoToUrl("https://example.com/login");
+        [SetUp]
+        public void Setup() {
+            driver = new ChromeDriver();
+            driver.Manage().Window.Maximize();
+        }
 
-        var usernameField = driver.FindElement(By.Id("username"));
-        var passwordField = driver.FindElement(By.Id("password"));
-        var loginButton = driver.FindElement(By.Id("loginButton"));
+        [Test]
+        public void LoginTest() {
+            driver.Navigate().GoToUrl("https://example.com/login");
+            driver.FindElement(By.Id("username")).SendKeys("testuser");
+            driver.FindElement(By.Id("password")).SendKeys("password123");
+            driver.FindElement(By.Id("loginButton")).Click();
+            Assert.IsTrue(driver.FindElement(By.Id("welcomeMessage")).Displayed);
+        }
 
-        usernameField.SendKeys(username);
-        passwordField.SendKeys(password);
-        loginButton.Click();
-
-        // Add assertions here to verify successful login
-        // Example: Assert.AreEqual("Welcome", driver.FindElement(By.Id("welcomeMessage")).Text);
-
-        driver.Quit();
+        [TearDown]
+        public void TearDown() {
+            driver.Quit();
+        }
     }
 }
