@@ -1,0 +1,12 @@
+### 1) Description on code fix:
+The issue identified in the RCA is related to user confusion regarding the keywords used in prompts for generating Epic artifacts. To address this, we need to ensure that the application provides clear instructions or validations for users when they input prompts. This can be done by adding validation logic to check for the correct keywords and provide feedback if incorrect keywords are used.
+
+### 2) Code fix:
+Relevant Code NOT Found.
+
+The provided code snippets do not contain any logic related to the generation of Epic artifacts or handling of prompt keywords. The code is primarily focused on a Selenium test for logging into Flipkart and a user service implementation for user registration and login. Therefore, there is no relevant code to fix in relation to the bug described.
+
+### 3) Other Relevant details:
+- The issue is primarily a user experience problem rather than a code defect.
+- Consider adding documentation or user guidance to clarify the expected keywords for prompts.
+- Implementing input validation in the prompt handling logic would enhance user experience and reduce errors.
