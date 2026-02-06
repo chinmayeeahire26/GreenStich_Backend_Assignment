@@ -1,0 +1,98 @@
+1) Description on code fix: 
+The defect stems from a mismatch between actions and expected results in feature test cases, primarily due to improper configuration and process issues during test case edits. Based on the RCA, the code lacks sufficient validation and error handling, leading to these mismatches. The fix involves adding assertions to verify successful login, configuring the WebDriver path correctly, and implementing error handling for pop-up windows. This addresses both the configuration and process issues identified in the RCA, ensuring actions match expected results.
+
+2) Code fix: 
+
+Existing Code: 
+java
+// File: LoginTest.java
+public void loginTest() {
+    WebDriver driver = new ChromeDriver();
+    driver.get("http://example.com/login");
+    driver.findElement(By.id("username")).sendKeys("user");
+    driver.findElement(By.id("password")).sendKeys("pass");
+    driver.findElement(By.id("loginButton")).click();
+    // Missing validation for successful login
+    driver.quit();
+}
+
+
+New Code with Fix: 
+java
+// File: LoginTest.java
+public void loginTest() {
+    // Ensure WebDriver is configured correctly
+    System.setProperty("webdriver.chrome.driver", "/path/to/chromedriver"); // Configuration fix
+    WebDriver driver = new ChromeDriver();
+    driver.get("http://example.com/login");
+    driver.findElement(By.id("username")).sendKeys("user");
+    driver.findElement(By.id("password")).sendKeys("pass");
+    driver.findElement(By.id("loginButton")).click();
+    
+    // Added assertion to verify successful login
+    String expectedUrl = "http://example.com/dashboard"; // Expected result
+    assert driver.getCurrentUrl().equals(expectedUrl) : "Login failed"; // Validation fix
+    
+    driver.quit();
+}
+
+
+Changes Made: 
+- Added `System.setProperty` to ensure correct WebDriver configuration path.
+- Introduced assertion to verify the URL post-login to ensure the login was successful.
+
+Existing Code: 
+java
+// File: FlipkartLoginTest.java
+public void loginToFlipkart() {
+    WebDriver driver = new ChromeDriver();
+    driver.get("http://flipkart.com");
+    driver.findElement(By.xpath("//button[contains(text(),'Login')]")).click();
+    driver.findElement(By.id("email")).sendKeys("user@example.com");
+    driver.findElement(By.id("password")).sendKeys("password");
+    driver.findElement(By.xpath("//button[contains(text(),'Submit')]")).click();
+    // Missing verification logic
+    driver.quit();
+}
+
+
+New Code with Fix: 
+java
+// File: FlipkartLoginTest.java
+public void loginToFlipkart() {
+    System.setProperty("webdriver.chrome.driver", "/path/to/chromedriver"); // Configuration fix
+    WebDriver driver = new ChromeDriver();
+    driver.get("http://flipkart.com");
+    driver.findElement(By.xpath("//button[contains(text(),'Login')]")).click();
+    driver.findElement(By.id("email")).sendKeys("user@example.com");
+    driver.findElement(By.id("password")).sendKeys("password");
+    driver.findElement(By.xpath("//button[contains(text(),'Submit')]")).click();
+    
+    // Added verification logic for login success
+    WebElement profileElement = driver.findElement(By.id("profileName"));
+    assert profileElement.isDisplayed() : "Login failed"; // Validation fix
+    
+    // Added error handling for pop-up closure
+    try {
+        WebElement popUpCloseButton = driver.findElement(By.xpath("//button[contains(text(),'Close')]"));
+        if (popUpCloseButton.isDisplayed()) {
+            popUpCloseButton.click(); // Process fix
+        }
+    } catch (NoSuchElementException e) {
+        System.out.println("No pop-up to close."); // Error handling
+    }
+    
+    driver.quit();
+}
+
+
+Changes Made: 
+- Added `System.setProperty` for WebDriver path configuration.
+- Introduced verification logic using `WebElement` to ensure login success.
+- Implemented error handling for potential pop-up windows using `try-catch`.
+
+3) Other Relevant details: 
+- Testing recommendations: Perform regression testing on all test cases that involve login functionality to ensure that assertions and error handling do not introduce new defects.
+- Configuration changes: Ensure all test environments have the correct WebDriver paths set up. Document these paths in the configuration files.
+- Documentation updates: Update test case documentation to reflect the added assertions and error handling logic, ensuring future testers understand the validation processes.
+- Any other implementation notes: Consider implementing a logging mechanism to capture login attempts and their outcomes for better debugging and monitoring.
