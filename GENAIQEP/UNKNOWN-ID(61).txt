@@ -1,0 +1,36 @@
+1) Description on code fix: 
+The fix addresses the defect by implementing a validation check in the `registerUser` method of the `UserServiceImpl` class to ensure that organization names are unique before saving a new user. This resolves the defect by preventing the creation of duplicate organization names, as identified in the root cause analysis. Additionally, the database configuration should be updated to enforce a unique constraint on organization names, preventing duplicates at the data layer.
+
+2) Code fix: 
+
+Existing Code: 
+java
+// UserServiceImpl.java
+public void registerUser(User user) {
+    // Existing logic to register a user
+    userRepo.save(user); // Line where userRepo.save(user) is called
+}
+
+
+New Code with Fix: 
+java
+// UserServiceImpl.java
+public void registerUser(User user) {
+    // Check if organization name already exists
+    if (organizationRepo.existsByName(user.getOrganizationName())) { // New validation logic
+        throw new IllegalArgumentException("Organization name must be unique.");
+    }
+    // Existing logic to register a user
+    userRepo.save(user); // Line where userRepo.save(user) is called
+}
+
+
+Changes Made: 
+- Added a validation check using `organizationRepo.existsByName(user.getOrganizationName())` to verify if the organization name already exists.
+- Threw an `IllegalArgumentException` if the organization name is not unique, preventing the save operation.
+
+3) Other Relevant details: 
+- Testing recommendations: Implement unit tests to verify that the `registerUser` method correctly throws an exception when attempting to register a user with a duplicate organization name.
+- Configuration changes if needed: Update the database schema to include a unique constraint on the organization name column to enforce uniqueness at the database level.
+- Documentation updates: Update the API documentation to specify that organization names must be unique and describe the error response when a duplicate name is attempted.
+- Any other implementation notes: Ensure that the `organizationRepo` has a method `existsByName` implemented to check for existing organization names in the database.
