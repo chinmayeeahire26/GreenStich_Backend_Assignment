@@ -1,0 +1,10 @@
+1) Description on code fix:  
+The issue arises from the use of incorrect prompt keywords for generating Epic artifacts. To resolve this, we need to ensure that the application correctly handles the keywords `{epic description}` and `{acceptance criteria}` instead of the default `{feature description}` and `{feature acceptance criteria}`. This requires updating the documentation and possibly the logic that processes these prompts.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided code snippets do not contain any logic related to the generation of Epic artifacts or handling of prompt keywords. The code primarily focuses on a login test for Flipkart and a user service implementation, which does not relate to the Epic artifacts generation issue described in the bug report.
+
+3) Other Relevant details:
+- The defect is primarily a configuration and user error issue, indicating a need for better documentation and user guidance.
+- The application should provide clear instructions on the expected keywords for prompts to avoid confusion among users.
