@@ -1,0 +1,31 @@
+### 1) Description on code fix:
+The code fix involves adding validation logic to ensure that only the selected solution can have blueprints created for it. This will prevent the user from inadvertently creating blueprints for unselected solutions. The validation logic should check if the selected solution matches the solution being processed in the blueprint creation modal.
+
+### 2) Code fix:
+
+Code without the Fix:
+```java
+public void createBlueprint(String solutionId) {
+    // Code to create blueprint
+    // No validation check for selected solution
+    // ...
+    createBlueprintForSolution(solutionId);
+}
+```
+
+New Code Fix:
+```java
+public void createBlueprint(String solutionId, String selectedSolutionId) {
+    // Validation check to ensure the solution being created matches the selected solution
+    if (!solutionId.equals(selectedSolutionId)) {
+        throw new IllegalArgumentException("Cannot create blueprint for unselected solution: " + solutionId);
+    }
+    // Code to create blueprint
+    createBlueprintForSolution(solutionId);
+}
+```
+
+### 3) Other Relevant details:
+- The validation logic is crucial to maintain the integrity of the blueprint creation process.
+- This fix ensures that the user experience aligns with the intended functionality, preventing any confusion regarding solution selection.
+- Additional tests should be implemented to verify that the validation works as expected and that no blueprints can be created for unselected solutions.
