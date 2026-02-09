@@ -3,18 +3,17 @@ using OpenQA.Selenium.Chrome;
 using NUnit.Framework;
 
 namespace AutomationTests {
-    public class LoginTest {
+    public class LoginTests {
         private IWebDriver driver;
 
         [SetUp]
         public void Setup() {
             driver = new ChromeDriver();
-            driver.Manage().Window.Maximize();
+            driver.Navigate().GoToUrl("http://example.com/login");
         }
 
         [Test]
         public void LoginTest() {
-            driver.Navigate().GoToUrl("https://example.com/login");
             driver.FindElement(By.Id("username")).SendKeys("testuser");
             driver.FindElement(By.Id("password")).SendKeys("password123");
             driver.FindElement(By.Id("loginButton")).Click();
