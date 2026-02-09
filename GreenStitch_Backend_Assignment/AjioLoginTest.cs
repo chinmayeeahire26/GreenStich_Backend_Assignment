@@ -1,14 +1,39 @@
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-public class AjioLoginTest {
-    public void LoginTest() {
-        IWebDriver driver = new ChromeDriver();
-        driver.Navigate().GoToUrl("https://www.ajio.com");
-        driver.FindElement(By.Id("username")).SendKeys("testuser");
-        driver.FindElement(By.Id("password")).SendKeys("password123");
-        driver.FindElement(By.Id("loginButton")).Click();
-        // Add assertions to verify login success
-        driver.Quit();
+public class LoginTest {
+    private WebDriver driver;
+
+    @BeforeClass
+    public void setUp() {
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+    }
+
+    @Test
+    public void loginToApplication() {
+        driver.get("http://example.com/login");
+        WebElement usernameField = driver.findElement(By.id("username"));
+        WebElement passwordField = driver.findElement(By.id("password"));
+        WebElement loginButton = driver.findElement(By.id("loginButton"));
+
+        usernameField.sendKeys("testuser");
+        passwordField.sendKeys("password123");
+        loginButton.click();
+
+        // Add assertions to verify successful login
+    }
+
+    @AfterClass
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
