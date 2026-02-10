@@ -2,9 +2,9 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using NUnit.Framework;
 
-namespace AutomationTests
+namespace WebAppTests
 {
-    public class LoginTest
+    public class LoginTests
     {
         private IWebDriver driver;
 
@@ -16,7 +16,7 @@ namespace AutomationTests
         }
 
         [Test]
-        public void TestLogin()
+        public void LoginTest()
         {
             var usernameField = driver.FindElement(By.Id("username"));
             var passwordField = driver.FindElement(By.Id("password"));
@@ -26,7 +26,8 @@ namespace AutomationTests
             passwordField.SendKeys("password123");
             loginButton.Click();
 
-            Assert.IsTrue(driver.Url.Contains("dashboard"));
+            var welcomeMessage = driver.FindElement(By.Id("welcomeMessage"));
+            Assert.AreEqual("Welcome, testuser!", welcomeMessage.Text);
         }
 
         [TearDown]
