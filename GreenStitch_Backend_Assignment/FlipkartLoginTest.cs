@@ -6,9 +6,9 @@ namespace SeleniumWebDriverExample
 {
     public class GoogleSearchTest
     {
-        public void performGoogleSearch()
+        public void PerformGoogleSearch()
         {
-            // Set up the ChromeDriver
+            // Set up the ChromeDriver (make sure you have the ChromeDriver executable in your PATH or project directory)
             IWebDriver driver = new ChromeDriver();
 
             try
