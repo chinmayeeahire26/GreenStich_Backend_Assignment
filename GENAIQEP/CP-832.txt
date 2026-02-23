@@ -1,0 +1,32 @@
+To address the defect in the Import File functionality, we need to analyze the code handling the import process, particularly focusing on the epic selection logic. Given the RCA, the issue is likely due to incorrect epic mapping or selection during the import process.
+
+1) Description on code fix:  
+   The code fix involves correcting the epic selection logic during the file import process to ensure the imported file is associated with the correct epic.
+
+2) Code fix:  
+   Without access to the actual code, I can provide a conceptual fix based on typical patterns seen in such issues. The problem might be in how the epic is selected or assigned during the import. Below is a hypothetical example:
+
+   Before Fix:  
+   ```javascript
+   function importFile(epicId, file) {
+       let targetEpic = getEpicById("Login to SAP");
+       targetEpic.import(file);
+   }
+   ```
+
+   After Fix:  
+   ```javascript
+   function importFile(epicId, file) {
+       let targetEpic = getEpicById(epicId);  // Highlight: Correct epicId used
+       targetEpic.import(file);
+   }
+   ```
+
+   Highlight:  
+   - Before Fix: The epic was hardcoded to "Login to SAP", causing the imported file to be associated incorrectly.
+   - After Fix: The epicId passed as a parameter is used to select the correct epic for import.
+
+3) Other Relevant details:  
+   - Ensure the epicId parameter is correctly passed from the UI when initiating the import process.
+   - Verify any configuration files or settings that might override or affect the epic selection logic.
+   - Test the functionality thoroughly with various epics to ensure the fix resolves the issue across different scenarios.
