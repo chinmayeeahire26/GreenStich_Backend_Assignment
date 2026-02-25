@@ -1,0 +1,28 @@
+1) Description on code fix:  
+The root cause of the duplicate defects creation is likely due to a lack of validation checks before creating a new defect entry. To fix this, we need to implement a validation mechanism that checks for existing defects before allowing the creation of a new one.
+
+2) Code fix:  
+Since the provided code does not directly relate to defect creation, I will illustrate a hypothetical function that could be responsible for creating defects. Below is a comparison of the original code and the modified code with the necessary validation checks.
+
+Original Code (without Fix):
+```java
+public Defect createDefect(Defect defect) {
+    return defectRepository.save(defect); // No validation check
+}
+```
+
+New Code (with Fix):
+```java
+public Defect createDefect(Defect defect) {
+    // Check if a defect with the same title already exists
+    if (defectRepository.existsByTitle(defect.getTitle())) {
+        throw new DuplicateDefectException("A defect with this title already exists."); // Validation check added
+    }
+    return defectRepository.save(defect);
+}
+```
+
+3) Other Relevant details:
+- Implement a method `existsByTitle(String title)` in the `defectRepository` to check for existing defects.
+- Introduce a custom exception `DuplicateDefectException` to handle duplicate defect scenarios gracefully.
+- Ensure that the validation logic is tested thoroughly to prevent future occurrences of duplicate defects.
