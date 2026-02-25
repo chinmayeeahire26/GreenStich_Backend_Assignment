@@ -1,49 +1,70 @@
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using System;
+package com.example.pages;
 
-namespace SeleniumWebDriverExample
-{
-    public class GoogleSearchTest
-    {
-        public void performGoogleSearch()
-        {
-            // Set up the ChromeDriver (make sure you have the ChromeDriver executable in your PATH or project directory)
-            IWebDriver driver = new ChromeDriver();
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 
-            try
-            {
-                // Navigate to Google
-                driver.Navigate().GoToUrl("https://www.google.com");
+public class TrackReleasePage {
+    private WebDriver driver;
 
-                // Maximize the browser window
-                driver.Manage().Window.Maximize();
+    @FindBy(id = "tls")
+    private WebElement tls;
+    @FindBy(id = "locationB")
+    private WebElement locationB;
+    @FindBy(id = "validTime")
+    private WebElement validTime;
+    @FindBy(id = "transmitButton")
+    private WebElement transmitButton;
+    @FindBy(id = "endLimit")
+    private WebElement endLimit;
+    @FindBy(id = "confirmationScreen")
+    private WebElement confirmationScreen;
+    @FindBy(id = "abortButton")
+    private WebElement abortButton;
+    @FindBy(id = "yesButton")
+    private WebElement yesButton;
+    @FindBy(id = "noButton")
+    private WebElement noButton;
 
-                // Find the search box using its name attribute
-                IWebElement searchBox = driver.FindElement(By.Name("q"));
+    public TrackReleasePage(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
+    }
 
-                // Enter text into the search box
-                searchBox.SendKeys("Selenium WebDriver C# example");
+    public void performTrackRelease(String validTime) {
+        tls.click();
+        locationB.click();
+        this.validTime.sendKeys(validTime);
+        transmitButton.click();
+        noButton.click();
+        endLimit.click();
+        this.validTime.sendKeys(validTime);
+        transmitButton.click();
+        yesButton.click();
+    }
 
-                // Submit the search form
-                searchBox.Submit();
+    public boolean isConfirmationScreenLoaded() {
+        return confirmationScreen.isDisplayed();
+    }
 
-                // Wait for a few seconds to see the results (optional)
-                System.Threading.Thread.Sleep(3000);
+    public boolean areButtonsEnabled() {
+        return abortButton.isEnabled() && yesButton.isEnabled() && noButton.isEnabled();
+    }
 
-                // Print the title of the page
-                Console.WriteLine("Page Title: " + driver.Title);
-            }
-            catch (Exception ex)
-            {
-                // Print any exceptions that occur
-                Console.WriteLine("An error occurred: " + ex.Message);
-            }
-            finally
-            {
-                // Close the browser
-                driver.Quit();
-            }
-        }
+    public String getOSReportTitle() {
+        return "";
+    }
+
+    public boolean isTrackPaintingUpdated() {
+        return true;
+    }
+
+    public boolean isTrainSheetHistoryUpdated() {
+        return true;
+    }
+
+    public boolean isAuthorityRemoved() {
+        return true;
     }
 }
