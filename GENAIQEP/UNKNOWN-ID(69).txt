@@ -1,0 +1,55 @@
+{
+  "Defect Analysis": {
+    "defects": [
+      {
+        "Feature": "Login Module",
+        "Defects": ["D001", "D002"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.7,
+        "Impact Analysis": {
+          "Impact": "Critical",
+          "Reason": "Users are unable to log in, causing significant disruption to access."
+        }
+      },
+      {
+        "Feature": "Payment Gateway",
+        "Defects": ["D003", "D004"],
+        "Feature Sentiment": "Negative",
+        "Sentiment Score": -0.6,
+        "Impact Analysis": {
+          "Impact": "High",
+          "Reason": "Transactions are failing, leading to user frustration and potential loss of revenue."
+        }
+      },
+      {
+        "Feature": "User Profile",
+        "Defects": ["D005"],
+        "Feature Sentiment": "Neutral",
+        "Sentiment Score": 0.0,
+        "Impact Analysis": {
+          "Impact": "Medium",
+          "Reason": "Minor bugs that do not affect overall functionality."
+        }
+      },
+      {
+        "Feature": "Search Functionality",
+        "Defects": ["D006"],
+        "Feature Sentiment": "Positive",
+        "Sentiment Score": 0.8,
+        "Impact Analysis": {
+          "Impact": "Low",
+          "Reason": "Users find the search feature efficient and effective."
+        }
+      }
+    ]
+  },
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Search Functionality is performing well with a positive sentiment.",
+    "Patterns of Frustration or Satisfaction": "Users express frustration with the Login Module and Payment Gateway due to failures.",
+    "Feature Priority": "Login Module should be prioritized for immediate attention.",
+    "Trends": "There is a trend of negative sentiment around critical features like Login and Payment.",
+    "Performance/Security Concerns": "Defects D001 and D003 are performance sensitive as they directly affect user access and transactions.",
+    "Response Time for negative areas": "Closed defects related to negative sentiment in Login and Payment were resolved within 48 hours.",
+    "Identify Sentiment Trends Over Time": "Overall sentiment has declined in the last month, particularly around critical features."
+  }
+}
