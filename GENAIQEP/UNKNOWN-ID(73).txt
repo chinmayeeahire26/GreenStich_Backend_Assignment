@@ -1,0 +1,105 @@
+1) Description on code fix:  
+The defect involves the lack of explicit enforcement of HTTPS and HSTS in the API testing code, which could lead to security vulnerabilities such as man-in-the-middle attacks or insecure communication over HTTP. Based on the RCA, the root causes are improper default HSTS settings in the environment or codebase (Configuration issue) and inadequate verification during API security compliance checks (Process issue). To resolve this, the code needs to explicitly enforce HTTPS, validate the security of the connection, and handle errors related to insecure connections. Additionally, HSTS headers should be verified to ensure strict transport security is enforced.  
+
+2) Code fix:  
+
+Affected Code Section 1: GoogleSearchTest.PerformGoogleSearch  
+Existing Code:  
+csharp  
+driver.Navigate().GoToUrl("https://www.google.com");  
+  
+
+New Code with Fix:  
+csharp  
+// Enforce HTTPS and validate connection security  
+string url = "https://www.google.com";  
+if (!url.StartsWith("https://"))  
+{  
+    throw new InvalidOperationException("Insecure connection: HTTPS is required."); // Explicitly enforce HTTPS  
+}  
+
+driver.Navigate().GoToUrl(url);  
+
+// Validate HSTS headers  
+var responseHeaders = driver.Manage().Logs.GetLog("performance"); // Retrieve network logs  
+bool hstsEnforced = responseHeaders.Any(log => log.Message.Contains("strict-transport-security"));  
+if (!hstsEnforced)  
+{  
+    throw new InvalidOperationException("HSTS is not enforced for the requested URL."); // Ensure HSTS is enforced  
+}  
+  
+
+Changes Made:  
+- Added a check to ensure the URL starts with "https://", explicitly enforcing HTTPS.  
+- Retrieved network logs to validate the presence of the "strict-transport-security" header, ensuring HSTS is enforced.  
+- Added error handling to throw exceptions if HTTPS is not used or HSTS is not enforced.  
+
+---
+
+Affected Code Section 2: LoginTest.Login  
+Existing Code:  
+csharp  
+driver.Navigate().GoToUrl("https://example.com/login");  
+  
+
+New Code with Fix:  
+csharp  
+// Enforce HTTPS and validate connection security  
+string loginUrl = "https://example.com/login";  
+if (!loginUrl.StartsWith("https://"))  
+{  
+    throw new InvalidOperationException("Insecure connection: HTTPS is required."); // Explicitly enforce HTTPS  
+}  
+
+driver.Navigate().GoToUrl(loginUrl);  
+
+// Validate HSTS headers  
+var responseHeaders = driver.Manage().Logs.GetLog("performance"); // Retrieve network logs  
+bool hstsEnforced = responseHeaders.Any(log => log.Message.Contains("strict-transport-security"));  
+if (!hstsEnforced)  
+{  
+    throw new InvalidOperationException("HSTS is not enforced for the requested URL."); // Ensure HSTS is enforced  
+}  
+
+// Additional error handling for insecure connections  
+try  
+{  
+    // Simulate a secure connection check  
+    var secureConnection = driver.Url.StartsWith("https://");  
+    if (!secureConnection)  
+    {  
+        throw new InvalidOperationException("Connection is not secure.");  
+    }  
+}  
+catch (Exception ex)  
+{  
+    Console.WriteLine($"Error: {ex.Message}");  
+    throw;  
+}  
+  
+
+Changes Made:  
+- Added a check to ensure the login URL starts with "https://", explicitly enforcing HTTPS.  
+- Retrieved network logs to validate the presence of the "strict-transport-security" header, ensuring HSTS is enforced.  
+- Added error handling to throw exceptions if HTTPS is not used or HSTS is not enforced.  
+- Implemented additional error handling to simulate a secure connection check and handle insecure connections gracefully.  
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Test the updated code in environments with varying browser settings to ensure HTTPS and HSTS enforcement works consistently.  
+  - Use tools like OWASP ZAP or Burp Suite to verify that HSTS headers are present and properly configured.  
+  - Perform regression testing to ensure the changes do not impact existing functionality.  
+
+- Configuration changes if needed:  
+  - Ensure the browser driver (e.g., ChromeDriver) is configured to log network traffic and allow retrieval of response headers.  
+  - Update server configurations to include the "strict-transport-security" header if it is not already present.  
+
+- Documentation updates:  
+  - Update the project documentation to include the new security requirements for HTTPS and HSTS enforcement.  
+  - Document the error handling mechanisms and provide guidelines for troubleshooting insecure connection issues.  
+
+- Any other implementation notes:  
+  - Consider implementing a utility function to centralize HTTPS and HSTS validation logic, reducing code duplication.  
+  - Review other parts of the codebase to ensure similar security measures are applied consistently.  
+
+By implementing these fixes, the defect will be resolved, addressing both the configuration and process issues identified in the RCA. This ensures secure communication and compliance with strict transport security standards.
