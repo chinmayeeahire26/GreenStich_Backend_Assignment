@@ -1,0 +1,75 @@
+1) Description on code fix:  
+The fix addresses the defect by ensuring that duplicate organization names cannot be created. Based on the RCA, the root causes are missing logic to check for duplicate organization names and validation gaps in the code. To resolve this:  
+- A repository method will be added to query existing organization names.  
+- Validation logic will be implemented in the `registerUser` method to check for duplicates before saving the organization.  
+- Error handling will be added to throw an exception or return an error response when a duplicate is detected.  
+- User feedback will be provided to inform them of the duplicate organization name.  
+Additionally, a database schema update will enforce uniqueness constraints on the organization name column to prevent duplicates at the data level.  
+
+2) Code fix:  
+
+Existing Code:  
+java  
+// UserServiceImpl.java  
+public void registerUser(User user) {  
+    userRepository.save(user);  
+}  
+  
+
+New Code with Fix:  
+java  
+// UserServiceImpl.java  
+public void registerUser(User user) {  
+    // Check if the organization name already exists  
+    if (userRepository.existsByOrganizationName(user.getOrganizationName())) {  
+        // Throw an exception or return an error response  
+        throw new DuplicateOrganizationNameException("Organization name already exists."); // Added validation logic  
+    }  
+    userRepository.save(user);  
+}  
+  
+
+Existing Code:  
+java  
+// UserRepository.java  
+public interface UserRepository extends JpaRepository<User, Long> {  
+    User findByEmail(String email);  
+}  
+  
+
+New Code with Fix:  
+java  
+// UserRepository.java  
+public interface UserRepository extends JpaRepository<User, Long> {  
+    User findByEmail(String email);  
+    // Added method to check for existing organization names  
+    boolean existsByOrganizationName(String organizationName); // New repository method  
+}  
+  
+
+Changes Made:  
+- Change 1: Added validation logic in `registerUser` to check for duplicate organization names using the new repository method `existsByOrganizationName`.  
+- Change 2: Added a new repository method `existsByOrganizationName` in `UserRepository` to query the database for existing organization names.  
+- Change 3: Included error handling in `registerUser` to throw a `DuplicateOrganizationNameException` when a duplicate is detected.  
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Write unit tests for the `registerUser` method to verify that duplicate organization names are correctly detected and handled.  
+  - Test the `existsByOrganizationName` repository method to ensure it accurately queries the database.  
+  - Perform integration testing to confirm that the application prevents duplicate organization names during user registration.  
+
+- Configuration changes:  
+  - Update the database schema to enforce a uniqueness constraint on the `organization_name` column. Example:  
+    sql  
+    ALTER TABLE organizations ADD CONSTRAINT unique_organization_name UNIQUE (organization_name);  
+      
+
+- Documentation updates:  
+  - Update the API documentation to include details about the new validation logic and error response for duplicate organization names.  
+  - Add a note in the user guide explaining that organization names must be unique.  
+
+- Implementation notes:  
+  - Ensure the `DuplicateOrganizationNameException` is properly defined and handled globally within the application.  
+  - Consider logging the error for monitoring purposes when a duplicate organization name is detected.  
+
+This fix comprehensively addresses the defect by resolving the root causes identified in the RCA and ensures that the application adheres to the requirement for unique organization names.
