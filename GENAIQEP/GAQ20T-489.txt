@@ -1,0 +1,23 @@
+1) Description on code fix:  
+The issue arises from the validation logic that incorrectly marks the "Zephyr access token" field as mandatory. The fix involves updating the validation logic in the relevant part of the code to ensure that this field is optional when creating a solution.
+
+2) Code fix:  
+*Note: The provided code does not contain the specific validation logic for the "Zephyr access token" field. Therefore, I will illustrate a hypothetical fix based on the RCA provided.*
+
+```java
+// Original Code (Hypothetical Validation Logic)
+if (zephyrAccessToken.isEmpty()) {
+    // This line incorrectly mandates the Zephyr access token
+    throw new ValidationException("Zephyr access token is required.");
+}
+
+// Fixed Code
+if (zephyrAccessToken.isEmpty()) {
+    // This line allows the Zephyr access token to be optional
+    // No exception is thrown if the token is empty
+}
+```
+
+3) Other Relevant details:
+- The validation logic should be reviewed to ensure that it aligns with the expected behavior of optional fields.
+- Additional testing should be conducted to confirm that the change does not introduce new issues and that the form behaves as expected when the Zephyr access token is left empty.
