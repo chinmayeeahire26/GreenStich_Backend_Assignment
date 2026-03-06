@@ -1,70 +1,39 @@
-package com.example.pages;
+using System;
+using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
+namespace SeleniumTest {
+    [TestFixture]
+    public class SampleTest {
+        private IWebDriver driver;
 
-public class TrackReleasePage {
-    private WebDriver driver;
+        [SetUp]
+        public void Setup() {
+            // Initialize the ChromeDriver
+            driver = new ChromeDriver();
+        }
 
-    @FindBy(id = "tls")
-    private WebElement tls;
-    @FindBy(id = "locationB")
-    private WebElement locationB;
-    @FindBy(id = "validTime")
-    private WebElement validTime;
-    @FindBy(id = "transmitButton")
-    private WebElement transmitButton;
-    @FindBy(id = "endLimit")
-    private WebElement endLimit;
-    @FindBy(id = "confirmationScreen")
-    private WebElement confirmationScreen;
-    @FindBy(id = "abortButton")
-    private WebElement abortButton;
-    @FindBy(id = "yesButton")
-    private WebElement yesButton;
-    @FindBy(id = "noButton")
-    private WebElement noButton;
+        [Test]
+        public void OpenGoogleTest() {
+            // Navigate to Google
+            driver.Navigate().GoToUrl("https://www.google.com");
+            // Find the search box using its name attribute
+            IWebElement searchBox = driver.FindElement(By.Name("q"));
+            // Enter text into the search box
+            searchBox.SendKeys("Selenium WebDriver");
+            // Submit the search form
+            searchBox.Submit();
+            // Wait for the results to appear
+            System.Threading.Thread.Sleep(2000);
+            // Assert that the title contains "Selenium WebDriver"
+            Assert.IsTrue(driver.Title.Contains("Selenium WebDriver"));
+        }
 
-    public TrackReleasePage(WebDriver driver) {
-        this.driver = driver;
-        PageFactory.initElements(driver, this);
-    }
-
-    public void performTrackRelease(String validTime) {
-        tls.click();
-        locationB.click();
-        this.validTime.sendKeys(validTime);
-        transmitButton.click();
-        noButton.click();
-        endLimit.click();
-        this.validTime.sendKeys(validTime);
-        transmitButton.click();
-        yesButton.click();
-    }
-
-    public boolean isConfirmationScreenLoaded() {
-        return confirmationScreen.isDisplayed();
-    }
-
-    public boolean areButtonsEnabled() {
-        return abortButton.isEnabled() && yesButton.isEnabled() && noButton.isEnabled();
-    }
-
-    public String getOSReportTitle() {
-        return "";
-    }
-
-    public boolean isTrackPaintingUpdated() {
-        return true;
-    }
-
-    public boolean isTrainSheetHistoryUpdated() {
-        return true;
-    }
-
-    public boolean isAuthorityRemoved() {
-        return true;
+        [TearDown]
+        public void Teardown() {
+            // Close the browser
+            driver.Quit();
+        }
     }
 }
