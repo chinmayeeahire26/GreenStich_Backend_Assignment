@@ -1,0 +1,20 @@
+1) Description on code fix:  
+The issue arises from the use of incorrect prompt keywords for generating Epic artifacts. The fix involves updating the documentation and user instructions to clarify the correct keywords to be used, ensuring that users understand they should use `{feature description}` and `{feature acceptance criteria}` instead of `{epic description}` and `{acceptance criteria}`.
+
+2) Code fix:  
+Since the provided code does not directly relate to the Epic artifacts generation functionality, the fix will not be in the code itself but rather in the documentation or user instructions. However, for the sake of clarity, here’s a hypothetical representation of what the documentation update might look like:
+
+```java
+// Existing Documentation (Hypothetical)
+// Users are instructed to use the following keywords for prompts:
+// {epic description}, {acceptance criteria}
+
+// Updated Documentation (Hypothetical)
+// Users should use the following keywords for prompts:
+// {feature description}, {feature acceptance criteria}
+```
+
+3) Other Relevant details:
+- The issue is primarily a user error due to misunderstanding the required keywords.
+- A clear update in the help documentation will help mitigate future occurrences of this defect.
+- Consider implementing validation in the prompt input to alert users if they use incorrect keywords.
