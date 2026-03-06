@@ -1,0 +1,41 @@
+1) Description on code fix: 
+The fix addresses the defect where the "Zephyr Access token" input field is incorrectly set as mandatory in the solution creation modal. According to the root cause analysis, this issue arises from a configuration error where the field is set as mandatory instead of optional, and a process issue where the expected field configurations were not updated. The fix involves modifying the code responsible for initializing and configuring the input fields to ensure that the "Zephyr Access token" field is optional, aligning with the intended configuration.
+
+2) Code fix: 
+
+Existing Code: 
+javascript
+// Assuming this is part of the SolutionCreationModal class
+function initializeFields() {
+    const fields = getFieldConfigurations();
+    fields.forEach(field => {
+        if (field.name === 'ZephyrAccessToken') {
+            field.mandatory = true; // Incorrectly set as mandatory
+        }
+        // Other field initializations
+    });
+}
+
+
+New Code with Fix: 
+javascript
+// Assuming this is part of the SolutionCreationModal class
+function initializeFields() {
+    const fields = getFieldConfigurations();
+    fields.forEach(field => {
+        if (field.name === 'ZephyrAccessToken') {
+            field.mandatory = false; // Corrected to be optional
+        }
+        // Other field initializations
+    });
+}
+
+
+Changes Made: 
+- Changed the `mandatory` property of the "ZephyrAccessToken" field from `true` to `false` to make it optional.
+
+3) Other Relevant details: 
+- Testing recommendations: Perform unit testing to ensure that the "Zephyr Access token" field is no longer mandatory. Test the solution creation process with and without the token to verify that it functions correctly in both scenarios.
+- Configuration changes if needed: Review and update any configuration files or database entries that define field properties to ensure they reflect the current requirements.
+- Documentation updates: Update any relevant documentation to reflect that the "Zephyr Access token" field is optional.
+- Any other implementation notes: Consider implementing error handling or validation checks to ensure field configurations align with expected settings in the future. This can help prevent similar issues from arising due to configuration mismatches.
