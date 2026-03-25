@@ -1,0 +1,29 @@
+1) Description on code fix:  
+The issue arises from a foreign key constraint violation when attempting to delete a solution that is still referenced by other entities in the database, specifically the Azure Steps table. To resolve this, we need to ensure that all related entities (like steps associated with the epic) are deleted or disassociated before the solution deletion is attempted.
+
+2) Code fix:  
+Since the provided code does not directly relate to the deletion of solutions or handling database constraints, the relevant code for the deletion logic is not present. However, I will illustrate a hypothetical fix based on the RCA provided.
+
+Hypothetical Code Before Fix:
+```java
+public void deleteSolution(Long solutionId) {
+    // Attempt to delete the solution directly
+    solutionRepository.deleteById(solutionId);
+}
+```
+
+Hypothetical Code After Fix:
+```java
+public void deleteSolution(Long solutionId) {
+    // Ensure all related steps are deleted before deleting the solution
+    stepRepository.deleteBySolutionId(solutionId); // Fix: Deleting related steps
+    
+    // Attempt to delete the solution
+    solutionRepository.deleteById(solutionId);
+}
+```
+
+3) Other Relevant details:
+- The fix involves ensuring that all foreign key dependencies are resolved before attempting to delete the main entity (solution).
+- It is crucial to implement cascading deletes or checks to prevent foreign key constraint violations in the database.
+- Additional error handling may be necessary to manage cases where related entities cannot be deleted due to other constraints.
