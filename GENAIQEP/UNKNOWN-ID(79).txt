@@ -1,0 +1,42 @@
+1) Description on code fix:  
+The defect arises because the application does not detect or handle the expiration or revocation of the Zephyr access token, resulting in no user notification (snack bar message) on the UI. The root cause is that the backend method `UserServiceImpl.loginUser()` retrieves the authenticated user without validating the token’s status or propagating errors related to token expiry. Consequently, the frontend never receives an event or error to trigger the snack bar message. To fix this, the backend must explicitly check the token validity during authentication or API calls and throw a specific exception or return an error response when the token is expired or revoked. On the frontend, event listeners or error handlers must be added to catch these token invalidation signals and display a snack bar message informing the user about the expired token. This fix addresses both the code issue (missing token expiry handling) and the user experience issue (lack of feedback).  
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided context includes descriptions of the `UserServiceImpl.loginUser()` method and the `FlipkartLoginTest.loginToFlipkart()` method but does not include the actual code snippets for these methods or the frontend code responsible for displaying snack bar messages. Without the actual code, it is not possible to provide exact before/after code comparisons. However, based on the analysis, the following general code changes are recommended:
+
+- Backend (`UserServiceImpl` or related authentication service):  
+  - Add token validation logic to check if the Zephyr access token is expired or revoked during user login or API requests.  
+  - If the token is invalid, throw a custom exception (e.g., `ExpiredAccessTokenException`).  
+  - Ensure this exception is mapped to an appropriate HTTP response (e.g., 401 Unauthorized) with a clear error message.
+
+- Frontend (UI layer handling authentication and API responses):  
+  - Add global error handling or interceptors to detect the 401 Unauthorized response with the expired token error message.  
+  - Trigger a snack bar message or toast notification informing the user that the Zephyr access token has expired or been revoked.  
+  - Optionally, prompt the user to re-authenticate or refresh the token.
+
+- Test code (`FlipkartLoginTest` or similar):  
+  - Add verification steps after login or token-related actions to assert that the snack bar message appears when the token is expired or revoked.
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Create automated tests to simulate token expiration and revocation scenarios and verify that the snack bar message is displayed correctly.  
+  - Perform manual testing by revoking the token and navigating the application to confirm user feedback appears as expected.
+
+- Configuration changes if needed:  
+  - Review security configurations to ensure token validation is enforced on all relevant API endpoints.  
+  - Ensure frontend notification libraries (e.g., Angular Material snack bar, React Toastify) are properly configured and imported.
+
+- Documentation updates:  
+  - Update developer documentation to describe the token expiry handling flow and how UI feedback is triggered.  
+  - Document the new exception types and error response formats related to token invalidation.
+
+- Implementation notes:  
+  - Consider centralizing token validation logic to avoid duplication.  
+  - Use consistent error codes/messages for token expiry to simplify frontend detection.  
+  - Ensure that the UI feedback mechanism is accessible and user-friendly.
+
+---
+
+Summary:  
+Due to lack of provided code snippets, exact code diffs cannot be shown. The fix requires adding token expiry detection and error propagation in backend authentication logic, and implementing frontend error handling to display snack bar messages upon token expiration or revocation. This approach directly addresses the root cause of missing user feedback and improves overall user experience.
