@@ -1,0 +1,39 @@
+1) Description on code fix:  
+The defect arises because the Epic artifacts generation API expects prompt keywords `{feature description}` and `{feature acceptance criteria}`, but users naturally write prompts using `{epic description}` and `{acceptance criteria}` based on their Jira Epic terminology. This mismatch causes the API to fail or return incorrect responses. The root cause is twofold: a configuration issue where prompt keywords are not validated or enforced before API calls, and a process issue where users lack clear guidance on which keywords to use.
+
+To fix this, the system must enforce or validate prompt keywords before invoking the API, ensuring only `{feature description}` and `{feature acceptance criteria}` are used for Epic artifact generation prompts. Additionally, the UI or prompt configuration layer should clearly instruct users on the required keywords, ideally through help documentation or inline guidance. Error handling should be improved to detect keyword mismatches and provide meaningful feedback.
+
+Since the provided code snippets do not contain the relevant prompt handling or API integration code, the fix recommendations focus on the configuration, prompt management, and user guidance layers that govern prompt creation and validation.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided source code (FlipkartLoginTest and UserServiceImpl) does not include any logic related to prompt keyword validation, prompt configuration, or API integration for Epic artifacts generation. Therefore, no direct code fix can be shown here. The defect lies in the prompt management/configuration and UI layers which are not part of the provided code.
+
+3) Other Relevant details:  
+- Prompt Keyword Validation:  
+  Implement validation logic in the prompt management module that checks the prompt text for allowed keywords before saving or using it for Epic artifact generation. For Epic prompts, only `{feature description}` and `{feature acceptance criteria}` should be accepted. If invalid keywords like `{epic description}` are detected, the system should reject the prompt with a clear error message.
+
+- User Guidance and Documentation:  
+  Update the help documentation and UI tooltips to explicitly instruct users that for Epic artifact generation prompts, the keywords `{feature description}` and `{feature acceptance criteria}` must be used, even though the Jira work item is an Epic. Clarify that the underlying API expects these keywords because it is shared with Feature artifact generation.
+
+- UI Enhancements:  
+  Consider adding a prompt template or dropdown that inserts the correct keywords automatically when users create or edit Epic artifact prompts. This reduces user errors and confusion.
+
+- Error Handling:  
+  Enhance the API integration layer to detect API failures caused by incorrect prompt keywords and provide user-friendly error messages suggesting the correct keywords.
+
+- Testing Recommendations:  
+  - Test prompt creation with valid keywords `{feature description}` and `{feature acceptance criteria}` to ensure successful artifact generation.  
+  - Test prompt creation with invalid keywords like `{epic description}` to verify validation rejects the prompt and shows appropriate errors.  
+  - Test the full Epic artifact generation flow with saved prompts to confirm correct API responses.  
+  - Validate that help documentation and UI tooltips display the correct keyword instructions.
+
+- Configuration Changes:  
+  - Add configuration entries or constants defining allowed keywords for Epic artifact prompts.  
+  - Possibly maintain separate prompt types or categories to distinguish Epic prompts from Feature prompts internally, even if the API is shared.
+
+- Process Improvements:  
+  - Train users or update onboarding materials to emphasize correct prompt keyword usage.  
+  - Monitor prompt usage and API errors to identify and correct misconfigurations early.
+
+By implementing these fixes, the system will prevent prompt keyword mismatches that cause Epic artifact generation failures, reduce user confusion, and improve overall reliability of the feature.
