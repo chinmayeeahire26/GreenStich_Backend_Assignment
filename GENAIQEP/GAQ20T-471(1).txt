@@ -1,0 +1,163 @@
+1) Description on code fix:
+   We need to address two root causes from the RCA:
+   - Missing validation/assertion logic in the Selenium test (FlipkartLoginTest.java) so that actual UI state is compared with expected test-step outcomes. Without this, the “mismatch” warning never clears.
+   - Lack of session-reset and logout logic in both the test suite and the backend service, leading to stale authentication state that only resets when the user manually logs out and back in.
+   
+   These fixes will:
+   - Add explicit checks after login to assert the user is correctly authenticated.
+   - Enhance popup-close handling with explicit waits and specific exception catching.
+   - Introduce cleanup steps (clearing cookies/local storage) and a dedicated logout method (logoutUser) to reset SecurityContextHolder.
+   - Prepare the framework for future implementation of action-vs-expected-results validation when uploading to ALM (not yet in provided code).
+
+2) Code fix:
+
+   A) FlipkartLoginTest.java – Enhance validation, session cleanup, and exception handling
+
+   Existing Code:
+   java
+   public void loginToFlipkart() {
+       driver.get("https://www.flipkart.com");
+       try {
+           WebElement closeButton = driver.findElement(By.cssSelector("button._2KpZ6l._2doB4z"));
+           closeButton.click();
+       } catch (Exception e) {
+           // ignore
+       }
+       WebElement loginLink = driver.findElement(By.linkText("Login"));
+       loginLink.click();
+       driver.findElement(By.cssSelector("input[class*='_2IX_2- VJZDxU']")).sendKeys(username);
+       driver.findElement(By.cssSelector("input[type='password']")).sendKeys(password);
+       driver.findElement(By.cssSelector("button._2KpZ6l._2HKlqd")).click();
+       // Verify login success
+       // TODO: verify user is logged in
+       driver.quit();
+   }
+   
+
+   New Code with Fix:
+   java
+   public void loginToFlipkart() {
+       // Clear any stale session data before test
+       driver.manage().deleteAllCookies();
+       // Optionally clear local storage
+       ((JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
+
+       driver.get("https://www.flipkart.com");
+
+       // Improved popup close: wait explicitly and catch only NoSuchElementException
+       try {
+           WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+           WebElement closeButton = wait.until(
+               ExpectedConditions.elementToBeClickable(By.cssSelector("button._2KpZ6l._2doB4z")));
+           closeButton.click();
+       } catch (NoSuchElementException | TimeoutException e) {
+           // Popup not present – continue
+       }
+
+       // Perform login
+       WebElement loginLink = driver.findElement(By.linkText("Login"));
+       loginLink.click();
+       driver.findElement(By.cssSelector("input[class*='_2IX_2- VJZDxU']")).sendKeys(username);
+       driver.findElement(By.cssSelector("input[type='password']")).sendKeys(password);
+       driver.findElement(By.cssSelector("button._2KpZ6l._2HKlqd")).click();
+
+       // ---- Verification: assert user greeting or account icon is displayed ----
+       WebDriverWait postLoginWait = new WebDriverWait(driver, Duration.ofSeconds(10));
+       WebElement accountIndicator = postLoginWait.until(
+           ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div._1ruvv2")));  // e.g. user name container
+       Assert.assertTrue(
+           accountIndicator.getText().contains(username),
+           "Expected user name to appear after login, but got: " + accountIndicator.getText()
+       );
+
+       // Logout/cleanup so next test starts fresh
+       try {
+           // If there's a logout link or button
+           WebElement logoutMenu = driver.findElement(By.cssSelector("div._28p97w"));
+           logoutMenu.click();
+           WebElement logoutBtn = driver.findElement(By.linkText("Logout"));
+           logoutBtn.click();
+       } catch (Exception e) {
+           // best effort cleanup
+       }
+
+       // Final session cleanup
+       driver.manage().deleteAllCookies();
+       ((JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
+
+       driver.quit();
+   }
+   
+
+   Changes Made:
+   - Added `driver.manage().deleteAllCookies()` and clearing of localStorage at start and end of method to reset session state.
+   - Replaced generic `Exception` catch with specific `NoSuchElementException|TimeoutException` around popup close, and introduced an explicit wait.
+   - Implemented actual login verification using `WebDriverWait` and `Assert.assertTrue()` against a visible UI element.
+   - Added a best-effort logout sequence before driver.quit() to reset UI state for the next run.
+
+   B) UserServiceImpl.java – Add logoutUser() and clear SecurityContext
+
+   Existing Code:
+   java
+   public User loginUser(String email, String password) {
+       Authentication auth = authenticationManager.authenticate(
+           new UsernamePasswordAuthenticationToken(email, password)
+       );
+       SecurityContextHolder.getContext().setAuthentication(auth);
+       return userRepo.findByEmail(email)
+               .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+   }
+   
+
+   New Code with Fix:
+   java
+   public User loginUser(String email, String password) {
+       Authentication auth = authenticationManager.authenticate(
+           new UsernamePasswordAuthenticationToken(email, password)
+       );
+       SecurityContextHolder.getContext().setAuthentication(auth);
+       return userRepo.findByEmail(email)
+           .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+   }
+
+   /
+    * Clears authentication context to simulate a full logout.
+    */
+   public void logoutUser() {
+       SecurityContextHolder.clearContext();  // clear authentication
+       // If using HTTP session:
+       // RequestContextHolder.currentRequestAttributes()
+       //       .removeAttribute("SPRING_SECURITY_CONTEXT", RequestAttributes.SCOPE_SESSION);
+   }
+   
+
+   Changes Made:
+   - Added a new `logoutUser()` method that clears the Spring Security context to prevent stale authentication from persisting across operations.
+
+   C) Test-step vs ALM upload validation logic
+
+   Relevant Code NOT Found  
+   The repository does not include the class or method responsible for uploading test-step changes to ALM or for validating action/expected-result mismatches. You will need to locate (or create) the ALM-uploader or validator class (e.g., `AlmTestStepValidator`) and implement a comparison method such as:
+   java
+   private boolean compareActionsAndExpectedResults(List<Step> actualSteps, List<Step> expectedSteps) {
+       // iterate, compare each Step.action and Step.expectedResult
+       // collect mismatches, throw or return details
+   }
+   
+   Then call this method before upload and show an actionable modal listing offending test cases.
+
+3) Other Relevant details:
+   - Testing recommendations:
+     • Add a new automated test case verifying that `logoutUser()` clears the `SecurityContextHolder` and that a subsequent operation requires fresh login.  
+     • Create an integration test for the ALM uploader to simulate mismatched steps and verify the warning modal lists correct case titles.
+     • Run the full suite locally in a clean browser profile to ensure cookies/localStorage are truly cleared.
+   - Configuration changes if needed:
+     • In your CI pipeline, ensure tests run with a fresh browser profile or add a pre-test cleanup step (e.g., delete browser cache directories).  
+     • If you use a test framework annotation (TestNG `@AfterMethod` or JUnit `@AfterEach`), factor the cleanup into a shared teardown method.
+   - Documentation updates:
+     • Update your Test Automation README to document the new validation and logout requirements.  
+     • Note in your ALM integration docs the need to implement and maintain the action/expected-result comparator.
+   - Implementation notes:
+     • Ensure the CSS selectors used for post-login validation are up to date; adapt to any Flipkart UI changes.  
+     • If your application uses localStorage for session tokens, clearing it is essential; otherwise you may still see stale state.  
+     • Coordinate with the ALM team to define the API and format for returning detailed mismatch information for display in the modal.
