@@ -1,0 +1,81 @@
+1) Description on code fix:  
+The fix addresses the security vulnerability caused by the password input field having autocomplete enabled. By explicitly setting `autocomplete="off"` in the HTML, browsers are prevented from autofilling or saving passwords, mitigating the risk of credential exposure. Additionally, enhancing the Selenium test to verify this attribute ensures that any regression or misconfiguration is caught early. Removing hardcoded credentials and adding login success verification further improves security and test robustness.
+
+2) Code fix:  
+Existing Code:  
+java
+// FlipkartLoginTest.java
+public void loginToFlipkart() {
+    WebDriver driver = new ChromeDriver();
+    driver.get("https://www.flipkart.com");
+
+    // Locate username field and enter username
+    WebElement usernameField = driver.findElement(By.cssSelector("input._2IX_2-._35m_Y2"));
+    usernameField.sendKeys("testuser@example.com");
+
+    // Locate password field and enter password
+    WebElement passwordField = driver.findElement(By.cssSelector("input._2IX_2-._3mctLh"));
+    passwordField.sendKeys("password123");
+
+    // Click login button
+    WebElement loginButton = driver.findElement(By.cssSelector("button._2KpZ6l._2HKlqd._3AWRsL"));
+    loginButton.click();
+
+    // No verification or assertion after login
+}
+
+
+New Code with Fix:  
+java
+// FlipkartLoginTest.java
+public void loginToFlipkart() {
+    WebDriver driver = new ChromeDriver();
+    driver.get("https://www.flipkart.com");
+
+    // Locate username field and enter username
+    WebElement usernameField = driver.findElement(By.cssSelector("input._2IX_2-._35m_Y2"));
+    usernameField.sendKeys(System.getenv("FLIPKART_USERNAME")); // Removed hardcoded username
+
+    // Locate password field
+    WebElement passwordField = driver.findElement(By.cssSelector("input._2IX_2-._3mctLh"));
+
+    // Verify that autocomplete attribute is set to 'off' for security
+    String autocompleteAttr = passwordField.getAttribute("autocomplete");
+    if (autocompleteAttr == null || !autocompleteAttr.equalsIgnoreCase("off")) {
+        throw new RuntimeException("Security risk: Password field autocomplete is not disabled.");
+    }
+
+    // Enter password securely from environment variable
+    passwordField.sendKeys(System.getenv("FLIPKART_PASSWORD")); // Removed hardcoded password
+
+    // Click login button
+    WebElement loginButton = driver.findElement(By.cssSelector("button._2KpZ6l._2HKlqd._3AWRsL"));
+    loginButton.click();
+
+    // Add verification to confirm login success
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    try {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div._1ruvv2"))); // Example selector for logged-in user element
+    } catch (TimeoutException e) {
+        throw new RuntimeException("Login failed or UI changed, please check the login flow.");
+    }
+}
+
+
+Changes Made:  
+- Removed hardcoded credentials; replaced with environment variables.  
+- Added verification for `autocomplete="off"` on password field.  
+- Added login success verification step.  
+- Added explanatory comments.
+
+Note: The actual HTML input field must be updated as follows:  
+html
+<input type="password" class="_2IX_2- _3mctLh" name="password" autocomplete="off" />
+
+
+3) Other Relevant details:  
+- Test the updated Selenium test to ensure it detects missing autocomplete attribute and verifies login success.  
+- Configure environment variables for credentials securely in the test environment.  
+- Update documentation to reflect security requirements and test setup changes.  
+- Apply the HTML attribute fix in the web application codebase to fully resolve the defect.  
+- Consider extending similar security checks to other sensitive input fields.
