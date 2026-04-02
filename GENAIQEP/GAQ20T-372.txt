@@ -1,0 +1,26 @@
+1) Description on code fix:  
+The root cause is that the embedding LLM model name is not correctly fetched due to missing or incorrect logic in the code that retrieves or maps the embedding model name. Since the provided code does not contain any logic related to fetching or mapping the embedding LLM model name, the fix involves adding or correcting the method that fetches the embedding model name from configuration or service. This fix typically involves reading the correct model name from a configuration file or service and returning it properly.
+
+2) Code fix:
+
+| Code without the Fix                                                                                   | Code with the Fix                                                                                              |
+|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                    | ```java                                                                                                           |
+| // No method to fetch embedding model name present                                                        | // Added method to fetch embedding model name from configuration                                                  |
+|                                                                                                            |                                                                                                                   |
+| // Missing method to get embedding model name                                                              | public String getEmbeddingModelName() {                                                                            |
+|                                                                                                            |     // Fetch the embedding model name from configuration or environment variable                                   |
+|                                                                                                            |     String modelName = System.getenv("EMBEDDING_LLM_MODEL_NAME");                                                 |
+|                                                                                                            |     if (modelName == null || modelName.isEmpty()) {                                                               |
+|                                                                                                            |         // fallback to default or throw exception                                                                  |
+|                                                                                                            |         modelName = "default-embedding-model";                                                                     |
+|                                                                                                            |     }                                                                                                             |
+|                                                                                                            |     return modelName;                                                                                              |
+|                                                                                                            | }                                                                                                                 |
+| ```                                                                                                        | ```                                                                                                               |
+
+3) Other Relevant details:  
+- The embedding model name should be configurable via environment variables or configuration files to avoid hardcoding.  
+- Ensure that the configuration or mapping for embedding model names is properly updated and loaded at runtime.  
+- If the embedding model name is fetched from a service or database, ensure the service call is correctly implemented and error-handled.  
+- Since the provided code snippet does not include embedding model fetching logic, the fix requires adding this missing piece in the relevant service or utility class.
