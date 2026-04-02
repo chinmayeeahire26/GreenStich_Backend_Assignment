@@ -1,0 +1,43 @@
+1) Description on code fix:  
+The fix addresses incorrect mandatory validation rules on the Jira Zephyr squad solution edit screen. The root cause is twofold: the solution data model configuration incorrectly marks Zephyr access key and secret key as mandatory, and the backend validation logic enforces these outdated mandatory checks while ignoring the Test Environment URL field. The fix involves updating the data model configuration to remove mandatory flags from the Zephyr keys and add it to the Test Environment URL, and revising the backend validation logic to remove mandatory checks on the Zephyr keys and add them for the Test Environment URL. This ensures validation aligns with expected business rules, preventing unnecessary validation errors and improving user experience.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided code snippets do not include the relevant solution data model configuration or backend validation logic. Therefore, no direct before/after code comparison can be shown from the current codebase. However, the typical changes required are:
+
+- In solution data model configuration:  
+  - Remove mandatory flag from `zephyrAccessKey` and `zephyrSecretKey`.  
+  - Add mandatory flag to `testEnvironmentUrl`.
+
+- In backend validation logic:  
+  - Remove mandatory validation for `zephyrAccessKey` and `zephyrSecretKey`.  
+  - Add mandatory validation for `testEnvironmentUrl`.
+
+*Illustrative pseudocode before fix:*  
+java
+if (solution.getDataModel().equals("JiraZephyrSquad")) {
+    if (isEmpty(solution.getZephyrAccessKey())) {
+        errors.add("Zephyr Access Key is mandatory.");
+    }
+    if (isEmpty(solution.getZephyrSecretKey())) {
+        errors.add("Zephyr Secret Key is mandatory.");
+    }
+    // Test Environment URL not validated
+}
+
+
+*Illustrative pseudocode after fix:*  
+java
+if (solution.getDataModel().equals("JiraZephyrSquad")) {
+    // Removed mandatory checks for Zephyr keys
+    if (isEmpty(solution.getTestEnvironmentUrl())) {
+        errors.add("Test Environment URL is mandatory.");
+    }
+}
+
+
+3) Other Relevant details:  
+- Testing: Add unit and integration tests to verify correct mandatory validation behavior for Jira Zephyr squad solutions.  
+- Configuration: Update data model configuration files or DB schema accordingly and refresh caches if applicable.  
+- Documentation: Update user and technical documentation to reflect the changed mandatory fields.  
+- Implementation notes: Consider refactoring validation logic to be configuration-driven to avoid hardcoded rules and improve maintainability. Enhance error handling and user feedback on the edit solution screen for better usability.
