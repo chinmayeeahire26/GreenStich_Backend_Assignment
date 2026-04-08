@@ -1,0 +1,54 @@
+1) Description on code fix:  
+The defect GAQ20T-371 is caused by inconsistent UI elements (unwanted borders and lines) and differing page layout configurations between 'story test Artifact' and 'story test cases' pages. The provided code is backend and Selenium login automation, which do not control UI layout or styling. Therefore, the fix must be applied in the frontend UI code (HTML/CSS) to remove or unify borders and lines, resolving the cosmetic inconsistency. Additionally, enhancing Selenium tests to verify UI elements after login will help detect such issues early in automated testing.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided backend and Selenium login code do not contain UI layout or styling logic to fix the defect directly. No frontend UI or CSS code is provided to modify.
+
+However, to improve test coverage, here is an enhancement to the Selenium login test to verify unwanted borders or lines:
+
+Existing Code:  
+java
+public void loginToFlipkart() {
+    driver.get("https://www.flipkart.com");
+    driver.findElement(By.cssSelector("input._2IX_2- VJZDxU")).sendKeys("username");
+    driver.findElement(By.cssSelector("input._2IX_2- _3mctLh VJZDxU")).sendKeys("password");
+    driver.findElement(By.cssSelector("button._2KpZ6l _2HKlqd _3AWRsL")).click();
+    // No UI verification after login
+}
+
+
+New Code with Fix:  
+java
+public void loginToFlipkart() {
+    driver.get("https://www.flipkart.com");
+    driver.findElement(By.cssSelector("input._2IX_2- VJZDxU")).sendKeys("username");
+    driver.findElement(By.cssSelector("input._2IX_2- _3mctLh VJZDxU")).sendKeys("password");
+    driver.findElement(By.cssSelector("button._2KpZ6l _2HKlqd _3AWRsL")).click();
+
+    // Added UI verification to detect unwanted borders or lines after login
+    WebElement pageBody = driver.findElement(By.cssSelector("body"));
+    String borderBottom = pageBody.getCssValue("border-bottom");
+    Assert.assertTrue(borderBottom.equals("none") || borderBottom.equals("0px"), 
+        "Unexpected bottom border found on the page after login.");
+
+    List<WebElement> bottomLines = driver.findElements(By.cssSelector(".bottom-line"));
+    Assert.assertTrue(bottomLines.isEmpty() || bottomLines.stream().allMatch(e -> !e.isDisplayed()),
+        "Unwanted bottom line element is visible on the page.");
+}
+
+
+Changes Made:  
+- Added CSS property check for `border-bottom` on the page body.  
+- Added assertion to fail test if unwanted border is present.  
+- Added check for elements with class `.bottom-line` to ensure they are not visible.
+
+3) Other Relevant details:  
+- Review and unify frontend CSS and HTML templates for both pages to remove unwanted borders and lines.  
+- Add UI verification steps in Selenium or UI automation tests to catch cosmetic defects early.  
+- Conduct cross-browser and responsive UI testing.  
+- Synchronize page layout configuration files or theme settings.  
+- Document UI style guidelines and update test case documentation accordingly.  
+- Collaborate with frontend developers and UI/UX designers for root cause resolution.
+
+This comprehensive approach addresses both the root cause and improves detection of similar defects in the future.
