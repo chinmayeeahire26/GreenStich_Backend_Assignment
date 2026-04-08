@@ -1,0 +1,55 @@
+1) Description on code fix:  
+The defect relates to UI inconsistencies and cosmetic issues in the "story test Artifact" page, specifically the removal of borders and lines at the bottom of the page to match the "story test cases" page. The provided code is backend service and Selenium login test code, which does not contain any UI rendering or styling logic related to the artifact or story test cases pages. Therefore, no direct code fix can be applied from the given code snippets.
+
+2) Code fix:  
+
+| Without Fix (Given Code)                                                                                      | With Fix (Proposed Fix)                                                                                      |
+|--------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                      | ```java                                                                                                      |
+| // No UI related code present here                                                                           | // Relevant UI code for story test Artifact page styling should be updated in the frontend/UI layer          |
+| public class FlipkartLoginTest {                                                                              | // Example: CSS or frontend component code to remove border and bottom line from the artifact page           |
+|                                                                                                              | // This is a placeholder since no UI code is provided                                                       |
+|     public void loginToFlipkart() {                                                                           | // e.g., in CSS:                                                                                             |
+|         System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");                                | // .artifact-page {                                                                                           |
+|         WebDriver driver = new ChromeDriver();                                                               | //     border: none;                                                                                          |
+|         driver.get("https://www.flipkart.com");                                                              | //     box-shadow: none; /* to remove bottom line if it is a shadow */                                       |
+|                                                                                                              | // }                                                                                                         |
+|         // Close the login popup if it appears                                                               |                                                                                                              |
+|         try {                                                                                                 |                                                                                                              |
+|             WebElement closeButton = driver.findElement(By.cssSelector("button._2KpZ6l._2doB4z"));             |                                                                                                              |
+|             closeButton.click();                                                                              |                                                                                                              |
+|         } catch (Exception e) {                                                                               |                                                                                                              |
+|             System.out.println("Login popup not displayed");                                                  |                                                                                                              |
+|         }                                                                                                     |                                                                                                              |
+|                                                                                                              |                                                                                                              |
+|         // Click on the login button                                                                          |                                                                                                              |
+|         WebElement loginButton = driver.findElement(By.cssSelector("a._1_3w1N"));                             |                                                                                                              |
+|         loginButton.click();                                                                                   |                                                                                                              |
+|                                                                                                              |                                                                                                              |
+|         // Enter username and password                                                                        |                                                                                                              |
+|         WebElement usernameField = driver.findElement(By.cssSelector("input._2IX_2-._2LYh3d"));               |                                                                                                              |
+|         usernameField.sendKeys("your_username");                                                              |                                                                                                              |
+|                                                                                                              |                                                                                                              |
+|         WebElement passwordField = driver.findElement(By.cssSelector("input._2IX_2-._3mctLh"));               |                                                                                                              |
+|         passwordField.sendKeys("your_password");                                                              |                                                                                                              |
+|                                                                                                              |                                                                                                              |
+|         // Submit the login form                                                                              |                                                                                                              |
+|         WebElement submitButton = driver.findElement(By.cssSelector("button._2KpZ6l._2HKlqd._3AWRsL"));       |                                                                                                              |
+|         submitButton.click();                                                                                  |                                                                                                              |
+|                                                                                                              |                                                                                                              |
+|         // Verify login success                                                                               |                                                                                                              |
+|         // Add verification logic here                                                                        |                                                                                                              |
+|                                                                                                              |                                                                                                              |
+|         driver.quit();                                                                                        |                                                                                                              |
+|     }                                                                                                        |                                                                                                              |
+| }                                                                                                            |                                                                                                              |
+| ```                                                                                                          | ```                                                                                                          |
+
+3) Other Relevant details:  
+- The defect is UI related (border and line removal), which is typically handled in frontend code (HTML/CSS/JS), not in backend Java service or Selenium test code.  
+- The provided code snippets do not contain any UI rendering or styling logic related to the story test Artifact or test cases pages.  
+- To fix the defect, frontend UI code (CSS or component templates) should be updated to standardize the page appearance and remove unwanted borders/lines.  
+- Collaboration with frontend/UI developers is recommended to identify and fix the exact UI elements causing the issue.  
+
+Summary:  
+Relevant Code NOT Found in the provided backend and Selenium test code for the UI cosmetic fix described in the defect and RCA.
