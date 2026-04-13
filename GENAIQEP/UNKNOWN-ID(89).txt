@@ -1,0 +1,31 @@
+1) Description on code fix:  
+The reported bug is about the "Play button not showing at the right position" on the homepage, which is a UI/layout issue. The provided code is a backend service related to user registration and login, which does not handle any UI rendering or positioning logic. Therefore, no relevant code related to the play button positioning is found in the given source code.
+
+2) Code fix:  
+Without Fix:  
+```java
+@Override
+public UserData loginUser() {
+		
+	SecurityContext sc  = SecurityContextHolder.getContext();
+	
+	Authentication auth  = sc.getAuthentication();
+	
+	String userName = auth.getName();
+	
+	UserData user = userRepo.findByEmail(userName);
+	
+	return user;
+	
+}
+```
+
+With Fix:  
+```java
+// Relevant Code NOT Found
+```
+
+3) Other Relevant details:  
+- The bug is related to frontend UI positioning, likely involving HTML/CSS/JavaScript, which is not present in the provided backend service code.  
+- To fix the bug, the frontend code responsible for rendering the play button on the homepage needs to be reviewed and adjusted.  
+- Backend user service code does not influence UI element positioning; hence no changes here will fix the reported issue.
