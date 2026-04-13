@@ -1,0 +1,32 @@
+1) Description on code fix:  
+The root cause indicates that the delete operation for a solution does not handle cascading deletes for dependent Azure Steps records, causing a foreign key constraint violation. The fix involves modifying the delete method to first delete or detach all dependent Azure Steps associated with the solution before deleting the solution itself, ensuring no foreign key constraints are violated.
+
+2) Code fix:
+
+| Before Fix (Current Code)                                                                                     | After Fix (Fixed Code)                                                                                                   |
+|--------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                      | ```java                                                                                                                 |
+| // Hypothetical deleteSolution method without cascade handling                                               | // Modified deleteSolution method with cascade handling for Azure Steps                                                |
+| public void deleteSolution(Long solutionId) {                                                               | public void deleteSolution(Long solutionId) {                                                                           |
+|     // Directly deleting solution without handling dependent Azure Steps                                     |     // First delete all Azure Steps linked to the solution to avoid FK constraint                                       |
+|     solutionRepository.deleteById(solutionId);                                                              |     azureStepsRepository.deleteBySolutionId(solutionId);  // New line: delete dependent Azure Steps                 |
+|                                                                                                              |                                                                                                                         |
+|     solutionRepository.deleteById(solutionId);                                                              |     solutionRepository.deleteById(solutionId);                                                                          |
+| }                                                                                                            | }                                                                                                                       |
+| ```                                                                                                          | ```                                                                                                                     |
+
+Highlight:  
+- `azureStepsRepository.deleteBySolutionId(solutionId);` is the key fix to delete dependent Azure Steps before deleting the solution.
+
+3) Other Relevant details:  
+- Ensure that the `azureStepsRepository` has a method `deleteBySolutionId(Long solutionId)` implemented to delete all Azure Steps linked to the solution.  
+- Alternatively, configure the database foreign key constraint with `ON DELETE CASCADE` if appropriate, but code-level cascade handling is safer for explicit control.  
+- The provided code snippet does not contain the delete logic for solutions or Azure Steps, so the fix is based on standard service layer delete patterns.  
+- Testing should verify that deleting a solution with dependent Azure Steps no longer throws a foreign key constraint error.  
+
+Summary:  
+The fix requires adding explicit deletion of dependent Azure Steps before deleting the solution to prevent foreign key constraint violations. Since the provided code does not include the delete logic, the fix is described in a typical service method style.  
+
+---
+
+If you want me to help write the exact method or repository interface snippet, please provide the relevant service or repository code handling solution deletion.
