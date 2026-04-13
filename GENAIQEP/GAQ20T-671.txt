@@ -1,0 +1,58 @@
+1) Description on code fix:  
+The fix addresses the root cause of the defect GAQ20T-671 by ensuring that Jira Zephyr Scale API URLs are properly decoded from any URL-encoded form before use, preventing malformed URL errors. It also adds strict input validation to the solution creation modal fields to reject or correct invalid URLs and tokens before processing. This prevents connection failures caused by malformed URLs and improves overall robustness and user experience during solution creation.  
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided code snippets do not include the solution creation or Jira API integration logic where the malformed URL issue occurs. The fix should be applied in the component responsible for creating the Jira Zephyr Scale solution (e.g., `SolutionCreationService`), which is not provided.  
+
+However, the recommended fix approach is illustrated below:  
+
+Before Fix (Hypothetical):  
+java
+public void createSolution(SolutionRequest request) {
+    String jiraApiUrl = request.getJiraBaseUrl(); // Encoded URL like "https%3A%2F%2Fapi.zephyrscale.smartbear.comc"
+    URL url = new URL(jiraApiUrl); // Causes MalformedURLException
+    // API call logic
+}
+
+
+After Fix:  
+java
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
+
+public void createSolution(SolutionRequest request) throws InvalidInputException {
+    String rawJiraApiUrl = request.getJiraBaseUrl();
+
+    // Decode URL to handle encoded characters
+    String decodedUrl = URLDecoder.decode(rawJiraApiUrl, StandardCharsets.UTF_8.name());
+
+    // Validate URL format
+    if (!isValidUrl(decodedUrl)) {
+        throw new InvalidInputException("Invalid Jira Base URL provided.");
+    }
+
+    URL url = new URL(decodedUrl); // Properly formed URL
+
+    // Proceed with API call
+}
+
+private boolean isValidUrl(String url) {
+    String urlRegex = "^(https?)://[w.-]+(:d+)?(/.*)?$";
+    return Pattern.matches(urlRegex, url);
+}
+
+
+Changes Made:  
+- Added URL decoding before usage.  
+- Added URL format validation with regex.  
+- Added exception handling for invalid inputs.  
+
+3) Other Relevant details:  
+- Add unit and integration tests for URL decoding and validation in solution creation.  
+- Validate and correct Jira API URLs in configuration to avoid encoded URLs.  
+- Update documentation to specify expected URL formats and validation rules.  
+- Centralize URL handling logic for maintainability.  
+- Improve error logging for malformed inputs.
