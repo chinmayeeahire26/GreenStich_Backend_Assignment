@@ -1,0 +1,10 @@
+1) Description on code fix:  
+The reported defect is a UI heat map y-axis label overlap/misalignment issue that requires changes in the front-end chart configuration (e.g., axis label padding/margin, wrapping/ellipsis, font/line-height, reflow after render). The provided source code contains Selenium Flipkart login automation and a Spring `UserServiceImpl`, neither of which controls heat map rendering or axis label layout—so no applicable fix can be identified here.
+
+2) Code fix (side-by-side comparison):  
+Relevant Code NOT Found
+
+3) Other Relevant details:  
+- The fix likely belongs in the heatmap/chart rendering layer (e.g., React/Angular component, JS chart config for Highcharts/ECharts/D3/Plotly, or CSS for axis labels).  
+- To proceed, share the heatmap component/code where the chart is configured (yAxis/labels/tick formatter/margins/grid/layout), plus the chart library name/version.  
+- If the overlap happens after async data load, the fix may also require a re-render/reflow after container sizing is finalized (e.g., `chart.reflow()`, `resizeObserver`, or rerender on data load).
