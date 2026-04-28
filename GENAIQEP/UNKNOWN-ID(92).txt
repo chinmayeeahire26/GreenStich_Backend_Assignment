@@ -1,0 +1,39 @@
+{
+  "Defect Analysis": {
+    "error": "No defect details were provided. The input contains a placeholder '{defects}' but not the actual defect records, so I cannot extract Defect IDs, features/parents, sentiments, impact, or response times.",
+    "required_input_format": {
+      "defects": [
+        {
+          "defectId": "string",
+          "title": "string",
+          "description": "string",
+          "status": "Open/Closed/etc",
+          "createdDate": "YYYY-MM-DD or timestamp",
+          "closedDate": "YYYY-MM-DD or timestamp (if closed)",
+          "severity": "Critical/High/Medium/Low (if available)",
+          "priority": "P0/P1/etc (if available)",
+          "rootCause": "string (if available)",
+          "comments": [
+            {
+              "authorRole": "user/tester/developer",
+              "text": "string",
+              "date": "YYYY-MM-DD or timestamp"
+            }
+          ],
+          "parentId": "string (if available)",
+          "parentTitle": "string (if available)"
+        }
+      ]
+    },
+    "table": []
+  },
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": [],
+    "Patterns of Frustration or Satisfaction": [],
+    "Feature Priority": [],
+    "Trends": [],
+    "Performance/Security Concerns": [],
+    "Response Time for negative areas": [],
+    "Identify Sentiment Trends Over Time": "Cannot determine without defect data (created/closed dates and defect content)."
+  }
+}
