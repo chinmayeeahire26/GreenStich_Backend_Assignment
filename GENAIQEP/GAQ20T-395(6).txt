@@ -1,0 +1,13 @@
+1) Description on code fix:  
+The defect is caused by missing responsive design and dynamic layout adaptation in the create blueprint modal dialog. Without proper CSS and JavaScript handling, resizing the browser or expanding the Blueprint information textbox causes modal content overflow and hides buttons/options. The fix requires enhancing the frontend modal dialog code to implement responsive CSS (flexible widths, max-height, overflow handling), dynamic resizing via JavaScript event listeners, and UI/UX improvements to keep all controls accessible regardless of viewport or content size.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided Selenium test and backend service code do not include any modal dialog or responsive UI code. Therefore, no direct code fix can be applied to the given code snippets. The fix must be applied in the frontend UI code responsible for the blueprint modal dialog, which is not provided.
+
+3) Other Relevant details:  
+- Extend UI automation tests to cover modal resizing and content expansion scenarios.  
+- Use CSS media queries, flexbox/grid layouts, and overflow handling to improve modal responsiveness.  
+- Add JavaScript to handle window resize events and adjust modal layout dynamically.  
+- Update UI/UX documentation to reflect responsive modal design requirements.  
+- Test across browsers and screen sizes to ensure consistent, accessible modal behavior.
