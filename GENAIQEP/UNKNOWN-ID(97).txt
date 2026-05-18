@@ -1,0 +1,42 @@
+1) Description on code fix:  
+The root cause involves improper handling of server responses that disclose sensitive server information. To fix this in the code, sensitive details such as exception stack traces or authentication details should not be exposed in API responses or logs. The `loginUser()` method should be enhanced to handle authentication failures gracefully and avoid returning sensitive user or server info directly. Also, ensure no sensitive info is logged or returned in error messages.
+
+2) Code fix:
+
+| Without Fix (Current Code)                                                                                      | With Fix (Updated Code)                                                                                                      |
+|----------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                        | ```java                                                                                                                     |
+| @Override                                                                                                      | @Override                                                                                                                   |
+| public UserData loginUser() {                                                                                  | public UserData loginUser() {                                                                                               |
+|                                                                                                                |                                                                                                                             |
+|     SecurityContext sc  = SecurityContextHolder.getContext();                                                  |     SecurityContext sc  = SecurityContextHolder.getContext();                                                               |
+|                                                                                                                |                                                                                                                             |
+|     Authentication auth  = sc.getAuthentication();                                                            |     Authentication auth  = sc.getAuthentication();                                                                           |
+|                                                                                                                |                                                                                                                             |
+|     String userName = auth.getName();                                                                          |     if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {                                  |
+|                                                                                                                |         // Return null or throw a custom exception without sensitive info                                                   |
+|     UserData user = userRepo.findByEmail(userName);                                                            |         throw new UserException("User is not authenticated.");  // Custom exception without exposing server details         |
+|                                                                                                                |     }                                                                                                                       |
+|     return user;                                                                                                |                                                                                                                             |
+|                                                                                                                |     String userName = auth.getName();                                                                                       |
+| }                                                                                                              |                                                                                                                             |
+|                                                                                                                |     UserData user = userRepo.findByEmail(userName);                                                                         |
+|                                                                                                                |                                                                                                                             |
+|                                                                                                                |     return user;                                                                                                            |
+| }                                                                                                              | }                                                                                                                           |
+| ```                                                                                                            | ```                                                                                                                         |
+
+Highlighted Fixes:  
+- Added authentication null and anonymous user check:  
+  ```java
+  if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+      throw new UserException("User is not authenticated.");
+  }
+  ```  
+- Avoid returning user data if authentication is invalid, preventing leakage of sensitive info.
+
+3) Other Relevant details:  
+- Ensure that exception handling in controllers or API layers does not expose stack traces or server details in HTTP responses.  
+- Server configuration should disable detailed error messages in production environments (e.g., disable `server.error.include-stacktrace` in Spring Boot).  
+- Logging should be sanitized to avoid logging sensitive user or server information.  
+- The Selenium test code is unrelated to the API server info disclosure issue; hence no fix is suggested there.
