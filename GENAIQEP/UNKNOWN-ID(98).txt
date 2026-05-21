@@ -1,0 +1,38 @@
+1) Description on code fix:  
+The root cause of the server information disclosure vulnerability is improper handling of server responses and possibly exposing sensitive information through error messages or detailed authentication exceptions. To fix this, the loginUser method should handle authentication failures gracefully without exposing sensitive details. Additionally, sensitive user information should not be returned directly without proper validation or filtering. Adding exception handling and sanitizing the returned user data can help mitigate information leakage.
+
+2) Code fix:
+
+| Without Fix                                                                                      | With Fix                                                                                                      |
+|-------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                         | ```java                                                                                                      |
+| @Override                                                                                       | @Override                                                                                                    |
+| public UserData loginUser() {                                                                   | public UserData loginUser() {                                                                                 |
+|                                                                                                 |     try {                                                                                                    |
+|     SecurityContext sc  = SecurityContextHolder.getContext();                                   |         SecurityContext sc  = SecurityContextHolder.getContext();                                           |
+|                                                                                                 |                                                                                                              |
+|     Authentication auth  = sc.getAuthentication();                                             |         Authentication auth  = sc.getAuthentication();                                                     |
+|                                                                                                 |                                                                                                              |
+|     String userName = auth.getName();                                                          |         String userName = auth.getName();                                                                  |
+|                                                                                                 |                                                                                                              |
+|     UserData user = userRepo.findByEmail(userName);                                            |         UserData user = userRepo.findByEmail(userName);                                                    |
+|                                                                                                 |                                                                                                              |
+|     return user;                                                                                |         // Sanitize user data before returning (e.g., remove sensitive fields)                              |
+| }                                                                                               |         user.setPassword(null); // Example of sanitizing sensitive info                                     |
+|                                                                                                 |         return user;                                                                                        |
+|                                                                                                 |     } catch (Exception e) {                                                                                 |
+|                                                                                                 |         // Log the exception without exposing details to client                                            |
+|                                                                                                 |         throw new UserException("Authentication failed");                                                  |
+|                                                                                                 |     }                                                                                                       |
+| }                                                                                               | }                                                                                                           |
+| ```                                                                                            | ```                                                                                                         |
+
+Highlighted Fixes:  
+- Added try-catch block to handle exceptions and avoid leaking stack traces or sensitive info.  
+- Sanitized the returned `UserData` object by nullifying sensitive fields like password before returning.  
+- Threw a generic `UserException` with a non-sensitive message on failure.
+
+3) Other Relevant details:  
+- Proper exception handling prevents stack traces or internal server errors from being exposed to API consumers.  
+- Sanitizing sensitive fields like passwords or tokens before returning user data reduces risk of sensitive data leakage.  
+- Server or API configuration should also be reviewed to ensure detailed error messages are not sent to clients (e.g., disable debug mode).
