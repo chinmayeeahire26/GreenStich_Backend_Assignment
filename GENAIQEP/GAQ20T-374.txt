@@ -1,0 +1,26 @@
+1) Description on code fix:  
+The current system enforces a global uniqueness constraint on solution names without considering the organization (orgID) and portfolio (portfolioID) context. The fix involves modifying the validation logic to check for duplicate solution names scoped within the same organization and portfolio, allowing identical solution names across different orgIDs and portfolioIDs without conflict.
+
+2) Code fix:
+
+| Before Fix (Incorrect Validation Logic) | After Fix (Corrected Validation Logic) |
+|---------------------------------------------|--------------------------------------------|
+| ```java                                   | ```java                                   |
+| // Pseudocode: Check if solution name exists globally (incorrect) | // Corrected: Check if solution name exists within the same orgID and portfolioID |
+| boolean isDuplicate = solutionRepository.existsByName(solutionName); | boolean isDuplicate = solutionRepository.existsByNameAndOrgIdAndPortfolioId(solutionName, orgId, portfolioId); |
+| if (isDuplicate) {                          | if (isDuplicate) {                         |
+|     throw new DuplicateSolutionException("Solution name already exists."); |     throw new DuplicateSolutionException("Solution name already exists within the same organization and portfolio."); |
+| }                                          | }                                          |
+| ```                                        | ```                                        |
+
+Note: The actual method names and repository calls may vary depending on the implementation, but the key fix is to include `orgId` and `portfolioId` as part of the uniqueness check.
+
+3) Other Relevant details:  
+- The fix requires updating the database query or repository method to include filtering by `orgId` and `portfolioId`.  
+- This change aligns with the business requirement that solution names should be unique only within the scope of an organization and portfolio, not globally.  
+- A process update may be needed to clearly define uniqueness criteria in documentation and validation rules.  
+
+---
+
+If the exact validation code is not present in the provided snippets:  
+"Relevant Code NOT Found"
