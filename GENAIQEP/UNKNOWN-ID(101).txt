@@ -1,0 +1,45 @@
+1) Description on code fix:  
+The root cause is that sensitive server or user information is being exposed through improper handling of server responses or API outputs. To fix this, the loginUser() method should avoid returning the entire UserData object directly, which may contain sensitive information. Instead, it should return a sanitized or limited user DTO (Data Transfer Object) that excludes sensitive fields, or only return necessary user details. This prevents sensitive data leakage through API responses.
+
+2) Code fix:
+
+| Without Fix (Original Code)                                                                                      | With Fix (Updated Code)                                                                                                 |
+|-----------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                         | ```java                                                                                                                |
+| @Override                                                                                                       | @Override                                                                                                              |
+| public UserData loginUser() {                                                                                   | public UserDTO loginUser() {                                                                                           |
+|                                                                                                                 |                                                                                                                        |
+|     SecurityContext sc  = SecurityContextHolder.getContext();                                                   |     SecurityContext sc  = SecurityContextHolder.getContext();                                                         |
+|                                                                                                                 |                                                                                                                        |
+|     Authentication auth  = sc.getAuthentication();                                                             |     Authentication auth  = sc.getAuthentication();                                                                     |
+|                                                                                                                 |                                                                                                                        |
+|     String userName = auth.getName();                                                                           |     String userName = auth.getName();                                                                                   |
+|                                                                                                                 |                                                                                                                        |
+|     UserData user = userRepo.findByEmail(userName);                                                             |     UserData user = userRepo.findByEmail(userName);                                                                     |
+|                                                                                                                 |                                                                                                                        |
+|     return user;                                                                                                |     // Return only non-sensitive user info to avoid server info disclosure                                            |
+| }                                                                                                               |     return new UserDTO(user.getId(), user.getEmail(), user.getName());                                                 |
+| ```                                                                                                             | }                                                                                                                      |
+|                                                                                                                 |                                                                                                                        |
+| // UserDTO class (new)                                                                                          | // UserDTO class (new)                                                                                                 |
+| public class UserDTO {                                                                                           | public class UserDTO {                                                                                                  |
+|     private Long id;                                                                                            |     private Long id;                                                                                                   |
+|     private String email;                                                                                        |     private String email;                                                                                              |
+|     private String name;                                                                                         |     private String name;                                                                                               |
+|                                                                                                                 |                                                                                                                        |
+|     public UserDTO(Long id, String email, String name) {                                                       |     public UserDTO(Long id, String email, String name) {                                                              |
+|         this.id = id;                                                                                           |         this.id = id;                                                                                                  |
+|         this.email = email;                                                                                     |         this.email = email;                                                                                            |
+|         this.name = name;                                                                                       |         this.name = name;                                                                                              |
+|     }                                                                                                          |     }                                                                                                                 |
+|                                                                                                                 |                                                                                                                        |
+|     // getters and setters                                                                                      |     // getters and setters                                                                                            |
+| }                                                                                                               | }                                                                                                                      |
+
+3) Other Relevant details:  
+- Returning the full UserData object may expose sensitive fields like password hashes, roles, or internal IDs.  
+- Introducing a UserDTO or similar pattern helps control what user information is exposed via APIs.  
+- Additionally, ensure server and API configurations (e.g., error messages, headers) do not leak server info. This fix addresses the code part of the RCA.  
+- If further configuration fixes are needed, they should be handled in server or API gateway settings outside this code.  
+
+If you want, I can also help draft the UserDTO class and update the service interface accordingly.
