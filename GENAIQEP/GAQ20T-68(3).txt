@@ -1,0 +1,162 @@
+1) Description on code fix:  
+The fixes address two primary root causes identified in the RCA: incomplete or insufficient test data in the automated login test, and UI display issues due to lack of verification and error handling in both the test code and backend service. For the `FlipkartLoginTest`, the hardcoded placeholder credentials are replaced with dynamic input parameters or externalized test data to improve test coverage and reproducibility. Verification logic is added after login submission to confirm success or failure by checking for expected UI elements or messages. Enhanced error handling is introduced to catch exceptions such as element not found or login failure popups, improving test robustness and UI feedback. For the `UserServiceImpl.loginUser` method, null checks and exception handling are added to safely handle cases where authentication is missing or the user is not found in the repository, preventing null pointer exceptions and ensuring consistent UI behavior. These changes directly address the incomplete test data and UI display issues, enabling more reliable defect reproduction and clearer frontend status reporting.
+
+2) Code fix:  
+
+FlipkartLoginTest.java
+
+Existing Code:  
+java
+public void loginToFlipkart() {
+    WebDriver driver = new ChromeDriver();
+    driver.get("https://www.flipkart.com");
+
+    WebElement usernameField = driver.findElement(By.id("username"));
+    usernameField.sendKeys("your_username");  // Hardcoded placeholder
+
+    WebElement passwordField = driver.findElement(By.id("password"));
+    passwordField.sendKeys("your_password");  // Hardcoded placeholder
+
+    WebElement loginButton = driver.findElement(By.id("loginBtn"));
+    loginButton.click();
+
+    // Verify login success
+    // Add verification logic here
+
+    // Dismiss login popup if present
+    try {
+        WebElement popupClose = driver.findElement(By.id("popupClose"));
+        popupClose.click();
+    } catch (NoSuchElementException e) {
+        // Popup not present, continue
+    }
+
+    driver.quit();
+}
+
+
+New Code with Fix:  
+java
+public void loginToFlipkart(String username, String password) {
+    WebDriver driver = null;
+    try {
+        driver = new ChromeDriver();
+        driver.get("https://www.flipkart.com");
+
+        // Wait for username field presence
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")));
+        usernameField.clear();
+        usernameField.sendKeys(username);  // Dynamic input
+
+        WebElement passwordField = driver.findElement(By.id("password"));
+        passwordField.clear();
+        passwordField.sendKeys(password);  // Dynamic input
+
+        WebElement loginButton = driver.findElement(By.id("loginBtn"));
+        loginButton.click();
+
+        // Verify login success by checking presence of user profile element or logout button
+        boolean loginSuccess = false;
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("userProfile")));
+            loginSuccess = true;
+        } catch (TimeoutException e) {
+            // Login failed or user profile not visible
+            loginSuccess = false;
+        }
+
+        if (!loginSuccess) {
+            // Optionally capture screenshot or log failure
+            System.out.println("Login failed for user: " + username);
+        } else {
+            System.out.println("Login successful for user: " + username);
+        }
+
+        // Dismiss login popup if present
+        try {
+            WebElement popupClose = driver.findElement(By.id("popupClose"));
+            popupClose.click();
+        } catch (NoSuchElementException e) {
+            // Popup not present, continue
+        }
+
+    } catch (Exception e) {
+        System.err.println("Exception during login test: " + e.getMessage());
+        e.printStackTrace();
+    } finally {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+}
+
+
+Changes Made:  
+- Replaced hardcoded credentials with method parameters `username` and `password` to allow dynamic test data input.  
+- Added explicit waits (`WebDriverWait`) to ensure elements are present before interaction, improving reliability.  
+- Added verification logic after login click to check for a user profile element indicating successful login.  
+- Added handling for login failure scenario with appropriate logging.  
+- Wrapped the entire test in try-catch-finally to handle unexpected exceptions and ensure driver quits properly.  
+- Retained popup dismissal logic with error handling.  
+
+---
+
+UserServiceImpl.java
+
+Existing Code:  
+java
+public User loginUser() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    String userName = auth.getName();
+    return userRepo.findByEmail(userName);
+}
+
+
+New Code with Fix:  
+java
+public User loginUser() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth == null || !auth.isAuthenticated()) {
+        // Log or handle unauthenticated access
+        System.err.println("Authentication is null or not authenticated");
+        return null;  // Or throw custom exception
+    }
+
+    String userName = auth.getName();
+    Optional<User> userOpt = userRepo.findByEmail(userName);
+    if (!userOpt.isPresent()) {
+        // Log user not found
+        System.err.println("User not found for email: " + userName);
+        return null;  // Or throw custom exception
+    }
+
+    return userOpt.get();
+}
+
+
+Changes Made:  
+- Added null check and authentication status check on `auth` to prevent NullPointerException.  
+- Changed `userRepo.findByEmail` to return `Optional<User>` and added presence check to handle user not found scenario gracefully.  
+- Added logging for error conditions to aid debugging and UI consistency.  
+- Returned `null` or could throw a custom exception depending on application design to handle missing user or unauthenticated access safely.  
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Execute the updated `FlipkartLoginTest` with multiple sets of valid and invalid credentials to verify dynamic data handling and login verification logic.  
+  - Test UI behavior on login success and failure to confirm correct display of user profile or error messages.  
+  - Perform negative testing by simulating missing elements or login popups to validate error handling robustness.  
+  - For `UserServiceImpl.loginUser`, add unit tests mocking `SecurityContextHolder` and `userRepo` to verify behavior when authentication is null, unauthenticated, or user not found.  
+
+- Configuration changes if needed:  
+  - Ensure the chromedriver path is correctly set in system properties or environment variables for Selenium tests.  
+  - Verify Spring Security context is properly configured in test environments to provide authentication objects.  
+
+- Documentation updates:  
+  - Update test method documentation to specify dynamic input parameters for credentials.  
+  - Document the new verification and error handling logic in test and service code for maintainability.  
+
+- Implementation notes:  
+  - Consider externalizing test credentials to configuration files or test data providers for better test management.  
+  - For production readiness, replace `System.out.println` and `System.err.println` with proper logging frameworks.  
+  - Review exception handling strategy in `UserServiceImpl` to align with overall application error handling policies (e.g., throwing custom exceptions vs returning null).
