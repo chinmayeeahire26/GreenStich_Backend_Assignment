@@ -1,0 +1,36 @@
+1) Description on code fix:  
+The root cause is that the API or service layer is exposing sensitive server information, likely through error messages or responses that reveal internal details. The provided code does not sanitize or handle exceptions securely, nor does it limit the information returned to the client. To fix this, we need to ensure that sensitive information is not exposed in responses by handling exceptions properly and avoiding returning internal server details. Additionally, security context usage should be validated to avoid leaking user or server info.
+
+2) Code fix:
+
+| Without Fix                                                                                         | With Fix                                                                                              |
+|---------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| ```java                                                                                           | ```java                                                                                            |
+| @Override                                                                                        | @Override                                                                                           |
+| public UserData loginUser() {                                                                     | public UserData loginUser() {                                                                       |
+|                                                                                                   |     try {                                                                                           |
+|     SecurityContext sc  = SecurityContextHolder.getContext();                                     |         SecurityContext sc  = SecurityContextHolder.getContext();                                   |
+|                                                                                                   |                                                                                                     |
+|     Authentication auth  = sc.getAuthentication();                                               |         Authentication auth  = sc.getAuthentication();                                             |
+|                                                                                                   |                                                                                                     |
+|     String userName = auth.getName();                                                            |         String userName = auth.getName();                                                          |
+|                                                                                                   |                                                                                                     |
+|     UserData user = userRepo.findByEmail(userName);                                              |         UserData user = userRepo.findByEmail(userName);                                            |
+|                                                                                                   |                                                                                                     |
+|     return user;                                                                                  |         return user;                                                                                |
+|                                                                                                   |     } catch (Exception e) {                                                                         |
+| }                                                                                                 |         // Log the exception internally without exposing details                                   |
+|                                                                                                   |         throw new UserException("Unable to process login at this time.");                          |
+|                                                                                                   |     }                                                                                              |
+| ```                                                                                               | ```                                                                                                |
+
+Highlighted Fix:  
+- Wrapped the loginUser method logic inside a try-catch block to handle exceptions gracefully.  
+- Replaced direct exception exposure with a generic error message via a custom exception (`UserException`).  
+- This prevents internal server or stack trace details from leaking to the API consumer.
+
+3) Other Relevant details:  
+- Ensure global exception handlers are configured to return sanitized error messages without stack traces or server info.  
+- Review API configurations to disable detailed error messages or stack trace exposure in production environments.  
+- Consider adding logging for exceptions internally for debugging without exposing sensitive info externally.  
+- The Selenium test code is unrelated to the API server info disclosure issue; focus should be on backend service and API error handling.
