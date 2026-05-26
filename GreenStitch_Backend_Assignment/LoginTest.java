@@ -1,30 +1,49 @@
-public class LoginAutomation {
-    public void loginToApplication() {
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+public class LoginTest {
+    private WebDriver driver;
+
+    @BeforeClass
+    public void setUp() {
+        // Set the path to chromedriver executable as per your local setup
         System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
-        WebDriver driver = new ChromeDriver();
-        try {
-            driver.get("https://kairos-capgemini.azurewebsites.net/login");
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+    }
 
-            driver.findElement(By.xpath("//body/app-root[1]/app-login[1]/div[1]/div[2]/div[1]/img[1]")).click();
-            driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-login[1]/div[1]/div[1]/app-header[1]/div[1]/div[1]/nav[1]/a[4]/img[1]")).click();
+    @Test
+    public void loginTest() {
+        driver.get("https://example.com/login");
 
-            driver.findElement(By.xpath("//input[@id='username']")).sendKeys("shaik-raghiba.sulthana@capgemini-test.com");
-            driver.findElement(By.xpath("//input[@id='password']")).sendKeys("Test@1234");
+        // Locate username field and enter username
+        WebElement usernameField = driver.findElement(By.id("username"));
+        usernameField.clear();
+        usernameField.sendKeys("testuser");
 
-            driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[2]/div[1]/mat-dialog-container[1]/div[1]/div[1]/app-login-register-modal[1]/div[1]/div[1]/div[1]/form[1]/div[1]/button[1]/span[2]/img[1]")).click();
+        // Locate password field and enter password
+        WebElement passwordField = driver.findElement(By.id("password"));
+        passwordField.clear();
+        passwordField.sendKeys("testpassword");
 
-            driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-home[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/mat-form-field[1]/div[1]/div[2]/div[1]")).click();
-            driver.findElement(By.xpath("//mat-option[@id='mat-option-4']")).click();
+        // Click login button
+        WebElement loginButton = driver.findElement(By.id("loginButton"));
+        loginButton.click();
 
-            driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-home[1]/div[2]/div[1]/div[1]/div[1]/div[3]/div[1]/mat-form-field[1]/div[1]/div[2]/div[1]/mat-select[1]/div[1]/div[1]/span[1]")).click();
-            driver.findElement(By.xpath("//span[contains(text(), 'Requirements Analysis')]")).click();
+        // Validate successful login by checking presence of logout button or user profile
+        WebElement logoutButton = driver.findElement(By.id("logoutButton"));
+        Assert.assertTrue(logoutButton.isDisplayed(), "Logout button should be displayed after login");
+    }
 
-            driver.findElement(By.xpath("//a[@id='mat-tab-link-6']")).click();
-            driver.findElement(By.xpath("//a[contains(text(), 'Logout')]")).click();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
+    @AfterClass
+    public void tearDown() {
+        if (driver != null) {
             driver.quit();
         }
     }
