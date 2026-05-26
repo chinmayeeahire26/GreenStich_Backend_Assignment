@@ -1,5 +1,5 @@
 public class LoginAutomation {
-    public void loginToApplication() {
+    public void loginToApplicationWithValidCredentials() {
         System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
         WebDriver driver = new ChromeDriver();
         try {
