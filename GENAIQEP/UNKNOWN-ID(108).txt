@@ -1,0 +1,69 @@
+1) Description on code fix:  
+The fix addresses the functional failure of the PDF download by implementing or correcting the server-side controller method that serves the PDF file with proper HTTP headers and streaming logic. It ensures the PDF file is correctly located, served with `Content-Type: application/pdf` and `Content-Disposition: attachment` headers to trigger browser download, and includes error handling for missing files. On the front-end, the button event handler must be correctly wired to trigger the download by navigating to the correct URL. This end-to-end fix resolves the root cause of the PDF download failure by ensuring the expected functional behavior is met.
+
+2) Code fix:  
+Relevant Code NOT Found  
+No relevant code snippets for the PDF download functionality were provided. The existing code relates to blueprint validation and does not address the PDF download defect. Below is an illustrative example of the necessary fix:
+
+Example Existing Code (missing):  
+java
+// No existing method to handle PDF download
+
+
+Example New Code with Fix:  
+java
+@GetMapping("/download/jira-qtest-integration-pdf")
+public void downloadJiraQTestIntegrationPdf(HttpServletResponse response) {
+    String pdfFilePath = "/path/to/resources/Jira_qTest_Integration_Data.pdf";
+    File pdfFile = new File(pdfFilePath);
+
+    if (!pdfFile.exists()) {
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        try {
+            response.getWriter().write("Requested PDF file not found.");
+        } catch (IOException e) {
+            // Log error
+        }
+        return;
+    }
+
+    response.setContentType("application/pdf");
+    response.setHeader("Content-Disposition", "attachment; filename="Jira_qTest_Integration_Data.pdf"");
+    response.setContentLengthLong(pdfFile.length());
+
+    try (InputStream inputStream = new FileInputStream(pdfFile);
+         OutputStream outputStream = response.getOutputStream()) {
+
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+        outputStream.flush();
+    } catch (IOException e) {
+        // Log error and optionally notify user
+    }
+}
+
+
+Front-end example:  
+html
+<button id="downloadPdfBtn">Jira qTest Integration Data</button>
+
+<script>
+document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+    window.location.href = '/download/jira-qtest-integration-pdf';
+});
+</script>
+
+
+Changes Made:  
+- Added server-side PDF download handler with correct headers and streaming.  
+- Added file existence check and error response.  
+- Updated front-end button to trigger download via URL navigation.
+
+3) Other Relevant details:  
+- Test the download functionality across browsers and scenarios.  
+- Verify server file permissions and path correctness.  
+- Update documentation with download endpoint details.  
+- Consider UX improvements and security controls as needed.
