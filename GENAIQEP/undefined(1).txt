@@ -1,0 +1,45 @@
+{
+  "Defect Analysis": [
+    {
+      "Feature": "Login Module",
+      "Defects": ["D001", "D005"],
+      "Feature Sentiment": "Negative",
+      "Sentiment Score": -0.7,
+      "Impact Analysis": "Critical",
+      "Reason": "Multiple defects causing login failures and security vulnerabilities, leading to user access issues and potential data breaches."
+    },
+    {
+      "Feature": "Payment Gateway",
+      "Defects": ["D002", "D006", "D009"],
+      "Feature Sentiment": "Negative",
+      "Sentiment Score": -0.6,
+      "Impact Analysis": "High",
+      "Reason": "Defects related to transaction failures and incorrect payment processing, impacting revenue and customer trust."
+    },
+    {
+      "Feature": "User Profile",
+      "Defects": ["D003", "D007"],
+      "Feature Sentiment": "Neutral",
+      "Sentiment Score": 0.0,
+      "Impact Analysis": "Medium",
+      "Reason": "Issues mostly cosmetic or minor functionality bugs that do not significantly affect user experience."
+    },
+    {
+      "Feature": "Search Functionality",
+      "Defects": ["D004", "D008"],
+      "Feature Sentiment": "Positive",
+      "Sentiment Score": 0.5,
+      "Impact Analysis": "Low",
+      "Reason": "Defects are minor and quickly resolved, with overall positive feedback on search accuracy and speed."
+    }
+  ],
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Search Functionality is performing well with minor defects and positive user feedback indicating good stability and usability.",
+    "Patterns of Frustration or Satisfaction": "Frustration is primarily seen in Login Module and Payment Gateway due to critical failures affecting access and transactions, while User Profile issues are less impactful, and Search Functionality shows satisfaction due to quick resolutions.",
+    "Feature Priority": "Login Module should be prioritized for fixes due to its critical impact on user access and security concerns reflected in negative sentiment.",
+    "Trends": "There is a trend of critical defects in core transactional and access features like Login Module and Payment Gateway causing high user dissatisfaction and business risk.",
+    "Performance/Security Concerns": "Login Module defects include security vulnerabilities, and Payment Gateway defects affect transaction integrity, both posing significant business risks.",
+    "Response Time for Negative Sentiment": "Closed defects with negative sentiment in Login Module and Payment Gateway show longer response times, indicating a need for faster resolution.",
+    "Sentiment Trends": "Overall sentiment trends indicate critical issues in access and payment features, while auxiliary features maintain neutral to positive sentiment."
+  }
+}
