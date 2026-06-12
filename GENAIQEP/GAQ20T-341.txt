@@ -1,0 +1,61 @@
+1) Description on code fix:  
+The RCA issue indicates intermittent empty tables due to possible incomplete or failed data fetch or rendering issues. The provided code snippet for `UserServiceImpl` shows a `loginUser()` method that fetches user data based on the authenticated username but does not handle cases where the user is not found or authentication is null. Adding null checks and exception handling will ensure that the method does not return null or cause failures that might lead to empty RCA results. This fix improves robustness in user data retrieval, which could be part of the data fetching pipeline for RCA results.
+
+---
+
+2) Code fix:
+
+| Code without Fix                                                                                  | Code with Fix                                                                                                  |
+|-----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                             | ```java                                                                                                          |
+| @Override                                                                                           | @Override                                                                                                        |
+| public UserData loginUser() {                                                                       | public UserData loginUser() {                                                                                    |
+|                                                                                                     |                                                                                                                  |
+|     SecurityContext sc  = SecurityContextHolder.getContext();                                       |     SecurityContext sc  = SecurityContextHolder.getContext();                                                   |
+|                                                                                                     |                                                                                                                  |
+|     Authentication auth  = sc.getAuthentication();                                                 |     Authentication auth  = sc.getAuthentication();                                                             |
+|                                                                                                     |                                                                                                                  |
+|     String userName = auth.getName();                                                              |     if (auth == null || !auth.isAuthenticated()) {                                                              |
+|                                                                                                     |         throw new UserException("User is not authenticated");  // Handle unauthenticated access                |
+|     UserData user = userRepo.findByEmail(userName);                                                |     }                                                                                                            |
+|                                                                                                     |                                                                                                                  |
+|     return user;                                                                                   |     String userName = auth.getName();                                                                            |
+| }                                                                                                   |                                                                                                                  |
+|                                                                                                     |     UserData user = userRepo.findByEmail(userName);                                                             |
+|                                                                                                     |                                                                                                                  |
+|                                                                                                     |     if (user == null) {                                                                                           |
+|                                                                                                     |         throw new UserException("User not found for email: " + userName);  // Handle missing user case          |
+|                                                                                                     |     }                                                                                                            |
+|                                                                                                     |                                                                                                                  |
+|                                                                                                     |     return user;                                                                                                  |
+|                                                                                                     | }                                                                                                                |
+| ```                                                                                                 | ```                                                                                                              |
+
+Highlighted Fixes:  
+- Added null and authentication checks:  
+  ```java
+  if (auth == null || !auth.isAuthenticated()) {
+      throw new UserException("User is not authenticated");
+  }
+  ```  
+- Added null check for user data and exception throw:  
+  ```java
+  if (user == null) {
+      throw new UserException("User not found for email: " + userName);
+  }
+  ```
+
+---
+
+3) Other Relevant details:  
+- Adding these checks prevents the method from returning null or incomplete data, which could cause UI components to render empty tables.  
+- Proper exception handling allows upstream services or UI layers to handle errors gracefully and possibly retry or show meaningful messages.  
+- This fix aligns with the RCA indicating intermittent empty results possibly due to incomplete data fetch or error handling gaps.  
+
+---
+
+If this method is part of the RCA result retrieval pipeline, these fixes will improve data consistency and reduce empty table occurrences.
+
+---
+
+Note: The provided code snippet is limited and does not directly show the RCA table rendering or data fetching logic for the AI triaging UI. If more relevant code is provided, a more precise fix can be suggested. For now, this is the best fix based on the given code and RCA.
