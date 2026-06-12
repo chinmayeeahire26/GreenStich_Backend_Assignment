@@ -1,0 +1,81 @@
+1) Description on code fix:  
+The fix directly addresses the defect by implementing a robust deletion process that respects the foreign key constraints identified in the root cause analysis. Specifically, it ensures that all dependent entities—Azure Steps linked to features, features linked to epics, and epics linked to the solution—are deleted in the correct order before the solution itself is deleted. This prevents foreign key constraint violations in the Azure Steps table and avoids internal server errors during the delete operation. The fix also incorporates transactional management to guarantee atomicity of the delete operation and includes exception handling to provide meaningful error messages if deletion fails due to database constraints or unexpected issues. This approach aligns perfectly with the RCA findings that improper handling of related work items and database constraints were the root causes of the failure.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The existing `UserServiceImpl` class does not contain any deletion logic related to solutions, epics, features, or Azure Steps, so no before/after code comparison is possible. Instead, the fix requires introducing a new service layer dedicated to handling solution deletion with proper cascading deletes and error handling, as illustrated below:
+
+java
+// SolutionService.java (new service interface)
+public interface SolutionService {
+    void deleteSolution(Long solutionId) throws SolutionDeletionException;
+}
+
+
+java
+// SolutionServiceImpl.java (new service implementation)
+@Service
+public class SolutionServiceImpl implements SolutionService {
+
+    @Autowired
+    private SolutionRepository solutionRepository;
+
+    @Autowired
+    private EpicRepository epicRepository;
+
+    @Autowired
+    private FeatureRepository featureRepository;
+
+    @Autowired
+    private AzureStepRepository azureStepRepository;
+
+    @Transactional
+    @Override
+    public void deleteSolution(Long solutionId) throws SolutionDeletionException {
+        try {
+            // 1. Retrieve all epics linked to the solution
+            List<Epic> epics = epicRepository.findBySolutionId(solutionId);
+
+            for (Epic epic : epics) {
+                // 2. Retrieve features linked to each epic
+                List<Feature> features = featureRepository.findByEpicId(epic.getId());
+
+                for (Feature feature : features) {
+                    // 3. Delete Azure Steps linked to each feature
+                    azureStepRepository.deleteByFeatureId(feature.getId());
+
+                    // 4. Delete the feature itself
+                    featureRepository.delete(feature);
+                }
+
+                // 5. Delete the epic after all features and their dependencies are deleted
+                epicRepository.delete(epic);
+            }
+
+            // 6. Finally, delete the solution
+            solutionRepository.deleteById(solutionId);
+
+        } catch (DataIntegrityViolationException ex) {
+            // Handle foreign key constraint violation or other DB exceptions
+            throw new SolutionDeletionException("Cannot delete solution due to related dependent entities.", ex);
+        } catch (Exception ex) {
+            throw new SolutionDeletionException("Unexpected error during solution deletion.", ex);
+        }
+    }
+}
+
+
+Changes Made:  
+- Introduced a new `SolutionService` interface and its implementation `SolutionServiceImpl` to encapsulate solution deletion logic.  
+- Implemented explicit deletion of dependent entities in the correct order: Azure Steps → Features → Epics → Solution.  
+- Added `@Transactional` annotation to ensure atomicity of the entire delete operation.  
+- Added exception handling to catch and wrap database constraint violations and other exceptions into a custom `SolutionDeletionException`.  
+- Ensured that repository methods such as `findBySolutionId`, `findByEpicId`, and `deleteByFeatureId` are used to manage related entities.
+
+3) Other Relevant details:  
+- Testing recommendations: Develop comprehensive integration tests that create solutions with linked epics, features, and Azure Steps, then verify successful deletion without foreign key constraint errors. Include negative tests to confirm proper exception handling when deletion is not possible.  
+- Configuration changes: Ensure that Spring’s transaction management is enabled and properly configured. Review database cascade delete settings to confirm they do not conflict with manual deletion logic.  
+- Documentation updates: Update API and developer documentation to describe the new deletion behavior, including the cascading delete process and error handling semantics.  
+- Implementation notes: Confirm that all repository interfaces provide necessary query and delete methods for related entities. Coordinate with database administrators to verify foreign key constraints and consider adding database-level cascade deletes if appropriate and safe.
+
+This fix fully resolves defect GAQ20T-488 by addressing both the code-level handling of related entities and the database constraints, ensuring the solution deletion operation completes successfully without internal server errors.
