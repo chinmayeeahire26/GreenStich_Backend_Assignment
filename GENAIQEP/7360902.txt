@@ -1,0 +1,10 @@
+1) Description on code fix:  
+Relevant code to compute or map “Over Payment Liability (OPL) PTD” values in the Liability ITG report is not present. The provided source is a Selenium UI login/navigation test and contains no liability/PTD aggregation logic, report query, metric mapping, or calculations to fix.
+
+2) Code fix (side-by-side comparison):  
+Relevant Code NOT Found
+
+3) Other Relevant details:  
+- The shared class `LllllLoginTest` only automates browser actions (login, select portfolio, navigate, logout) and cannot influence report calculation outputs like OPL PTD.  
+- To propose a real fix, the backend/reporting layer code is needed (SQL/stored procedure, service method, metric-key mapping, or aggregation logic used for PTD/YTD/MTD).  
+- If you share the ITG report generation code (or the query/config defining OPL/PTD columns), I can pinpoint the incorrect mapping/filter/join/sign handling and provide an exact patch.
