@@ -1,0 +1,30 @@
+1) Description on code fix:  
+The intermittent empty RCA table issue is likely due to asynchronous data fetching or rendering delays not handled properly in the UI or backend service calls. Since the provided code does not show any data fetching or rendering logic related to RCA, the fix involves adding proper synchronization or retry mechanisms when fetching RCA data. In the backend service, ensure that the data fetch from the repository is robust and handles null or empty results gracefully. Since the provided code snippet is unrelated to RCA data fetching, the fix cannot be applied here.
+
+2) Code fix:
+
+| Code without Fix                                                                                  | Code with Fix                                                                                   |
+|-----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| `public UserData loginUser() {`                                                                      | `public UserData loginUser() {`                                                                    |
+| `    SecurityContext sc  = SecurityContextHolder.getContext();`                                      | `    SecurityContext sc  = SecurityContextHolder.getContext();`                                    |
+| `    Authentication auth  = sc.getAuthentication();`                                                | `    Authentication auth  = sc.getAuthentication();`                                              |
+| `    String userName = auth.getName();`                                                             | `    String userName = auth.getName();`                                                           |
+| `    UserData user = userRepo.findByEmail(userName);`                                               | `    UserData user = userRepo.findByEmail(userName);`                                             |
+| `    return user;`                                                                                   | `    if(user == null) {` <br> `        throw new UserException("User not found for email: " + userName);` <br> `    }` <br> `    return user;` |
+| `}`                                                                                                | `}`                                                                                               |
+
+Highlighted fix:  
+```java
+if(user == null) {
+    throw new UserException("User not found for email: " + userName);
+}
+```
+
+3) Other Relevant details:  
+- The provided code does not contain any logic related to RCA data fetching or rendering, so the root cause fix cannot be directly applied here.  
+- The intermittent issue might be caused by frontend asynchronous calls or API misconfiguration, which is not visible in the given code.  
+- Adding error handling for null user data improves robustness but does not directly fix the RCA display issue.  
+- Recommend reviewing the frontend code that fetches and renders RCA data, and backend API endpoints for proper data retrieval and error handling.  
+
+Summary:  
+Relevant Code NOT Found for direct RCA fix. The provided code snippet is unrelated to the RCA data fetch or rendering logic causing the intermittent empty table issue.
