@@ -4,13 +4,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 public class LoginAutomation {
-    public void loginApplication() {
+    public void loginTheApplication() {
         // Set the path to the ChromeDriver executable
         System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
-
-        // Initialize a new WebDriver instance
         WebDriver driver = new ChromeDriver();
-
         try {
             // Open the website
             driver.get("https://kairos-capgemini.azurewebsites.net/login");
