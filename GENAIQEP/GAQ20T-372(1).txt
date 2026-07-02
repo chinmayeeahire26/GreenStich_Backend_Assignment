@@ -1,0 +1,17 @@
+1) Description on code fix:  
+The root cause is the incorrect fetching of the Embedding LLM model name due to improper filtering or mapping logic in the code that retrieves model names. Since the provided code does not contain any logic related to fetching or filtering LLM model names or dropdown handling, the fix would involve correcting the code that fetches the model names, ensuring proper filtering to select the embedding model specifically. However, this relevant code is not present in the snippets provided.
+
+2) Code fix:
+
+| Without Fix (Current Code)                                                                 | With Fix (Corrected Code)                                                                 |
+|--------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| *Relevant code for fetching Embedding LLM model name is not present in the provided code.* | *Relevant code for fetching Embedding LLM model name is not present in the provided code.* |
+
+3) Other Relevant details:  
+- The defect is related to the logic that fetches and filters LLM model names, which is missing from the provided code snippets.  
+- The provided code samples are unrelated to the defect (one is a Selenium test for Flipkart login, the other is a UserService implementation for user login/registration).  
+- To fix the defect, review and correct the code responsible for populating the dropdown or fetching the embedding model name, ensuring correct filtering and mapping as done in previous fixes GAQ20T-333 and GAQ20T-335.  
+- Configuration files or environment settings related to model name mappings should also be verified for correctness.  
+
+Conclusion:  
+Relevant Code NOT Found
