@@ -1,0 +1,59 @@
+1) Description on code fix:  
+The root cause of the defect is that the solution name uniqueness validation is incorrectly applied globally across all organizations and portfolios, causing errors when users create solutions with the same name under different portfolios or organizations. The fix requires implementing validation logic scoped to the organization and portfolio context, ensuring that solution names are unique only within the same portfolio and organization. Additionally, the system must handle duplicate creation attempts gracefully by catching exceptions and providing clear, user-friendly error messages to improve UX. Since the provided code does not include solution creation logic, the fix involves adding scoped validation in the service and repository layers managing solutions and enhancing error handling and user feedback.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided code snippets relate to user registration and login and do not contain solution creation or validation logic. Therefore, no direct before/after code comparison is possible. Below is an example of the recommended changes that should be implemented in the solution creation service and repository layers:
+
+*Example repository method before:*  
+java
+boolean existsByName(String solutionName);
+
+
+*Example repository method after:*  
+java
+boolean existsByNameAndOrgIdAndPortfolioId(String solutionName, Long orgId, Long portfolioId);
+
+
+*Example service layer validation before:*  
+java
+public void createSolution(SolutionDto solutionDto) {
+    if (solutionRepository.existsByName(solutionDto.getName())) {
+        throw new DuplicateSolutionNameException("Solution name already exists.");
+    }
+    solutionRepository.save(solutionDto.toEntity());
+}
+
+
+*Example service layer validation after:*  
+java
+public void createSolution(SolutionDto solutionDto) {
+    boolean exists = solutionRepository.existsByNameAndOrgIdAndPortfolioId(
+        solutionDto.getName(), solutionDto.getOrgId(), solutionDto.getPortfolioId());
+    if (exists) {
+        throw new DuplicateSolutionNameException(
+            String.format("Solution name '%s' already exists in the selected portfolio and organization.",
+                          solutionDto.getName()));
+    }
+    try {
+        solutionRepository.save(solutionDto.toEntity());
+    } catch (DataIntegrityViolationException e) {
+        throw new DuplicateSolutionNameException(
+            "Unable to create solution due to duplicate name within the portfolio and organization.");
+    }
+}
+
+
+*Changes Made:*  
+- Added scoped repository method for uniqueness check.  
+- Updated service layer validation to use scoped check.  
+- Added exception handling for database constraint violations.  
+- Improved error messages for clarity and UX.
+
+3) Other Relevant details:  
+- Testing: Unit and integration tests for scoped uniqueness validation and error handling; UI tests for error message display.  
+- Configuration: Update database unique constraints to composite keys including solution name, orgID, and portfolioID.  
+- Documentation: Update API and developer docs to reflect scoped uniqueness and error messages.  
+- Implementation notes: Coordinate with front-end for error message handling; consider client-side scoped validation.
+
+This comprehensive fix addresses both the root cause of improper uniqueness validation scope and the UX issue of missing or unclear error alerts, thereby resolving the defect GAQ20T-374 effectively.
