@@ -1,50 +1,39 @@
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 
 public class LoginTest {
-    private WebDriver driver;
 
-    @BeforeClass
-    public void setUp() {
-        // Set the path to chromedriver executable as per your local setup
-        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public LoginTest(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    @Test
-    public void loginTest() {
-        driver.get("https://example.com/login");
+    public void loginToApplication(String url, String username, String password) {
+        // Navigate to login page
+        driver.get(url);
 
-        // Locate username field and enter username
-        WebElement usernameField = driver.findElement(By.id("username"));
+        // Wait for username field to be visible and enter username
+        WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")));
         usernameField.clear();
-        usernameField.sendKeys("testuser");
+        usernameField.sendKeys(username);
 
-        // Locate password field and enter password
-        WebElement passwordField = driver.findElement(By.id("password"));
+        // Wait for password field to be visible and enter password
+        WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));
         passwordField.clear();
-        passwordField.sendKeys("testpassword");
+        passwordField.sendKeys(password);
 
-        // Click login button
-        WebElement loginButton = driver.findElement(By.id("loginButton"));
+        // Click on login button
+        WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("loginButton")));
         loginButton.click();
 
-        // Validate successful login by checking presence of logout button or user profile
-        WebElement logoutButton = driver.findElement(By.id("logoutButton"));
-        Assert.assertTrue(logoutButton.isDisplayed(), "Logout button should be displayed after login");
-    }
-
-    @AfterClass
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        // Optionally wait for a post-login element to confirm login success
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("dashboard")));
     }
 }
