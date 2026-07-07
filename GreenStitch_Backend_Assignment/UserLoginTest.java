@@ -1,31 +1,38 @@
-public class LoginAutomation {
-    public void loginToApplication() {
-        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
-        WebDriver driver = new ChromeDriver();
-        try {
-            driver.get("https://kairos-capgemini.azurewebsites.net/login");
+using System;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 
-            driver.findElement(By.xpath("//body/app-root[1]/app-login[1]/div[1]/div[2]/div[1]/img[1]")).click();
-            driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-login[1]/div[1]/div[1]/app-header[1]/div[1]/div[1]/nav[1]/a[4]/img[1]")).click();
+public class GoogleSearchTest
+{
+    public void SearchGoogle()
+    {
+        // Initialize ChromeDriver with default options
+        using (IWebDriver driver = new ChromeDriver())
+        {
+            try
+            {
+                // Navigate to Google homepage
+                driver.Navigate().GoToUrl("https://www.google.com");
 
-            driver.findElement(By.xpath("//input[@id='username']")).sendKeys("shaik-raghiba.sulthana@capgemini-test.com");
-            driver.findElement(By.xpath("//input[@id='password']")).sendKeys("Test@1234");
+                // Wait until the search box is present and visible
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                IWebElement searchBox = wait.Until(drv => drv.FindElement(By.Name("q")));
 
-            driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[2]/div[1]/mat-dialog-container[1]/div[1]/div[1]/app-login-register-modal[1]/div[1]/div[1]/div[1]/form[1]/div[1]/button[1]/span[2]/img[1]")).click();
+                // Enter search query
+                searchBox.SendKeys("Selenium WebDriver with C#");
 
-            driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-home[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/mat-form-field[1]/div[1]/div[2]/div[1]")).click();
-            driver.findElement(By.xpath("//mat-option[@id='mat-option-4']")).click();
+                // Submit the search form
+                searchBox.Submit();
 
-            driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-home[1]/div[2]/div[1]/div[1]/div[1]/div[3]/div[1]/mat-form-field[1]/div[1]/div[2]/div[1]/mat-select[1]/div[1]/div[1]/span[1]")).click();
-            driver.findElement(By.xpath("//span[contains(text(), 'Requirements Analysis')]")).click();
-
-            driver.findElement(By.xpath("//a[@id='mat-tab-link-6']")).click();
-            driver.findElement(By.xpath("//a[contains(text(), 'Logout')]")).click();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            driver.quit();
+                // Wait until search results are loaded (wait for results stats element)
+                wait.Until(drv => drv.FindElement(By.Id("result-stats")));
+            }
+            finally
+            {
+                // Close the browser
+                driver.Quit();
+            }
         }
     }
 }
