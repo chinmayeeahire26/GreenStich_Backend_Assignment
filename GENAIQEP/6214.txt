@@ -1,0 +1,10 @@
+1) Description on code fix:  
+Relevant application code for Organization create / uniqueness validation is not present in the provided snippets. The shared code contains a Selenium Flipkart login test and a Spring `UserServiceImpl` (register/login user), neither of which handles Organization creation or validation of Organization name uniqueness.
+
+2) Code fix:  
+Relevant Code NOT Found
+
+3) Other Relevant details:
+- The defect requires a fix in the Organization create flow (typically `OrganizationService.createOrganization(...)`, controller endpoint, repository, and/or DB schema), which is missing here.  
+- Proper fix usually includes: (a) service-layer check like `existsByNameIgnoreCase(...)` and throwing a validation exception, and (b) a DB unique constraint on organization name to prevent race-condition duplicates.  
+- If you share the `Organization` entity + repository + service/controller used to create organizations (and DB schema/migration), I can provide the exact patched code diff.
