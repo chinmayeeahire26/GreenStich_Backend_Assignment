@@ -1,0 +1,35 @@
+1) Description on code fix:  
+The defect arises because the current spreadsheet upload functionality does not differentiate between unsupported file formats and files that do not conform to the expected template format. This results in a generic "Unsupported format" error message being shown even when the file type is supported but the template structure is invalid. To fix this, the code must be enhanced to include explicit validation logic that checks whether the uploaded spreadsheet matches the required template format. If the validation fails, a specific error message such as "Invalid template format. Please upload a file matching the required template." should be returned and displayed to the user. Additionally, the error handling and UI notification modules must be updated to recognize and display this specific error message instead of the generic one. This fix addresses both the code issue (lack of specific validation and error propagation) and the user experience issue (unclear error messaging), thereby improving clarity and reducing user confusion.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided context and code snippets do not include the actual implementation of the spreadsheet upload, template validation, or error handling logic. The existing code snippet relates to Google search automation and is unrelated to the defect. Therefore, no direct before/after code comparison can be provided. However, the following is a recommended approach for the fix that developers should implement in the relevant modules:
+
+Recommended Implementation Outline:  
+- In the `SpreadsheetUploadHandler` class, within the `ValidateTemplateFormat` or `UploadDataSet` method:  
+  - Add logic to parse the uploaded spreadsheet and verify that it matches the expected template structure (e.g., correct headers, required columns, data types).  
+  - If the template validation fails, throw or return a specific exception or error code indicating "InvalidTemplateFormat".  
+
+- In the error handling or UI notification module (e.g., `DisplayErrorMessage` method):  
+  - Catch the specific "InvalidTemplateFormat" error.  
+  - Display a clear, user-friendly error message such as: "Invalid template format. Please upload a file matching the required template."  
+  - Retain the existing handling for unsupported file formats to continue showing "Unsupported format" only when the file type itself is invalid.
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Create test cases uploading files with supported formats but incorrect template structures to verify the new specific error message is shown.  
+  - Test uploading unsupported file formats to ensure the generic "Unsupported format" message still appears.  
+  - Test uploading correctly formatted template files to confirm successful upload.  
+  - Perform UI testing to verify error messages are displayed clearly and consistently.  
+
+- Configuration changes if needed:  
+  - None anticipated unless template definitions are configurable; if so, ensure template validation logic reads from the correct configuration.  
+
+- Documentation updates:  
+  - Update user guides and help documentation to include the new error message and instructions on the required template format.  
+  - Document the validation logic and error handling changes in developer documentation for maintainability.  
+
+- Any other implementation notes:  
+  - Ensure that the validation logic is efficient and does not significantly degrade upload performance.  
+  - Consider logging detailed validation failures internally for support and debugging purposes without exposing technical details to end users.  
+  - Coordinate with UI/UX teams to confirm the wording and placement of the new error message aligns with overall application design standards.
