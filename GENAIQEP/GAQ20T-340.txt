@@ -1,0 +1,35 @@
+1) Description on code fix:  
+The root cause is missing validation for mandatory fields when creating a solution with Azure Devops and Jira-Xray, especially when empty data is provided. The existing code does not validate input data before processing, leading to failure. The fix involves adding input validation checks to ensure mandatory fields are not empty before proceeding with solution creation.
+
+2) Code fix:
+
+| Without Fix (Current Code)                                                                                 | With Fix (Updated Code)                                                                                              |
+|------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                    | ```java                                                                                                             |
+| public Solution createSolution(SolutionData data) {                                                        | public Solution createSolution(SolutionData data) {                                                                 |
+|     // No validation on input data                                                                         |     // Validate mandatory fields before proceeding                                                                   |
+|     // Proceed to create solution directly                                                                 |     if (data == null || data.getMandatoryField() == null || data.getMandatoryField().isEmpty()) {                    |
+|     // ...                                                                                                 |         throw new IllegalArgumentException("Mandatory fields cannot be empty");                                      |
+|     // Logic to create solution                                                                             |     }                                                                                                               |
+|     Solution solution = solutionRepository.save(data);                                                     |                                                                                                                     |
+|     return solution;                                                                                        |     Solution solution = solutionRepository.save(data);                                                              |
+| }                                                                                                          |     return solution;                                                                                                |
+| ```                                                                                                        | }                                                                                                                   |
+|                                                                                                            | ```                                                                                                                 |
+
+Highlighted Fix:  
+```java
+if (data == null || data.getMandatoryField() == null || data.getMandatoryField().isEmpty()) {
+    throw new IllegalArgumentException("Mandatory fields cannot be empty");
+}
+```
+
+3) Other Relevant details:  
+- The fix ensures that empty or null mandatory fields are caught early, preventing downstream failures during solution creation.  
+- This validation should be applied consistently when switching between Azure Devops and Jira-Xray integrations.  
+- If the actual `SolutionData` class or method names differ, the validation logic should be adapted accordingly.  
+
+Note:  
+Relevant code for solution creation and input handling was not provided in the snippets shared. The above fix is a generic example based on the RCA and typical validation practices. If the actual code is available, the validation should be inserted at the start of the method handling solution creation.  
+
+If you want me to analyze a specific method or class, please provide that code snippet.
