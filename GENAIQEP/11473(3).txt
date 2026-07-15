@@ -1,0 +1,40 @@
+1) Description on code fix:  
+The provided code is related to login functionality and does not contain any logic for importing epics or displaying snack bar messages. The fix requires adding or correcting the snack bar message handling logic specifically for invalid Jira epic imports, which is missing in the current code.
+
+2) Code fix:
+
+| Without Fix (Current Code)                                                                                      | With Fix (Proposed Code)                                                                                              |
+|----------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                        | ```java                                                                                                              |
+| // No code related to epic import or snack bar message handling                                                | // Example method to handle epic import and show snack bar message for invalid Jira epic import                      |
+| public void loginToApplication(String url, String username, String password) {                                 | public void importEpic(String projectName, String epicId) {                                                         |
+|     // Navigate to login page                                                                                  |     if (!isValidProjectName(projectName)) {                                                                          |
+|     driver.get(url);                                                                                            |         showSnackBar("Epic doesn't Exist");  // <-- Fix: Show snack bar message for invalid project name         |
+|                                                                                                                |         return;                                                                                                      |
+|     // Wait for username field to be visible and enter username                                                |     }                                                                                                                |
+|     WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")));    |                                                                                                                      |
+|     usernameField.clear();                                                                                      |     // Proceed with epic import logic here                                                                          |
+|     usernameField.sendKeys(username);                                                                           | }                                                                                                                    |
+|                                                                                                                |                                                                                                                      |
+|     // Wait for password field to be visible and enter password                                                | private boolean isValidProjectName(String projectName) {                                                            |
+|     WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));    |     // Validate project name against Jira projects                                                                   |
+|     passwordField.clear();                                                                                      |     // Return false if invalid                                                                                       |
+|     passwordField.sendKeys(password);                                                                           |     return /* validation logic */;                                                                                   |
+|                                                                                                                | }                                                                                                                    |
+|     // Click on login button                                                                                   |                                                                                                                      |
+|     WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("loginButton")));         | private void showSnackBar(String message) {                                                                          |
+|     loginButton.click();                                                                                        |     // Implementation to display snack bar message on UI                                                             |
+|                                                                                                                |     WebElement snackBar = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("snackBar")));               |
+|     // Optionally wait for a post-login element to confirm login success                                       |     snackBar.clear();                                                                                                |
+|     wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("dashboard")));                             |     snackBar.sendKeys(message);                                                                                      |
+| }                                                                                                              | }                                                                                                                    |
+| ```                                                                                                            | ```                                                                                                                  |
+
+Highlighted Fix:  
+- Added a method `importEpic` that checks for valid project name and shows the snack bar message `"Epic doesn't Exist"` if invalid.  
+- Added helper methods `isValidProjectName` and `showSnackBar` to encapsulate validation and UI message display.
+
+3) Other Relevant details:  
+- The current code snippet is unrelated to the bug and does not handle epic imports or snack bar messages.  
+- The fix requires adding or updating the import logic and UI feedback mechanism in the relevant part of the application dealing with Jira epic imports.  
+- Consistency with ADO snack bar messages should be ensured by using the same message text and display mechanism.
