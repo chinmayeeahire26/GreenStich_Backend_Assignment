@@ -1,0 +1,21 @@
+1) Description on code fix:  
+The provided code is a Selenium automation script focused on logging into the application and navigating through UI elements. It does not contain any logic related to importing epics, handling invalid project names, or displaying snack bar messages for Jira data models. Hence, the root cause for missing snack bar messages when importing epics with invalid project names is not addressed in this code.
+
+2) Code fix:  
+| Without Fix (Current Code)                                                                                                      | With Fix (Proposed Code)                                                                                                          |
+|-------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                                       | ```java                                                                                                                         |
+| // No code related to importing epics or snack bar message handling                                                            | // No code related to importing epics or snack bar message handling                                                              |
+| public class LoginAutomation {                                                                                                | public class LoginAutomation {                                                                                                  |
+|     public void loginTheApplication() {                                                                                       |     public void loginTheApplication() {                                                                                         |
+|         // Selenium code for login and navigation                                                                              |         // Selenium code for login and navigation                                                                                |
+|     }                                                                                                                         |     }                                                                                                                           |
+| }                                                                                                                             | }                                                                                                                               |
+| ```                                                                                                                           | ```                                                                                                                             |
+
+Relevant Code NOT Found
+
+3) Other Relevant details:  
+- The defect is related to the backend or frontend logic that handles Jira epic import and error messaging, which is not present in the given Selenium test automation code.  
+- Fixing the defect requires changes in the application code responsible for validating the project name and displaying snack bar messages during epic import operations, likely in the service or UI layer of the Jira data model integration.  
+- Recommend reviewing the importEpic method or component where epics are fetched and error handling is done for invalid project names, then adding or fixing the snack bar notification logic for Jira similar to ADO.
