@@ -1,0 +1,34 @@
+1) Description on code fix:  
+The current `loginUser()` method relies on Spring Security's `SecurityContextHolder` to get the authenticated user's name, but it does not perform actual authentication using the provided credentials. This causes valid users to be rejected because no authentication is triggered. The fix is to modify the login method to accept username and password, authenticate the user explicitly (e.g., via `AuthenticationManager`), and then fetch the user details upon successful authentication.
+
+2) Code fix:
+
+| Without Fix (Current Code)                                                                                     | With Fix (Updated Code)                                                                                                                      |
+|---------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                       | ```java                                                                                                                                     |
+| @Override                                                                                                     | @Override                                                                                                                                   |
+| public UserData loginUser() {                                                                                  | public UserData loginUser(String email, String password) throws UserException {                                                             |
+|                                                                                                               |     try {                                                                                                                                   |
+|     SecurityContext sc  = SecurityContextHolder.getContext();                                                 |         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password);                           |
+|                                                                                                               |         Authentication authentication = authenticationManager.authenticate(authToken);                                                     |
+|     Authentication auth  = sc.getAuthentication();                                                           |                                                                                                                                             |
+|                                                                                                               |         SecurityContextHolder.getContext().setAuthentication(authentication);                                                               |
+|     String userName = auth.getName();                                                                         |                                                                                                                                             |
+|                                                                                                               |         UserData user = userRepo.findByEmail(email);                                                                                        |
+|     UserData user = userRepo.findByEmail(userName);                                                           |         return user;                                                                                                                        |
+|                                                                                                               |     } catch (AuthenticationException e) {                                                                                                  |
+|     return user;                                                                                              |         throw new UserException("Invalid username or password");                                                                            |
+| }                                                                                                             |     }                                                                                                                                       |
+| ```                                                                                                           | }                                                                                                                                           |
+
+Highlighted Fixes:  
+- Change method signature to accept `email` and `password`.  
+- Use `AuthenticationManager` to authenticate credentials explicitly.  
+- Set the authenticated `Authentication` in `SecurityContextHolder`.  
+- Handle authentication exceptions and throw meaningful errors.
+
+3) Other Relevant details:  
+- The current code does not perform any authentication but assumes the user is already authenticated, which is incorrect for a login method.  
+- The fix requires injecting `AuthenticationManager` into the service class (not shown here) to perform authentication.  
+- Configuration issues mentioned in RCA (like misconfigured authentication service) should also be verified to ensure `AuthenticationManager` is properly set up.  
+- The Selenium test code is unrelated to backend authentication logic and does not affect this fix.
