@@ -1,0 +1,36 @@
+1) Description on code fix:  
+The current code snippet is related to login automation and does not contain any logic for spreadsheet upload or error validation messages. The root cause indicates that the error handling logic for spreadsheet upload is showing a generic "Unsupported format" message instead of a specific validation message for incorrect template format. To fix this, the upload handling code must be updated to check the template format explicitly and show an appropriate error message.
+
+2) Code fix:
+
+| Without Fix (Current Code)                                                                                      | With Fix (Hypothetical Upload Validation Code)                                                                                      |
+|----------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| *No code related to spreadsheet upload or validation present in the provided snippet.*                         | ```java                                                                                                                            |
+|                                                                                                                | public String validateSpreadsheetUpload(File file) {                                                                                |
+|                                                                                                                |     if (!isSupportedFormat(file)) {                                                                                                |
+|                                                                                                                |         return "Unsupported format";                                                                                              |
+|                                                                                                                |     }                                                                                                                             |
+|                                                                                                                |                                                                                                                                    |
+|                                                                                                                |     if (!isValidTemplateFormat(file)) {                                                                                           |
+|                                                                                                                |         return "Invalid template format. Please upload the file in the correct template format.";                                  |
+|                                                                                                                |     }                                                                                                                             |
+|                                                                                                                |                                                                                                                                    |
+|                                                                                                                |     // Proceed with upload                                                                                                        |
+|                                                                                                                |     return "Upload successful";                                                                                                   |
+|                                                                                                                | }                                                                                                                                 |
+|                                                                                                                |                                                                                                                                    |
+|                                                                                                                | private boolean isSupportedFormat(File file) {                                                                                     |
+|                                                                                                                |     // Logic to check if file is csv or xls                                                                                       |
+|                                                                                                                | }                                                                                                                                 |
+|                                                                                                                |                                                                                                                                    |
+|                                                                                                                | private boolean isValidTemplateFormat(File file) {                                                                                 |
+|                                                                                                                |     // Logic to validate the template format of the spreadsheet                                                                   |
+|                                                                                                                | }                                                                                                                                 |
+|                                                                                                                | ```                                                                                                                               |
+
+*Note: The above fix is a conceptual snippet since the provided code does not contain any upload or validation logic.*
+
+3) Other Relevant details:  
+- The provided code is only for login automation and does not include any upload or validation logic, so the fix must be applied in the upload handling module.  
+- The fix involves adding explicit validation for the spreadsheet template format and returning a specific error message instead of a generic one.  
+- Process improvements may also be needed to ensure validation rules are clearly defined and enforced before upload.
