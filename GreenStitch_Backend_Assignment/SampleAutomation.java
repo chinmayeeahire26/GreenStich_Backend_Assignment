@@ -2,68 +2,46 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-public class SampleAutomation {
+public class LoginTest {
+    private WebDriver driver;
 
-    public void loginApplication() {
-        // Set the path to the ChromeDriver executable
-        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+    @BeforeClass
+    public void setUp() {
+        // Set the path to chromedriver executable if needed
+        // System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+    }
 
-        // Initialize a new WebDriver instance
-        WebDriver driver = new ChromeDriver();
+    @Test
+    public void testLoginFunctionality() {
+        driver.get("https://example.com/login");
 
-        try {
-            // Open the website
-            driver.get("https://kairos-capgemini.azurewebsites.net/login");
+        WebElement usernameInput = driver.findElement(By.id("username"));
+        WebElement passwordInput = driver.findElement(By.id("password"));
+        WebElement loginButton = driver.findElement(By.id("loginBtn"));
 
-            // Click on Your Image
-            WebElement yourImage = driver.findElement(By.xpath("//body/app-root[1]/app-login[1]/div[1]/div[2]/div[1]/img[1]"));
-            yourImage.click();
+        usernameInput.sendKeys("testuser");
+        passwordInput.sendKeys("testpassword");
+        loginButton.click();
 
-            // Click on login
-            WebElement loginButton = driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-login[1]/div[1]/div[1]/app-header[1]/div[1]/div[1]/nav[1]/a[4]/img[1]"));
-            loginButton.click();
+        // Wait for page to load or use explicit wait here if needed
 
-            // Enter Username
-            WebElement usernameField = driver.findElement(By.xpath("//input[@id='username']"));
-            usernameField.sendKeys("shaik-raghiba.sulthana@capgemini-test.com");
+        String expectedUrl = "https://example.com/dashboard";
+        Assert.assertEquals(driver.getCurrentUrl(), expectedUrl, "User should be redirected to dashboard after login");
 
-            // Enter Password
-            WebElement passwordField = driver.findElement(By.xpath("//input[@id='password']"));
-            passwordField.sendKeys("Test@1234");
+        WebElement welcomeMessage = driver.findElement(By.id("welcomeMsg"));
+        Assert.assertTrue(welcomeMessage.isDisplayed(), "Welcome message should be displayed after login");
+    }
 
-            // Click on Description of the image
-            WebElement descriptionImage = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[2]/div[1]/mat-dialog-container[1]/div[1]/div[1]/app-login-register-modal[1]/div[1]/div[1]/div[1]/form[1]/div[1]/button[1]/span[2]/img[1]"));
-            descriptionImage.click();
-
-            // Click on Select Portfolio
-            WebElement selectPortfolio = driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-home[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/mat-form-field[1]/div[1]/div[2]/div[1]"));
-            selectPortfolio.click();
-
-            // Click on option
-            WebElement option = driver.findElement(By.xpath("//mat-option[@id='mat-option-4']"));
-            option.click();
-
-            // Click on combobox
-            WebElement comboBox = driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-home[1]/div[2]/div[1]/div[1]/div[1]/div[3]/div[1]/mat-form-field[1]/div[1]/div[2]/div[1]/mat-select[1]/div[1]/div[1]/span[1]"));
-            comboBox.click();
-
-            // Click on Requirements Analysis
-            WebElement requirementsAnalysis = driver.findElement(By.xpath("//span[contains(text(), 'Requirements Analysis')]"));
-            requirementsAnalysis.click();
-
-            // Click on tab
-            WebElement tab = driver.findElement(By.xpath("//a[@id='mat-tab-link-6']"));
-            tab.click();
-
-            // Click on Logout
-            WebElement logout = driver.findElement(By.xpath("//a[contains(text(), 'Logout')]"));
-            logout.click();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            // Close the browser
+    @AfterClass
+    public void tearDown() {
+        if (driver != null) {
             driver.quit();
         }
     }
