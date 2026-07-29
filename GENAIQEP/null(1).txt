@@ -1,0 +1,37 @@
+1) Description on code fix:  
+The root cause indicates that the session is not invalidated properly on logout, allowing users to navigate back without re-authentication. However, the provided code is a Selenium test for Google search and does not contain any logout or session management logic. Therefore, the fix should be applied in the application code responsible for logout, ensuring session invalidation and cache control headers to prevent back-navigation after logout.
+
+2) Code fix:  
+
+| Without Fix (Relevant code not present) | With Fix (Example logout session invalidation and cache control) |
+|-----------------------------------------|-----------------------------------------------------------------|
+| Relevant Code NOT Found              | ```csharp                                                      |
+|                                         | // Example ASP.NET logout method                                |
+|                                         | public void Logout()                                            |
+|                                         | {                                                              |
+|                                         |     // Invalidate the session                                  |
+|                                         |     Session.Clear();                                           |
+|                                         |     Session.Abandon();                                         |
+|                                         |                                                               |
+|                                         |     // Clear authentication cookie                            |
+|                                         |     if (Request.Cookies["AuthCookie"] != null)                |
+|                                         |     {                                                         |
+|                                         |         var cookie = new HttpCookie("AuthCookie");            |
+|                                         |         cookie.Expires = DateTime.Now.AddDays(-1);            |
+|                                         |         Response.Cookies.Add(cookie);                         |
+|                                         |     }                                                         |
+|                                         |                                                               |
+|                                         |     // Set cache control headers to prevent back navigation  |
+|                                         |     Response.Cache.SetCacheability(HttpCacheability.NoCache); |
+|                                         |     Response.Cache.SetExpires(DateTime.UtcNow.AddMinutes(-1));|
+|                                         |     Response.Cache.SetNoStore();                              |
+|                                         |                                                               |
+|                                         |     // Redirect to login page                                 |
+|                                         |     Response.Redirect("Login.aspx");                          |
+|                                         | }                                                              |
+|                                         | ```                                                           |
+
+3) Other Relevant details:  
+- The Selenium test code provided is unrelated to the logout functionality and session management.  
+- The fix must be implemented in the backend logout handler to properly clear sessions and cookies.  
+- Additionally, HTTP cache headers should be set to prevent browser caching of authenticated pages, which allows back navigation after logout.
