@@ -1,0 +1,47 @@
+Based on the RCA and the open bug details, the root cause is that the error handling logic for spreadsheet upload returns a generic "Unsupported format" message even when the uploaded file is of a supported type but does not follow the required template format. The fix requires improving the validation logic to distinguish between unsupported file formats and invalid template formats, and then display an appropriate, user-friendly error message for the latter case.
+
+---
+
+### 1) Description on code fix:
+Modify the spreadsheet upload error handling logic to check if the uploaded file format is supported first, and then validate the template format. If the template format is invalid, return a specific error message like "Invalid template format" instead of the generic "Unsupported format" message.
+
+---
+
+### 2) Code fix:
+
+| Before Fix (Incorrect Error Handling) | After Fix (Corrected Error Handling) |
+|-------------------------------------------|------------------------------------------|
+| ```csharp                               | ```csharp                              |
+| // Existing error handling snippet      | // Improved error handling snippet     |
+| if (!IsSupportedFormat(file))           | if (!IsSupportedFormat(file))           |
+| {                                       | {                                        |
+|     errorMessage = "Unsupported format";|     errorMessage = "Unsupported format";|
+| }                                       | }                                        |
+| else                                    | else                                     |
+| {                                       | {                                        |
+|     // Template validation is done here |     // Template validation is done here |
+|     if (!IsValidTemplateFormat(file))   |     if (!IsValidTemplateFormat(file))   |
+|     {                                 |     {                                  |
+|         errorMessage = "Unsupported format"; |         errorMessage = "Invalid template format. Please upload the correct template."; |
+|     }                                 |     }                                  |
+|     else                              |     else                               |
+|     {                                |     {                                 |
+|         errorMessage = null;          |         errorMessage = null;           |
+|     }                                |     }                                 |
+| }                                     | }                                       |
+| ```                                   | ```                                      |
+
+Lines highlighted are the actual fixes:
+
+- Changed the error message inside the template format validation failure block from `"Unsupported format"` to `"Invalid template format. Please upload the correct template."`
+
+---
+
+### 3) Other Relevant details:
+- This fix improves user experience by providing a clear, actionable error message.
+- It requires that the code has separate checks for file format support and template format validation.
+- If the current code does not separate these checks, refactoring may be needed to isolate these validations.
+
+---
+
+If you want, I can help you draft the exact function or method if you provide the relevant code snippet for the spreadsheet upload validation. Otherwise, based on the RCA and bug description, this is the recommended fix approach.
