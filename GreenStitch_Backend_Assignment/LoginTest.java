@@ -1,92 +1,124 @@
-Certainly! Based on your prompt, I'll create a C# Selenium WebDriver automation script that logs into an application. Since the blueprint details, project structure, dependencies, and configuration options are not explicitly provided, I'll assume a typical Selenium WebDriver setup in C# with NUnit as the test framework.
+Certainly! Based on your prompt, I'll create an automation script template using Selenium WebDriver with Java and TestNG. Since the blueprint details project structure, dependencies, configuration, and tools, I'll assume a typical Maven project setup with TestNG and Selenium dependencies configured.
 
 The script will:
-- Initialize the WebDriver
-- Navigate to the login page
-- Perform login using provided credentials (as variables)
-- Include setup and teardown methods
-- Avoid repeating test scripts
 
-Here is a sample automation script in C#:
+- Use TestNG annotations and settings.
+- Include variables for configuration.
+- Implement the sample test script logic.
+- Avoid repeating test scripts.
 
-```csharp
-using NUnit.Framework;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using System;
+---
 
-namespace AutomationTests
-{
-    [TestFixture]
-    public class LoginTests
-    {
-        private IWebDriver driver;
+### Sample Automation Script (Java + Selenium + TestNG)
 
-        // Variables (can be moved to config or environment variables)
-        private readonly string baseUrl = "https://yourapplicationurl.com/login";
-        private readonly string username = "testuser";
-        private readonly string password = "testpassword";
+```java
+package com.example.tests;
 
-        [SetUp]
-        public void Setup()
-        {
-            // Initialize ChromeDriver (make sure chromedriver.exe is in the PATH or project folder)
-            driver = new ChromeDriver();
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.*;
 
-            // Maximize browser window
-            driver.Manage().Window.Maximize();
+import java.time.Duration;
 
-            // Set implicit wait if needed
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-        }
+public class SampleTest {
 
-        [Test]
-        public void LoginToApplication()
-        {
-            // Navigate to login page
-            driver.Navigate().GoToUrl(baseUrl);
+    private WebDriver driver;
 
-            // Find username input and enter username
-            var usernameField = driver.FindElement(By.Id("username")); // Adjust selector as per your app
-            usernameField.Clear();
-            usernameField.SendKeys(username);
+    // Variables (can be moved to a config file or TestNG XML)
+    private final String baseUrl = "https://example.com";
+    private final String chromeDriverPath = "path/to/chromedriver"; // Update path accordingly
+    private final Duration implicitWait = Duration.ofSeconds(10);
 
-            // Find password input and enter password
-            var passwordField = driver.FindElement(By.Id("password")); // Adjust selector as per your app
-            passwordField.Clear();
-            passwordField.SendKeys(password);
+    @BeforeClass
+    public void setUp() {
+        // Set system property for ChromeDriver
+        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
 
-            // Find login button and click
-            var loginButton = driver.FindElement(By.Id("loginButton")); // Adjust selector as per your app
-            loginButton.Click();
+        // Initialize WebDriver
+        driver = new ChromeDriver();
 
-            // Optionally, assert login success by checking for a specific element or URL
-            Assert.IsTrue(driver.Url.Contains("dashboard"), "Login failed or dashboard not loaded.");
+        // Configure driver
+        driver.manage().timeouts().implicitlyWait(implicitWait);
+        driver.manage().window().maximize();
+    }
 
-            // Or check for a logout button or welcome message
-            // var logoutButton = driver.FindElement(By.Id("logoutButton"));
-            // Assert.IsTrue(logoutButton.Displayed);
-        }
+    @Test(description = "Verify the page title of the base URL")
+    public void testPageTitle() {
+        driver.get(baseUrl);
+        String expectedTitle = "Example Domain";
+        String actualTitle = driver.getTitle();
+        Assert.assertEquals(actualTitle, expectedTitle, "Page title does not match!");
+    }
 
-        [TearDown]
-        public void TearDown()
-        {
-            // Close the browser and dispose driver
-            if (driver != null)
-            {
-                driver.Quit();
-                driver.Dispose();
-            }
+    @Test(description = "Verify the presence of a specific element")
+    public void testElementPresence() {
+        driver.get(baseUrl);
+        WebElement element = driver.findElement(By.cssSelector("h1"));
+        Assert.assertTrue(element.isDisplayed(), "Header element is not displayed!");
+        Assert.assertEquals(element.getText(), "Example Domain", "Header text does not match!");
+    }
+
+    @AfterClass
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
         }
     }
 }
 ```
 
-### Notes:
-- Replace `"https://yourapplicationurl.com/login"` with your actual login URL.
-- Replace element selectors (`By.Id("username")`, etc.) with the actual IDs or selectors from your application.
-- You can externalize variables like URL, username, and password into a configuration file or environment variables for better maintainability.
-- This script uses NUnit, so make sure NUnit and Selenium WebDriver NuGet packages are installed.
-- ChromeDriver must be compatible with your installed Chrome browser version.
+---
 
-If you provide the exact blueprint or test scripts, I can tailor the script further!
+### Explanation:
+
+- **Project Structure**: The class is placed under `com.example.tests` package.
+- **Dependencies**: Assumes Maven dependencies for Selenium and TestNG are included in `pom.xml`.
+- **Configuration**: Variables like `baseUrl` and `chromeDriverPath` are defined at the class level for easy modification.
+- **TestNG Settings**: Uses `@BeforeClass` and `@AfterClass` for setup and teardown, and `@Test` for test cases.
+- **Test Cases**: Two sample tests are included — one for page title verification and one for element presence.
+- **No Repetition**: Each test case is unique and does not repeat logic.
+
+---
+
+### Maven Dependencies (pom.xml snippet)
+
+```xml
+<dependencies>
+    <!-- Selenium Java -->
+    <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-java</artifactId>
+        <version>4.10.0</version>
+    </dependency>
+
+    <!-- TestNG -->
+    <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>7.8.0</version>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+```
+
+---
+
+### TestNG XML Configuration (testng.xml)
+
+```xml
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+<suite name="Sample Suite">
+    <test name="Sample Tests">
+        <classes>
+            <class name="com.example.tests.SampleTest"/>
+        </classes>
+    </test>
+</suite>
+```
+
+---
+
+If you provide the exact blueprint and test scripts, I can tailor the script further to your project specifics.
