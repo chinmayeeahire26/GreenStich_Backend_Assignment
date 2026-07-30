@@ -1,0 +1,107 @@
+1) Description on code fix:  
+The fix addresses the defect by implementing explicit waits to ensure the username and password fields, as well as the login button, are interactable before performing actions on them. This mitigates issues caused by elements not being ready, which aligns with the RCA's identification of code malfunction and broken authentication features. Exception handling is added to catch and report failures in element interaction, improving diagnostics. Credentials are parameterized instead of hardcoded, enhancing test flexibility and preventing masking of input-related issues. The login success verification is improved by waiting for the logout button and additionally verifying a user profile element, ensuring that the login flow has truly succeeded. The chromedriver path is no longer hardcoded but required as a system property, preventing driver initialization failures that could indirectly cause login test failures. These changes directly address the root causes identified in the RCA and the defect summary by making the login process more robust, reliable, and transparent.
+
+2) Code fix:  
+
+Existing Code:  
+java
+public class LoginTest {
+    WebDriver driver;
+
+    @Before
+    public void setUp() {
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        driver = new ChromeDriver();
+        driver.get("https://example.com/login");
+    }
+
+    public void loginApplication() {
+        WebElement usernameField = driver.findElement(By.id("username"));
+        usernameField.sendKeys("testuser");
+        WebElement passwordField = driver.findElement(By.id("password"));
+        passwordField.sendKeys("password");
+        WebElement loginBtn = driver.findElement(By.id("loginBtn"));
+        loginBtn.click();
+
+        WebElement logoutBtn = driver.findElement(By.id("logoutBtn"));
+        Assert.assertTrue(logoutBtn.isDisplayed());
+    }
+}
+
+
+New Code with Fix:  
+java
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.NoSuchElementException;
+
+public class LoginTest {
+    WebDriver driver;
+    WebDriverWait wait;
+
+    // Credentials parameterized
+    private String username = System.getProperty("login.username", "testuser");
+    private String password = System.getProperty("login.password", "password");
+
+    @Before
+    public void setUp() {
+        // Use configurable chromedriver path with fallback
+        String chromeDriverPath = System.getProperty("webdriver.chrome.driver");
+        if (chromeDriverPath == null || chromeDriverPath.isEmpty()) {
+            throw new RuntimeException("System property 'webdriver.chrome.driver' is not set. Please set it to the path of chromedriver executable.");
+        }
+        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
+
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+        driver.get("https://example.com/login");
+
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+
+    public void loginApplication() {
+        try {
+            // Wait until username field is visible and enabled before interacting
+            WebElement usernameField = wait.until(ExpectedConditions.elementToBeClickable(By.id("username")));
+            usernameField.clear();
+            usernameField.sendKeys(username); // parameterized username
+
+            WebElement passwordField = wait.until(ExpectedConditions.elementToBeClickable(By.id("password")));
+            passwordField.clear();
+            passwordField.sendKeys(password); // parameterized password
+
+            WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("loginBtn")));
+            loginBtn.click();
+
+            // Wait for logout button presence and visibility to confirm login success
+            WebElement logoutBtn = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("logoutBtn")));
+
+            // Additional verification: check for user profile element or welcome message
+            WebElement userProfile = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("userProfile")));
+            Assert.assertTrue(logoutBtn.isDisplayed() && userProfile.isDisplayed());
+
+        } catch (TimeoutException e) {
+            throw new RuntimeException("Login failed due to element not found or not interactable within timeout.", e);
+        } catch (NoSuchElementException e) {
+            throw new RuntimeException("Login failed due to missing element.", e);
+        }
+    }
+}
+
+
+Changes Made:  
+- Added explicit waits before interacting with username, password, and login button elements to ensure they are ready.  
+- Added exception handling (TimeoutException, NoSuchElementException) to provide clear diagnostics on failures.  
+- Parameterized credentials using system properties (`login.username` and `login.password`) instead of hardcoded values.  
+- Added additional login success verification by checking visibility of a user profile element alongside the logout button.  
+- Replaced hardcoded chromedriver path with a required system property check, throwing a runtime exception if missing.  
+- Added `clear()` calls before sending keys to input fields for reliability.  
+- Maximized browser window on startup for consistent UI element interaction.
+
+3) Other Relevant details:  
+- Testing recommendations: Execute tests with different sets of credentials and under varied network conditions to ensure robustness. Confirm that failure messages are informative and guide troubleshooting.  
+- Configuration changes: Users must set the `webdriver.chrome.driver` system property to the correct chromedriver executable path. Optionally, set `login.username` and `login.password` system properties to control test credentials without code changes.  
+- Documentation updates: Update test setup documentation to include instructions for setting system properties for chromedriver path and credentials. Include guidelines on interpreting exception messages from login failures.  
+- Implementation notes: Consider externalizing wait durations and locator identifiers for easier maintenance. Adapt login success verification steps to the specific application UI changes if needed. Maintain exception handling to support debugging and test reliability.
