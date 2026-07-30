@@ -1,0 +1,33 @@
+1) Description on code fix:  
+The root cause is improper decoding of HTML entities before rendering the content on Features and Stories pages. The fix involves decoding the HTML entities (like `&quot;`, `&nbsp;`) properly before displaying them, ensuring special characters render correctly and new lines are preserved. Since the provided code does not show any rendering or decoding logic, the fix would typically be applied where the content is fetched and prepared for display, by using an HTML entity decoder (e.g., Apache Commons Lang `StringEscapeUtils.unescapeHtml4()` or equivalent).
+
+2) Code fix:
+
+| Code without Fix                                                                                              | Code with Fix                                                                                                                      |
+|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                                         | ```java                                                                                                                             |
+| // Assume this is the method fetching or preparing content for display                                          | // Assume this is the method fetching or preparing content for display                                                              |
+| public String prepareContentForDisplay(String rawContent) {                                                     | import org.apache.commons.text.StringEscapeUtils;                                                                                   |
+|     // Content is returned as-is without decoding                                                               |                                                                                                                                    |
+|     return rawContent;                                                                                           |                                                                                                                                    |
+| }                                                                                                               |                                                                                                                                    |
+|                                                                                                                 | public String prepareContentForDisplay(String rawContent) {                                                                         |
+|                                                                                                                 |     // Decode HTML entities to render special characters correctly                                                                 |
+|     // No decoding done                                                                                          |     String decodedContent = StringEscapeUtils.unescapeHtml4(rawContent);                                                           |
+|                                                                                                                 |                                                                                                                                    |
+|                                                                                                                 |     // Optionally replace new line characters with <br> tags if rendering in HTML                                                  |
+|                                                                                                                 |     decodedContent = decodedContent.replace("n", "<br>");                                                                          |
+|                                                                                                                 |                                                                                                                                    |
+|                                                                                                                 |     return decodedContent;                                                                                                          |
+|                                                                                                                 | }                                                                                                                                |
+| ```                                                                                                             | ```                                                                                                                                |
+
+Highlighted Fix Lines:  
+- `import org.apache.commons.text.StringEscapeUtils;`  
+- `String decodedContent = StringEscapeUtils.unescapeHtml4(rawContent);`  
+- `decodedContent = decodedContent.replace("n", "<br>");`  
+
+3) Other Relevant details:  
+- The provided code snippets do not include the rendering or content preparation logic where the decoding should be applied, so the fix is conceptual and should be applied in the content service or controller layer responsible for preparing the Features and Stories content.  
+- Ensure the frontend or template engine does not double-escape or re-encode the content after decoding.  
+- Proper content encoding headers (e.g., UTF-8) should be set in HTTP responses to avoid display issues.
