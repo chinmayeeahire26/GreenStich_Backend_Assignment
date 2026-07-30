@@ -1,0 +1,119 @@
+1) Description on code fix:  
+The defect occurs because the current validation and error handling logic treats all upload failures as generic format errors, resulting in the misleading "Unsupported format" message when the actual issue is a template format violation. To fix this, the `ValidateTemplateFormat()` method in `SpreadsheetUploadValidator.cs` must be enhanced to return detailed validation results or specific error codes that clearly indicate when the uploaded file does not conform to the required template format. The `HandleUpload()` method in `UploadController.cs` should then interpret these detailed results and differentiate template format violations from other errors. Finally, the `GetErrorMessageForValidationResult()` method in `ErrorMessageService.cs` must be updated to map these new, specific error codes to clear, user-friendly messages such as "Uploaded file does not match the required template format." This approach aligns with the RCA findings by improving error detection granularity and aligning validation messages with actual errors, thus providing accurate feedback to users and preventing confusion.
+
+2) Code fix:  
+
+Existing Code:  
+csharp
+// SpreadsheetUploadValidator.cs
+public bool ValidateTemplateFormat(File uploadedFile)
+{
+    // Approximate lines 45-75
+    // Current logic returns only a boolean indicating success/failure
+    bool isValid = CheckFormat(uploadedFile);
+    return isValid;
+}
+
+// UploadController.cs
+public IActionResult HandleUpload(File uploadedFile)
+{
+    bool isValidTemplate = validator.ValidateTemplateFormat(uploadedFile);
+    if (!isValidTemplate)
+    {
+        // All failures mapped to generic message
+        string errorMessage = errorMessageService.GetErrorMessageForValidationResult("UnsupportedFormat");
+        return BadRequest(errorMessage);
+    }
+    // Proceed with upload
+}
+
+// ErrorMessageService.cs
+public string GetErrorMessageForValidationResult(string validationCode)
+{
+    switch(validationCode)
+    {
+        case "UnsupportedFormat":
+            return "Unsupported format.";
+        // No specific case for template format violation
+        default:
+            return "An error occurred during upload.";
+    }
+}
+
+
+New Code with Fix:  
+csharp
+// SpreadsheetUploadValidator.cs
+public enum TemplateValidationResult
+{
+    Success,
+    InvalidTemplateFormat,
+    UnsupportedFileFormat,
+    // Other specific validation results can be added here
+}
+
+public TemplateValidationResult ValidateTemplateFormat(File uploadedFile)
+{
+    // Enhanced logic to detect specific template format violations
+    if (!IsSupportedFileType(uploadedFile))
+    {
+        return TemplateValidationResult.UnsupportedFileFormat;
+    }
+
+    bool matchesTemplate = CheckTemplateConformance(uploadedFile);
+    if (!matchesTemplate)
+    {
+        return TemplateValidationResult.InvalidTemplateFormat; // Specific error code
+    }
+
+    return TemplateValidationResult.Success;
+}
+
+// UploadController.cs
+public IActionResult HandleUpload(File uploadedFile)
+{
+    TemplateValidationResult validationResult = validator.ValidateTemplateFormat(uploadedFile);
+    if (validationResult != TemplateValidationResult.Success)
+    {
+        string errorMessage = errorMessageService.GetErrorMessageForValidationResult(validationResult);
+        return BadRequest(errorMessage);
+    }
+    // Proceed with upload
+}
+
+// ErrorMessageService.cs
+public string GetErrorMessageForValidationResult(TemplateValidationResult validationResult)
+{
+    switch(validationResult)
+    {
+        case TemplateValidationResult.InvalidTemplateFormat:
+            return "Uploaded file does not match the required template format."; // Clear, specific message
+        case TemplateValidationResult.UnsupportedFileFormat:
+            return "Unsupported file format.";
+        default:
+            return "An error occurred during upload.";
+    }
+}
+
+
+Changes Made:  
+- Changed `ValidateTemplateFormat()` to return a detailed enum `TemplateValidationResult` instead of a simple boolean.  
+- Added specific checks inside `ValidateTemplateFormat()` to distinguish between unsupported file types and template format violations.  
+- Updated `HandleUpload()` to interpret the new enum result and request an appropriate error message.  
+- Modified `GetErrorMessageForValidationResult()` to handle the new enum values and return precise, user-friendly messages.  
+- Introduced a new error message "Uploaded file does not match the required template format." to clearly communicate template violations.  
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Add unit tests for `ValidateTemplateFormat()` to verify it correctly identifies unsupported file formats and template format violations.  
+  - Add integration tests for `HandleUpload()` to ensure the correct error messages are returned for different validation results.  
+  - Test with various spreadsheet files: valid template files, files with correct format but wrong template, and unsupported file types.  
+- Configuration changes if needed:  
+  - Ensure that the template definitions used in `CheckTemplateConformance()` are up to date and loaded correctly.  
+  - Verify error message resources or localization files include the new message string if applicable.  
+- Documentation updates:  
+  - Update API or user documentation to reflect the new, more descriptive error messages for upload failures.  
+  - Document the new validation result codes and their meanings for maintainers.  
+- Implementation notes:  
+  - Consider extending the `TemplateValidationResult` enum in the future to cover other validation scenarios for better granularity.  
+  - Maintain consistent error handling patterns across the upload module to improve maintainability and user experience.
