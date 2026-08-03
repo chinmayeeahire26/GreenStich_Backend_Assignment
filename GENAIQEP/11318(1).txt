@@ -1,0 +1,65 @@
+1) Description on code fix:  
+The defect occurs because the Epic import process fails to fetch mapped testcases from Zephyr Scale, resulting in a 404 error from the fetch testcases API. This indicates that the API endpoint used is incorrect or missing, and the integration logic to retrieve and import these testcases is either absent or flawed. The fix addresses the root cause by ensuring that the Epic import functionality correctly constructs and calls the valid Zephyr Scale API endpoint with proper authentication tokens, handles 404 errors gracefully, and successfully imports the mapped testcases into the application. This resolves the integration failure and prevents the 404 error by using the correct API endpoint and valid tokens.
+
+The provided code is a Selenium UI test for login functionality and does not contain any code related to the Epic import process, Zephyr Scale API integration, or testcase fetching. Therefore, no direct code fix can be applied to the provided code. Instead, the fix recommendations focus on implementing or correcting the backend integration code responsible for:
+
+- Constructing the correct Zephyr Scale API endpoint URL for fetching testcases mapped to an Epic.
+- Using valid access tokens and API tokens for authentication.
+- Handling HTTP 404 errors by verifying endpoint correctness and providing meaningful error messages.
+- Importing the fetched testcases into the application’s data model.
+- Ensuring the Epic import process triggers this fetch correctly.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided code is a UI test class for login functionality and does not include any logic related to the Epic import process, Zephyr Scale API calls, or testcase fetching. Therefore, no before/after code comparison can be provided for the defect described.
+
+To fix the defect, the following backend integration code should be reviewed and implemented (example pseudocode):
+
+java
+// Pseudocode example for fetching testcases mapped to an Epic from Zephyr Scale API
+
+public List<Testcase> fetchTestcasesForEpic(String epicId) throws ApiException {
+    String zephyrScaleApiBaseUrl = config.getZephyrScaleApiBaseUrl(); // e.g. https://api.zephyrscale.smartbear.com/v2
+    String endpoint = zephyrScaleApiBaseUrl + "/testcases?epicId=" + epicId; // Correct endpoint to fetch testcases by epic
+
+    HttpRequest request = HttpRequest.newBuilder()
+        .uri(URI.create(endpoint))
+        .header("Authorization", "Bearer " + config.getZephyrScaleApiToken())
+        .header("Accept", "application/json")
+        .GET()
+        .build();
+
+    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+    if (response.statusCode() == 404) {
+        throw new ApiException("Fetch testcases API endpoint not found: " + endpoint);
+    } else if (response.statusCode() != 200) {
+        throw new ApiException("Failed to fetch testcases: HTTP " + response.statusCode());
+    }
+
+    // Parse JSON response to list of Testcase objects
+    List<Testcase> testcases = parseTestcasesFromJson(response.body());
+
+    return testcases;
+}
+
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Add integration tests that simulate importing an Epic with mapped testcases in Zephyr Scale, verifying that the fetch testcases API is called correctly and testcases are imported.  
+  - Validate that the API tokens and endpoints used are correct and have necessary permissions.  
+  - Test error handling for 404 and other HTTP errors to ensure graceful failure and meaningful logs.  
+  - Perform end-to-end testing by importing an Epic and verifying testcases appear on the Automation Script Generation page.
+
+- Configuration changes if needed:  
+  - Ensure Zephyr Scale API base URL and tokens are correctly configured in application properties or environment variables.  
+  - Validate that tokens have not expired and have sufficient scope to access testcases.
+
+- Documentation updates:  
+  - Document the Epic import process including the Zephyr Scale API integration details, required tokens, and error handling behavior.  
+  - Update API endpoint references if they have changed.
+
+- Any other implementation notes:  
+  - Review and update the Epic import service/module to include the testcase fetching logic.  
+  - Implement retry or fallback mechanisms if the Zephyr Scale API is temporarily unavailable.  
+  - Log detailed error messages to aid troubleshooting.
