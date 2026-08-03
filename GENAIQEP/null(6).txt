@@ -1,0 +1,34 @@
+1) Description on code fix:  
+The UI rendering logic for the Azure ADO data model needs to be updated to include the missing fields "organization," "project," and "PAT." This involves adding the corresponding input fields and ensuring they are bound correctly to the data model so that they appear on the screen when the Azure ADO data model is selected.
+
+2) Code fix:
+
+| Without Fix                                                                                   | With Fix                                                                                      |
+|----------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| ```html                                                                                      | ```html                                                                                      |
+| <!-- Azure ADO data model fields missing -->                                                | <!-- Added missing Azure ADO data model fields -->                                          |
+| <!-- No input fields for organization, project, PAT -->                                    | <label for="organization">Organization:</label>                                            |
+|                                                                                              | <input type="text" id="organization" name="organization" />                                 |
+|                                                                                              | <label for="project">Project:</label>                                                      |
+|                                                                                              | <input type="text" id="project" name="project" />                                           |
+|                                                                                              | <label for="pat">PAT:</label>                                                              |
+|                                                                                              | <input type="password" id="pat" name="pat" />                                              |
+| ```                                                                                          | ```                                                                                          |
+| ```javascript                                                                               | ```javascript                                                                               |
+| // UI rendering logic for data model selection                                             | // UI rendering logic updated to render Azure ADO fields                                   |
+| function renderDataModelFields(selectedModel) {                                           | function renderDataModelFields(selectedModel) {                                           |
+|     if (selectedModel === 'AzureADO') {                                                  |     if (selectedModel === 'AzureADO') {                                                  |
+|         // Missing rendering of organization, project, PAT fields                         |         // Render organization, project, PAT fields                                       |
+|         // No code here                                                                    |         renderInputField('organization', 'Organization');                                 |
+|                                                                                          |         renderInputField('project', 'Project');                                           |
+|                                                                                          |         renderInputField('pat', 'PAT', 'password');                                       |
+|     }                                                                                    |     }                                                                                    |
+| }                                                                                        | }                                                                                        |
+| ```                                                                                      | ```                                                                                      |
+
+3) Other Relevant details:  
+- The fix requires both UI markup and JavaScript logic to ensure fields are displayed and functional.  
+- Proper binding and validation should be added for these fields to ensure data integrity.  
+- This fix aligns with the RCA indicating missing UI bindings and rendering logic for Azure ADO fields.  
+
+Note: Since the provided code snippet does not include the actual UI rendering or data model selection logic, the above fix is a conceptual patch based on the RCA and typical UI implementation patterns.
