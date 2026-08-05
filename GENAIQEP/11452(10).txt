@@ -1,0 +1,35 @@
+1) Description on code fix:  
+The current error handling logic returns a generic "Unsupported format" message when the uploaded spreadsheet does not follow the required template format. The fix involves adding a specific validation check for the template format and updating the error message to reflect this precise issue, improving user guidance.
+
+2) Code fix:
+
+| Without Fix (Current Code)                                         | With Fix (Updated Code)                                                                                   |
+|-------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| ```                                                             | ```                                                                                                      |
+| function validateUpload(file) {                                   | function validateUpload(file) {                                                                            |
+|     if (!isSupportedFormat(file)) {                              |     if (!isSupportedFormat(file)) {                                                                       |
+|         showError("Unsupported format.");                        |         showError("Unsupported format.");                                                                 |
+|         return false;                                            |         return false;                                                                                      |
+|     }                                                           |     }                                                                                                     |
+|     // No specific template validation here                      |                                                                                                          |
+|     return true;                                                 |                                                                                                          |
+| }                                                               |                                                                                                          |
+|                                                                 |     if (!isValidTemplateFormat(file)) {                                                                   |
+|                                                                 |         showError("Invalid template format. Please upload the file in the correct template format.");    |
+|                                                                 |         return false;                                                                                      |
+|                                                                 |     }                                                                                                     |
+|                                                                 |                                                                                                          |
+|                                                                 |     return true;                                                                                           |
+|                                                                 | }                                                                                                        |
+| ```                                                             | ```                                                                                                      |
+
+Highlighted Fix:  
+- Added a new validation check `isValidTemplateFormat(file)` after confirming the file format is supported.  
+- Changed the error message to `"Invalid template format. Please upload the file in the correct template format."` instead of the generic unsupported format message.
+
+3) Other Relevant details:  
+- The function `isValidTemplateFormat(file)` should be implemented to verify the spreadsheet structure against the expected template.  
+- This fix improves user experience by providing clear feedback on why the upload failed.  
+- Process improvements should ensure that validation rules are well documented and enforced consistently.  
+
+If the actual code for `validateUpload` or error handling is not found in the provided code snippets, please confirm with: "Relevant Code NOT Found".
