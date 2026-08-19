@@ -1,0 +1,32 @@
+1) Description on code fix:  
+The defect arises because the application does not detect invalid Jira project names during the import of epics, resulting in no snack bar message being displayed to inform the user of the failure. The fix must address both the data handling and UI/UX issues identified in the root cause analysis: implementing validation logic to detect invalid project names during the import process, and triggering a snack bar message with the text "Epic doesn't Exists" when such an error occurs. This ensures users receive immediate feedback on import failures, aligning Jira’s behavior with the existing ADO implementation. Additionally, enhancing the automation code to verify the presence of this snack bar message after import attempts will help catch regressions and improve test reliability.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided code snippet is a Selenium WebDriver automation script focused solely on login and navigation steps. It contains no logic related to importing epics, validating Jira project names, or displaying snack bar messages. Therefore, no direct fix can be applied to this code for the described defect. The fix must be implemented in the application’s backend or frontend code responsible for the import functionality and UI feedback.
+
+However, to support the fix and prevent regressions, the automation code should be enhanced as follows:
+
+java
+// Example enhancement to verify snack bar message after import attempt
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+WebElement snackBar = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".snackbar-message")));
+
+String message = snackBar.getText();
+assertEquals("Epic doesn't Exists", message);
+
+
+Changes Made:  
+- Confirmed absence of import and snack bar handling logic in provided code.  
+- Recommended implementing validation and snack bar display in application import logic.  
+- Suggested adding explicit waits and assertions in automation to verify snack bar messages.  
+
+3) Other Relevant details:  
+- Conduct thorough testing of the import functionality to ensure invalid Jira project names trigger the correct error and snack bar message.  
+- Implement UI tests that explicitly check for the presence and correctness of snack bar messages after import attempts.  
+- Refactor automation scripts to replace brittle absolute XPath locators with more stable selectors (e.g., CSS selectors or relative XPath) and incorporate explicit waits to improve reliability.  
+- Remove hardcoded credentials and file paths in automation scripts to enhance security and maintainability.  
+- Update user documentation and release notes to specify the expected snack bar message "Epic doesn't Exists" for invalid Jira project imports, ensuring clarity for end users and support teams.  
+- Coordinate with development teams to ensure the fix is integrated into both backend validation and frontend UI components responsible for error handling and messaging.
+
+This comprehensive fix approach directly addresses the root causes, improves user experience by providing clear feedback, and strengthens automation coverage to prevent future regressions.
