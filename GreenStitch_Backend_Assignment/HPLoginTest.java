@@ -1,51 +1,35 @@
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using NUnit.Framework;
 
-public class LoginTest {
+namespace AutomationTests
+{
+    public class SampleTestScript
+    {
+        private IWebDriver driver;
 
-    private WebDriver driver;
-
-    public LoginTest() {
-        // Assuming ChromeDriver path is set in system properties or environment variables
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-    }
-
-    public void loginToApplication(String username, String password) {
-        try {
-            driver.get("https://example.com/login"); // Replace with actual login URL
-
-            WebElement usernameField = driver.findElement(By.id("username"));
-            WebElement passwordField = driver.findElement(By.id("password"));
-            WebElement loginButton = driver.findElement(By.id("loginButton"));
-
-            usernameField.clear();
-            usernameField.sendKeys(username);
-
-            passwordField.clear();
-            passwordField.sendKeys(password);
-
-            loginButton.click();
-
-            // Optionally, add wait or validation here to confirm login success
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        [SetUp]
+        public void Setup()
+        {
+            driver = new ChromeDriver();
+            driver.Manage().Window.Maximize();
         }
-    }
 
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
+        [Test]
+        public void sampleTestScript()
+        {
+            driver.Navigate().GoToUrl("https://example.com");
+            Assert.AreEqual("Example Domain", driver.Title);
+            IWebElement moreInfoLink = driver.FindElement(By.CssSelector("a[href='https://www.iana.org/domains/example']"));
+            Assert.IsTrue(moreInfoLink.Displayed);
+            moreInfoLink.Click();
+            Assert.IsTrue(driver.Url.Contains("iana.org"));
         }
-    }
 
-    public static void main(String[] args) {
-        LoginTest test = new LoginTest();
-        test.loginToApplication("testUser", "testPassword");
-        // Add assertions or validations as needed
-        test.tearDown();
+        [TearDown]
+        public void TearDown()
+        {
+            driver.Quit();
+        }
     }
 }
