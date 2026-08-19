@@ -1,0 +1,41 @@
+1) Description on code fix:  
+The fix directly addresses the defect of missing snack bar messages when importing epics in Jira with an invalid project name by introducing validation logic that detects invalid project names during the import process. Upon detecting an invalid project name, the fix triggers a snack bar message displaying "Epic doesn't Exists," providing immediate and clear user feedback. This aligns Jira’s behavior with the existing ADO data model, which already displays this notification, thereby resolving the inconsistency and improving user experience. The fix is consistent with the root cause analysis, which identified missing UI notification logic and inadequate snack bar message display as the primary reasons for the defect.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided LoginTest class and its methods do not contain any logic related to Jira epic import, validation of project names, or snack bar notification display. Therefore, the fix cannot be applied or demonstrated within the provided code snippet. The relevant code sections responsible for Jira epic import handling and UI notifications are absent.  
+
+For clarity, a hypothetical example illustrating the fix is provided below:
+
+Existing Code:  
+java
+public void importEpic(String projectName, String epicId) {
+    // No validation or UI notification on invalid project name
+    if (!projectExists(projectName)) {
+        return;
+    }
+    // proceed with import
+}
+
+
+New Code with Fix:  
+java
+public void importEpic(String projectName, String epicId) {
+    if (!projectExists(projectName)) {
+        uiNotificationService.showSnackBar("Epic doesn't Exists"); // Added snack bar notification
+        return;
+    }
+    // proceed with import
+}
+
+
+Changes Made:  
+- Added validation to check if the project name exists before proceeding with the import.  
+- Added a call to the UI notification service to display a snack bar message "Epic doesn't Exists" when the project name is invalid.
+
+3) Other Relevant details:  
+- Testing should include attempts to import epics with invalid project names in the Jira data model and verifying that the snack bar message "Epic doesn't Exists" is displayed correctly.  
+- Ensure that the UI notification service or snack bar component is properly integrated and configured to handle these messages.  
+- Documentation should be updated to reflect the new behavior of displaying snack bar messages on invalid epic imports for Jira, ensuring consistency with ADO.  
+- Consider centralizing error handling and snack bar notification logic across all data models (Jira, ADO, etc.) to maintain uniform user feedback and reduce code duplication.  
+- Additional UI/UX review may be warranted to confirm the snack bar message’s visibility, duration, and styling meet user expectations.
