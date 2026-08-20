@@ -1,0 +1,12 @@
+Relevant Code NOT Found
+
+1) Description on code fix:  
+The provided code snippets and page elements do not contain any logic or implementation related to Jira URL handling, solution creation, or validation. Therefore, no direct code fix can be suggested based on the given information.
+
+2) Code fix:  
+Not applicable as the relevant code handling Jira URL validation and solution setup is missing.
+
+3) Other Relevant details:  
+- The bug relates to solution setup and Jira integration logic which is not present in the provided code snippets.  
+- To fix the issue, the code responsible for saving and validating the Jira URL in the solution settings must be updated to enforce a single Jira URL per solution and make the Jira URL field read-only in the UI after initial setup.  
+- UI changes are also needed to display the Jira URL as a greyed-out, non-editable field while allowing only Jira API token and username to be modified.
