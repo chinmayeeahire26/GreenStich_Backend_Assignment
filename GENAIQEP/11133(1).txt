@@ -1,0 +1,93 @@
+1) Description on code fix:  
+The fix directly addresses the defect by enforcing a strict restriction that only one Jira URL can be associated with a solution. It prevents any modification to the Jira URL once it has been set, thereby resolving the configuration issue of multiple Jira URLs per solution. The validation logic in the backend now checks if a Jira URL already exists and rejects any attempts to change it, providing clear error messages to the user. On the UI side, the Jira URL is displayed as a read-only, greyed-out field, which informs users of the linked Jira project and prevents confusion caused by editable fields without context. This aligns with the root cause analysis that identified missing restrictions and lack of UI feedback as the core issues. The fix also maintains the ability to update Jira API token and username, as required. Overall, this ensures data consistency, improves user experience, and meets the expected behavior outlined in the defect report.
+
+2) Code fix:  
+
+Existing Code:  
+java
+// SolutionSetupController.java - saveSolutionSettings() method snippet
+public void saveSolutionSettings(Solution solution, String jiraUrl, String jiraToken, String jiraUsername) {
+    // No validation on Jira URL, simply saves whatever is provided
+    solution.setJiraUrl(jiraUrl);
+    solution.setJiraToken(jiraToken);
+    solution.setJiraUsername(jiraUsername);
+    solutionRepository.save(solution);
+}
+
+
+java
+// SolutionSetupValidator.java - validateJiraUrl() method snippet
+public ValidationResult validateJiraUrl(Solution solution, String jiraUrl) {
+    // No validation logic to prevent changing Jira URL if already set
+    return ValidationResult.success();
+}
+
+
+html
+<!-- SolutionSetupView.html - renderSolutionSettings() snippet -->
+<label for="jiraUrl">Jira URL:</label>
+<input type="text" id="jiraUrl" name="jiraUrl" value="{{jiraUrl}}" />
+
+
+New Code with Fix:  
+java
+// SolutionSetupController.java - saveSolutionSettings() method snippet
+public void saveSolutionSettings(Solution solution, String jiraUrl, String jiraToken, String jiraUsername) {
+    // Enforce single Jira URL per solution
+    if (solution.getJiraUrl() != null && !solution.getJiraUrl().isEmpty()) {
+        if (!solution.getJiraUrl().equals(jiraUrl)) {
+            // Reject change to Jira URL - keep existing URL
+            // Optionally log or notify user about restriction
+            // Do not update Jira URL
+        }
+    } else {
+        // Jira URL not set yet - allow setting it
+        solution.setJiraUrl(jiraUrl);
+    }
+    // Allow updating token and username regardless
+    solution.setJiraToken(jiraToken);
+    solution.setJiraUsername(jiraUsername);
+    solutionRepository.save(solution);
+}
+
+
+java
+// SolutionSetupValidator.java - validateJiraUrl() method snippet
+public ValidationResult validateJiraUrl(Solution solution, String jiraUrl) {
+    if (solution.getJiraUrl() != null && !solution.getJiraUrl().isEmpty()) {
+        if (!solution.getJiraUrl().equals(jiraUrl)) {
+            return ValidationResult.failure("Jira URL cannot be changed once set. Please contact admin to update.");
+        }
+    }
+    // Additional validation for URL format can be added here
+    return ValidationResult.success();
+}
+
+
+html
+<!-- SolutionSetupView.html - renderSolutionSettings() snippet -->
+<label for="jiraUrl">Jira URL:</label>
+<input type="text" id="jiraUrl" name="jiraUrl" value="{{jiraUrl}}" readonly style="background-color:#f0f0f0; color:#555;" />
+<!-- Jira URL is displayed as greyed-out, read-only field -->
+
+
+Changes Made:  
+- Added conditional logic in `saveSolutionSettings()` to prevent overwriting an existing Jira URL.  
+- Enhanced `validateJiraUrl()` to return a validation error if a different Jira URL is entered after initial setup.  
+- Modified UI to display Jira URL as a read-only, greyed-out input field to inform users of the linked Jira project without allowing edits.  
+- Allowed Jira API token and username fields to remain editable as per requirements.  
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Implement unit tests for `validateJiraUrl()` to verify rejection of Jira URL changes after initial set.  
+  - Integration tests for `saveSolutionSettings()` to ensure Jira URL immutability and proper saving of token and username.  
+  - UI tests to confirm Jira URL field is read-only and visually distinct (greyed-out).  
+  - End-to-end tests simulating multiple users attempting to change Jira URL to verify validation and error handling.  
+- Configuration changes:  
+  - Introduce a unique constraint or index in the database schema to enforce one Jira URL per solution at the persistence layer, preventing data inconsistency even if backend logic is bypassed.  
+- Documentation updates:  
+  - Update user-facing documentation to explain that Jira URL is immutable once set and displayed as read-only in the solution setup UI.  
+  - Update admin guides to describe the validation behavior and how to handle Jira URL changes if necessary.  
+- Implementation notes:  
+  - Consider adding logging or user notifications when a Jira URL change attempt is rejected to improve transparency.  
+  - Plan for administrative workflows or support tickets to handle legitimate Jira URL changes in the future, if required.
