@@ -1,68 +1,106 @@
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+Certainly! Based on your prompt, I'll create a C# Selenium WebDriver automation script template that aligns with a typical blueprint involving project structure, dependencies, and configuration. Since you mentioned "Variables" and "Sample Test Script" but didn't provide specific details, I'll include placeholders and a sample test case demonstrating a basic Selenium test.
 
-public class LoginAutomation {
-    public void loginTheApplication() {
-        // Set the path to the ChromeDriver executable
-        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+---
 
-        WebDriver driver = new ChromeDriver();
+### Assumptions from the blueprint:
+- Project uses C# with Selenium WebDriver.
+- NUnit or MSTest as the test framework.
+- Configuration and variables are managed via a settings file or constants.
+- No repeated test scripts; all test cases are incorporated in a single test class or suite.
+- Dependencies: Selenium.WebDriver, Selenium.Support, NUnit (or MSTest).
 
-        try {
-            // Open the website
-            driver.get("https://kairos-capgemini.azurewebsites.net/login");
+---
 
-            // Click on Your Image
-            WebElement yourImage = driver.findElement(By.xpath("//body/app-root[1]/app-login[1]/div[1]/div[2]/div[1]/img[1]"));
-            yourImage.click();
+### Sample Automation Script in C#
 
-            // Click on login
-            WebElement loginButton = driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-login[1]/div[1]/div[1]/app-header[1]/div[1]/div[1]/nav[1]/a[4]/img[1]"));
-            loginButton.click();
+```csharp
+using NUnit.Framework; // or use MSTest if preferred
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using System;
 
-            // Enter Username
-            WebElement usernameField = driver.findElement(By.xpath("//input[@id='username']"));
-            usernameField.sendKeys("shaik-raghiba.sulthana@capgemini-test.com");
+namespace AutomationTests
+{
+    [TestFixture]
+    public class SampleTests
+    {
+        private IWebDriver driver;
 
-            // Enter Password
-            WebElement passwordField = driver.findElement(By.xpath("//input[@id='password']"));
-            passwordField.sendKeys("Test@1234");
+        // Variables (can be moved to config or constants)
+        private readonly string baseUrl = "https://example.com";
+        private readonly string expectedTitle = "Example Domain";
 
-            // Click on Description of the image
-            WebElement descriptionImage = driver.findElement(By.xpath("/html[1]/body[1]/div[2]/div[2]/div[1]/mat-dialog-container[1]/div[1]/div[1]/app-login-register-modal[1]/div[1]/div[1]/div[1]/form[1]/div[1]/button[1]/span[2]/img[1]"));
-            descriptionImage.click();
+        [SetUp]
+        public void Setup()
+        {
+            // Initialize ChromeDriver (ensure chromedriver.exe is in PATH or project folder)
+            var options = new ChromeOptions();
+            options.AddArgument("--start-maximized");
 
-            // Click on Select Portfolio
-            WebElement selectPortfolio = driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-home[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[1]/mat-form-field[1]/div[1]/div[2]/div[1]"));
-            selectPortfolio.click();
+            driver = new ChromeDriver(options);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+        }
 
-            // Click on option
-            WebElement option = driver.findElement(By.xpath("//mat-option[@id='mat-option-4']"));
-            option.click();
+        [Test]
+        public void VerifyHomePageTitle()
+        {
+            // Navigate to the base URL
+            driver.Navigate().GoToUrl(baseUrl);
 
-            // Click on combobox
-            WebElement comboBox = driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-home[1]/div[2]/div[1]/div[1]/div[1]/div[3]/div[1]/mat-form-field[1]/div[1]/div[2]/div[1]/mat-select[1]/div[1]/div[1]/span[1]"));
-            comboBox.click();
+            // Assert the page title is as expected
+            Assert.AreEqual(expectedTitle, driver.Title, "Page title does not match expected value.");
+        }
 
-            // Click on Requirements Analysis
-            WebElement requirementsAnalysis = driver.findElement(By.xpath("//span[contains(text(), 'Requirements Analysis')]");
-            requirementsAnalysis.click();
+        [Test]
+        public void SampleLoginTest()
+        {
+            // Example test case for login - replace selectors and URL as per blueprint
+            driver.Navigate().GoToUrl($"{baseUrl}/login");
 
-            // Click on tab
-            WebElement tab = driver.findElement(By.xpath("//a[@id='mat-tab-link-6']"));
-            tab.click();
+            // Locate username and password fields and login button
+            var usernameField = driver.FindElement(By.Id("username"));
+            var passwordField = driver.FindElement(By.Id("password"));
+            var loginButton = driver.FindElement(By.Id("loginBtn"));
 
-            // Click on Logout
-            WebElement logout = driver.findElement(By.xpath("//a[contains(text(), 'Logout')]");
-            logout.click();
+            // Input credentials - replace with variables or secure storage
+            usernameField.SendKeys("testuser");
+            passwordField.SendKeys("password123");
+            loginButton.Click();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            // Close the browser
-            driver.quit();
+            // Validate successful login - example: check for logout button or user profile
+            var logoutButton = driver.FindElement(By.Id("logoutBtn"));
+            Assert.IsTrue(logoutButton.Displayed, "Logout button not displayed, login might have failed.");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            // Close the browser and dispose driver
+            if (driver != null)
+            {
+                driver.Quit();
+                driver.Dispose();
+            }
         }
     }
 }
+```
+
+---
+
+### Explanation:
+- **Setup**: Initializes the ChromeDriver before each test.
+- **Tests**: Includes two sample tests — one verifying the homepage title, another simulating a login.
+- **TearDown**: Cleans up the driver after each test.
+- **Variables**: Base URL and expected title are stored as class-level readonly fields; these can be moved to a config file or environment variables.
+- **No repetition**: All test cases are in one class; you can add more test methods as needed.
+
+---
+
+### Next Steps:
+- Replace placeholder URLs, element locators, and credentials with actual values from your blueprint.
+- Add more test methods for other test cases.
+- Integrate configuration management (e.g., appsettings.json or environment variables).
+- Consider using Page Object Model (POM) for better maintainability if the blueprint suggests.
+
+If you provide the exact blueprint or test cases, I can tailor the script further!
