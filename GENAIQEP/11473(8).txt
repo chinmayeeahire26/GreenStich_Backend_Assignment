@@ -1,0 +1,5 @@
+Relevant Code NOT Found
+
+- The provided information includes only UI element details for Login Page and Dashboard, which are unrelated to the Jira epic import functionality or snack bar message handling.
+- No source code related to the import process, error handling, or snack bar display logic for Jira epics is provided.
+- Without the relevant code, it is not possible to analyze or suggest a fix for the missing snack bar message on invalid Jira project names.
