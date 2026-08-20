@@ -1,0 +1,58 @@
+1) Description on code fix:  
+The fix directly addresses the defect by ensuring that the user session is properly invalidated upon logout, which prevents unauthorized access to protected pages via browser back navigation. This resolves the root cause identified in the RCA, where the session was not properly terminated, allowing users to revisit the landing page without re-authentication. Additionally, the fix includes setting HTTP cache control headers to prevent browsers from caching authenticated pages, further securing the application against back navigation exploits. The test automation is enhanced to include logout steps and assertions verifying that after logout, navigating back does not grant access to protected content, thus covering both code and security issues comprehensively.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided code snippets do not include logout or session management logic; therefore, no direct before/after code comparison is possible within the existing code. Below are example implementations that should be integrated into the application and test automation to resolve the defect:
+
+*Application Logout Servlet Example:*  
+java
+@WebServlet("/logout")
+public class LogoutServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate(); // Invalidate session to terminate authentication
+        }
+        // Prevent caching of authenticated pages
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+        response.setHeader("Pragma", "no-cache"); 
+        response.setDateHeader("Expires", 0); 
+
+        response.sendRedirect("login.jsp"); // Redirect to login page
+    }
+}
+
+
+*Selenium Test Automation Extension:*  
+java
+public void loginLogoutTest() {
+    driver.get("https://example.com/login");
+    driver.findElement(By.id("username")).sendKeys("user");
+    driver.findElement(By.id("password")).sendKeys("pass");
+    driver.findElement(By.id("loginButton")).click();
+
+    Assert.assertTrue(driver.findElement(By.id("welcomeMessage")).isDisplayed());
+
+    driver.findElement(By.id("logoutButton")).click();
+
+    Assert.assertTrue(driver.getCurrentUrl().contains("login"));
+
+    driver.navigate().back();
+
+    Assert.assertTrue(driver.getCurrentUrl().contains("login") || 
+                      driver.findElements(By.id("loginButton")).size() > 0);
+}
+
+
+Changes Made:  
+- Added server-side session invalidation on logout to terminate user authentication.  
+- Added HTTP cache control headers in logout response to prevent browser caching of authenticated pages.  
+- Redirected user to login page after logout to enforce re-authentication.  
+- Extended Selenium test automation to include logout steps and verify that back navigation does not allow access to protected pages.
+
+3) Other Relevant details:  
+- Perform manual and automated testing of logout flows to confirm session termination and prevention of back navigation access.  
+- Review and configure server session timeout settings and security filters to reinforce session management.  
+- Update project documentation to include logout security requirements and test coverage details.  
+- Consider implementing additional client-side cache clearing and security best practices as per framework guidelines.
