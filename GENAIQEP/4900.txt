@@ -1,0 +1,5 @@
+Relevant Code NOT Found
+
+- The provided RCA and code details do not include any part of the tendency analysis report generation or CSV download functionality.
+- Without the relevant code that handles CSV file creation or data population, it is not possible to identify or suggest a fix for the empty first column issue.
+- Please provide the source code related to the tendency analysis report generation and CSV export for a detailed analysis and fix.
