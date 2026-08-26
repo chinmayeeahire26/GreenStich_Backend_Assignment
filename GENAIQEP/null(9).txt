@@ -1,0 +1,14 @@
+1) Description on code fix:  
+The login button locator in the code uses `By.id("loginButton")`, but the actual login button on the Flipkart login page uses `name="login"`. Updating the locator to use `By.name("login")` will correctly identify and click the login button, fixing the login failure issue.
+
+2) Code fix:
+
+| Code without the Fix                              | Code with the Fix                               |
+|------------------------------------------------------|----------------------------------------------------|
+| `WebElement loginButton = driver.findElement(By.id("loginButton"));` | `WebElement loginButton = driver.findElement(By.name("login"));` |
+| `loginButton.click();`                                | `loginButton.click();`                              |
+
+3) Other Relevant details:  
+- The dashboard element check should also be updated to match the Flipkart dashboard, which uses a `div` with class `welcome` instead of an element with id `dashboard`.  
+- Consider updating the wait condition to check for presence of the welcome banner or URL change relevant to Flipkart's dashboard page.  
+- Credentials should be parameterized or fetched from a secure config rather than hardcoded.
