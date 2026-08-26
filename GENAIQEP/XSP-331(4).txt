@@ -1,0 +1,25 @@
+1) Description on code fix:  
+The current code uses hardcoded credentials ("your_username" and "your_password") which will not authenticate successfully. The fix involves fetching valid credentials from a secure configuration or environment variables to ensure the test uses actual valid login data.
+
+2) Code fix:
+
+| Without Fix (Current Code)                                                                 | With Fix (Updated Code)                                                                                         |
+|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                   | ```java                                                                                                       |
+| // Locate username field and enter username                                               | // Locate username field and enter username                                                                   |
+| WebElement usernameField = driver.findElement(By.id("username"));                         | WebElement usernameField = driver.findElement(By.id("username"));                                             |
+| usernameField.sendKeys("your_username"); // Replace with valid username or fetch from config | String username = System.getenv("CAPGEMINI_USERNAME");                                                    |
+|                                                                                            | if (username == null) username = "default_username"; // fallback or throw error                            |
+|                                                                                            | usernameField.sendKeys(username);                                                                         |
+|                                                                                            |                                                                                                               |
+| // Locate password field and enter password                                               | // Locate password field and enter password                                                                   |
+| WebElement passwordField = driver.findElement(By.id("password"));                         | WebElement passwordField = driver.findElement(By.id("password"));                                             |
+| passwordField.sendKeys("your_password"); // Replace with valid password or fetch from config | String password = System.getenv("CAPGEMINI_PASSWORD");                                                    |
+|                                                                                            | if (password == null) password = "default_password"; // fallback or throw error                            |
+|                                                                                            | passwordField.sendKeys(password);                                                                         |
+| ```                                                                                       | ```                                                                                                           |
+
+3) Other Relevant details:  
+- Using environment variables or configuration files for credentials improves security and flexibility.  
+- This approach allows running tests in different environments without code changes.  
+- Consider adding explicit error handling if credentials are missing to fail fast.
