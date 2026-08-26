@@ -1,0 +1,18 @@
+1) Description on code fix:  
+The current test does not wait for the page to load or the profile icon to become visible after clicking the login button, which can cause a `NoSuchElementException` or false test failures due to timing issues. Adding an explicit wait for the profile icon element to be visible ensures the test waits for the login process to complete before asserting.
+
+2) Code fix:
+
+| Without Fix                                                                                  | With Fix                                                                                                   |
+|---------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                     | ```java                                                                                                    |
+| loginButton.click();                                                                        | loginButton.click();                                                                                         |
+|                                                                                             | WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));                                     |
+| WebElement profileIcon = driver.findElement(By.id("profileIcon"));                          | WebElement profileIcon = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("profileIcon")));    |
+| Assert.assertTrue(profileIcon.isDisplayed(), "Login failed - Profile icon not displayed"); | Assert.assertTrue(profileIcon.isDisplayed(), "Login failed - Profile icon not displayed");                  |
+| ```                                                                                        | ```                                                                                                        |
+
+3) Other Relevant details:  
+- Import statements for `WebDriverWait`, `ExpectedConditions`, and `Duration` need to be added.  
+- This fix improves test reliability by handling dynamic page load times.  
+- It prevents flaky test failures caused by immediate element lookup after login click.
