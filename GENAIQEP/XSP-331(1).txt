@@ -1,0 +1,117 @@
+1) Description on code fix:  
+The current test implementation only verifies successful login with valid credentials but lacks coverage for invalid credentials, which is critical to fully validate the user authentication process as per the defect and RCA. Additionally, the test does not use explicit waits to ensure the profile icon is present before asserting login success, which can cause flaky tests due to timing issues. The hardcoded ChromeDriver path in the setup method reduces environment portability and may cause failures if the path is incorrect or the driver is incompatible. There is also no error handling around element lookups, which can cause misleading test failures unrelated to authentication logic.  
+
+The fix addresses these issues by:  
+- Adding negative test cases to verify login failure with invalid credentials and asserting appropriate error messages or failure states.  
+- Introducing explicit waits (WebDriverWait) to synchronize the test flow and improve stability.  
+- Replacing the hardcoded ChromeDriver path with WebDriverManager to automate driver management and improve environment portability.  
+- Adding try-catch blocks to handle element not found exceptions gracefully and provide clearer failure reporting.  
+
+These changes ensure the test fully validates the authentication process as required, improves reliability, and enhances maintainability and portability.
+
+2) Code fix:  
+Existing Code:  
+java
+public class LoginTest {
+    WebDriver driver;
+
+    @BeforeMethod
+    public void setUp() {
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        driver = new ChromeDriver();
+        driver.get("https://example.com/login");
+    }
+
+    @Test
+    public void verifyLoginFunctionality() {
+        driver.findElement(By.id("username")).sendKeys("validUser");
+        driver.findElement(By.id("password")).sendKeys("validPass");
+        driver.findElement(By.id("loginBtn")).click();
+
+        Assert.assertTrue(driver.findElement(By.id("profileIcon")).isDisplayed());
+    }
+}
+
+
+New Code with Fix:  
+java
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.NoSuchElementException;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import org.testng.Assert;
+import java.time.Duration;
+
+public class LoginTest {
+    WebDriver driver;
+    WebDriverWait wait;
+
+    @BeforeMethod
+    public void setUp() {
+        // Use WebDriverManager to manage ChromeDriver binaries automatically
+        WebDriverManager.chromedriver().setup();
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+        driver.get("https://example.com/login");
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+
+    @Test
+    public void verifyLoginFunctionality_ValidCredentials() {
+        try {
+            driver.findElement(By.id("username")).sendKeys("validUser");
+            driver.findElement(By.id("password")).sendKeys("validPass");
+            driver.findElement(By.id("loginBtn")).click();
+
+            // Wait explicitly for profile icon to be visible
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("profileIcon")));
+
+            Assert.assertTrue(driver.findElement(By.id("profileIcon")).isDisplayed(), "Profile icon should be displayed after successful login.");
+        } catch (NoSuchElementException e) {
+            Assert.fail("Element not found during valid login test: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void verifyLoginFunctionality_InvalidCredentials() {
+        try {
+            driver.findElement(By.id("username")).clear();
+            driver.findElement(By.id("username")).sendKeys("invalidUser");
+            driver.findElement(By.id("password")).clear();
+            driver.findElement(By.id("password")).sendKeys("invalidPass");
+            driver.findElement(By.id("loginBtn")).click();
+
+            // Wait explicitly for error message to be visible
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("loginError")));
+
+            Assert.assertTrue(driver.findElement(By.id("loginError")).isDisplayed(), "Error message should be displayed for invalid login.");
+        } catch (NoSuchElementException e) {
+            Assert.fail("Element not found during invalid login test: " + e.getMessage());
+        }
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+}
+
+
+Changes Made:  
+- Replaced hardcoded ChromeDriver path with WebDriverManager setup for automatic driver management.  
+- Added explicit WebDriverWait to wait for elements (profile icon and error message) before assertions.  
+- Added a new test method `verifyLoginFunctionality_InvalidCredentials` to test login failure with invalid credentials and assert error message presence.  
+- Wrapped element interactions in try-catch blocks to handle `NoSuchElementException` and fail tests with clear messages.  
+- Added `tearDown` method to quit the driver after each test to clean up resources.  
+- Maximized browser window for consistent UI behavior.
+
+3) Other Relevant details:  
+- Testing recommendations: Run the test suite multiple times to verify stability improvements and confirm both positive and negative authentication scenarios are correctly handled. Validate that error messages for invalid login are consistent with application behavior.  
+- Configuration changes: No manual ChromeDriver path configuration is needed anymore due to WebDriverManager usage, simplifying environment setup. Ensure the project includes the WebDriverManager dependency.  
+- Documentation updates: Update test documentation to reflect the addition of negative test cases and the use of explicit waits and WebDriverManager. Document the expected error message element ID (`loginError`) and its role in validation.  
+- Implementation notes: If the application under test changes element IDs or error message behavior, update the locators accordingly. Consider parameterizing credentials for better test data management in future enhancements.
