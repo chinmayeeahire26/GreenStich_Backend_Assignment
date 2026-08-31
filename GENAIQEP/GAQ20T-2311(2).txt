@@ -1,0 +1,19 @@
+1) Description on code fix:  
+The test code does not wait for the page to load or for the profile icon element to appear after clicking the login button, which can cause a `NoSuchElementException` or false failure if the element is not immediately present. Adding an explicit wait for the profile icon after login ensures the element is loaded before assertion, fixing the "invalid user" error caused by premature element lookup.
+
+2) Code fix:
+
+| Without Fix                                                                                     | With Fix                                                                                                      |
+|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| ```java                                                                                         | ```java                                                                                                      |
+| loginButton.click();                                                                            | loginButton.click();                                                                                          |
+|                                                                                                |                                                                                                              |
+| WebElement profileIcon = driver.findElement(By.id("profileIcon"));                              | WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));                                      |
+| Assert.assertTrue(profileIcon.isDisplayed(), "Login failed - Profile icon not displayed");     | WebElement profileIcon = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("profileIcon")));    |
+|                                                                                                | Assert.assertTrue(profileIcon.isDisplayed(), "Login failed - Profile icon not displayed");                   |
+| ```                                                                                            | ```                                                                                                          |
+
+3) Other Relevant details:  
+- The fix uses Selenium's explicit wait (`WebDriverWait`) to handle dynamic page loading.  
+- This prevents false negatives in login verification due to timing issues.  
+- Ensure to import `org.openqa.selenium.support.ui.WebDriverWait` and `org.openqa.selenium.support.ui.ExpectedConditions` and `java.time.Duration`.
