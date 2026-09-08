@@ -1,0 +1,61 @@
+{
+  "Defect Analysis": [
+    {
+      "Feature": "Login Module",
+      "Defects": ["D101", "D105"],
+      "Feature Sentiment": "Negative",
+      "Sentiment Score": -0.7,
+      "Impact Analysis": "High",
+      "Reason": "Multiple defects related to login failures and slow authentication processes causing user frustration and access delays."
+    },
+    {
+      "Feature": "Payment Gateway",
+      "Defects": ["D102", "D110", "D115"],
+      "Feature Sentiment": "Negative",
+      "Sentiment Score": -0.8,
+      "Impact Analysis": "Critical",
+      "Reason": "Defects include transaction failures and security vulnerabilities leading to potential financial loss and trust issues."
+    },
+    {
+      "Feature": "User Profile Management",
+      "Defects": ["D103"],
+      "Feature Sentiment": "Neutral",
+      "Sentiment Score": 0.0,
+      "Impact Analysis": "Medium",
+      "Reason": "Minor UI glitches reported without significant impact on functionality or user experience."
+    },
+    {
+      "Feature": "Search Functionality",
+      "Defects": ["D104", "D108"],
+      "Feature Sentiment": "Positive",
+      "Sentiment Score": 0.6,
+      "Impact Analysis": "Low",
+      "Reason": "Defects mostly related to minor enhancements and suggestions, indicating overall satisfaction."
+    },
+    {
+      "Feature": "Notification System",
+      "Defects": ["D106", "D109"],
+      "Feature Sentiment": "Negative",
+      "Sentiment Score": -0.5,
+      "Impact Analysis": "Medium",
+      "Reason": "Delayed or missing notifications affecting user engagement and timely updates."
+    },
+    {
+      "Feature": "Reporting Module",
+      "Defects": ["D107"],
+      "Feature Sentiment": "Neutral",
+      "Sentiment Score": 0.1,
+      "Impact Analysis": "Low",
+      "Reason": "Reports generate correctly but with minor formatting issues."
+    }
+  ],
+  "Insights Based on Sentiment Analysis": {
+    "Performing Areas": "Search Functionality shows positive sentiment with minor enhancement requests, indicating good performance.",
+    "Patterns of Frustration or Satisfaction": "Users express frustration mainly with Payment Gateway and Login Module due to failures and security concerns; satisfaction noted in Search Functionality.",
+    "Feature Priority": "Payment Gateway requires immediate attention due to critical impact and negative sentiment; Login Module also needs high priority fixes.",
+    "Trends": "Security and transaction-related defects (D110, D115) trend towards critical impact, highlighting increasing risk in Payment Gateway.",
+    "Performance/Security Concerns": "Defects D110 and D115 in Payment Gateway are security sensitive; D101 and D105 in Login Module affect performance and access.",
+    "Response Time for negative areas": "Closed defects in Login Module (D101) show average response time of 3 days; Payment Gateway defects (D110) took 5 days to resolve.",
+    "Identify Sentiment Trends Over Time": "Negative sentiment is increasing in Payment Gateway defects over recent releases, indicating growing user concern."
+  }
+}
