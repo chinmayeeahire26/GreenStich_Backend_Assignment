@@ -1,0 +1,12 @@
+### Relevant Code NOT Found
+
+1) Description on code fix:  
+- The reported bug is about creating a Solution using Azure DevOps and Jira-Xray with empty data (i.e., validation/handling of empty fields during solution creation).  
+- The provided code is only Selenium login/navigation + portfolio selection + logout, and contains no “create solution” flow, no Azure DevOps/Jira-Xray integration logic, and no empty-data validation.
+
+2) Code fix (Before vs After):  
+- Not applicable because the solution creation / validation code path is not present in the shared source.
+
+3) Other Relevant details:  
+- The shared code is test automation, not application/business logic; even if fixed, it won’t address a product defect in solution creation validation.  
+- To propose a real fix, share the backend/controller/service or UI form component handling “Create Solution” for Azure DevOps + Jira-Xray (especially where request payload is validated / submitted).
