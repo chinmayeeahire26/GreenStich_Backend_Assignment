@@ -1,0 +1,30 @@
+1) Description on code fix:  
+The defect is that, in Jira Zephyr Scale Data Model → Test Data Generator → Upload to Jira ALM, entering an invalid work item id results in a snackbar showing the generic text "Error" instead of the expected validation message "Please provide the valid work item Id". This matches the RCA: the invalid work item id scenario is being mapped/handled through a generic error pathway, and the specific validation message is not being surfaced to the snackbar.  
+
+To resolve the defect, the fix must ensure that the invalid work item id condition is handled as a known validation failure (not a generic “unknown error”), and that the UI snackbar message is set from either:  
+- a backend-provided validation message/error code (preferred; stable contract), or  
+- a frontend mapping for the invalid-id case (fallback if backend message is missing).  
+
+However, the provided “previous agent output” did not include any actual repository code. Without the real frontend upload handler / API client / snackbar utility / backend endpoint code, a precise before/after code comparison cannot be produced without inventing code. The fix recommendation remains: stop collapsing invalid work item id errors into a generic `"Error"` message, by preserving and mapping the validation message/code through backend → client → snackbar.
+
+2) Code fix:  
+Relevant Code NOT Found  
+No actual source files/snippets were provided for the identified hotspots (e.g., `TestDataGenerator.tsx` upload click handler, API wrapper like `jiraAlmService.ts`, HTTP interceptor/error normalizer, snackbar/error utility, backend controller endpoint, or validation layer). Because the concrete “Existing Code” is not available, I cannot provide an accurate before/after diff of *your* code without fabricating it.
+
+Changes Made:  
+- N/A (no code supplied to modify).  
+
+3) Other Relevant details:  
+- Implementation requirements once code is located (must-do to satisfy defect + RCA):  
+  - Frontend (upload handler in Test Data Generator): Replace any hardcoded generic snackbar invocation (patterns like `showSnackbar("Error")` / `notifyError("Error")` in a `catch`) with logic that extracts server validation detail (e.g., `error.response.data.message` / `detail` / `errors`) and displays it. If the backend returns a stable error code (recommended), map `INVALID_WORK_ITEM_ID` → "Please provide the valid work item Id".  
+  - Frontend API client/interceptor: Ensure interceptors/wrappers do not overwrite API error payloads (avoid patterns like `throw new Error("Error")` or `Promise.reject("Error")` that discard `response.data`). Preserve status + body so the UI can display the specific message.  
+  - Backend (Upload to Jira ALM endpoint): Add explicit validation for invalid work item id before calling downstream Jira/Zephyr APIs. For invalid input, return HTTP 400/422 with a response payload containing either:  
+    - `{ code: "INVALID_WORK_ITEM_ID", message: "Please provide the valid work item Id" }`, or  
+    - RFC7807 `ProblemDetails` with `detail: "Please provide the valid work item Id"` and an extension error code.  
+    Avoid broad exception handlers that return `BadRequest("Error")` or otherwise flatten validation failures into `"Error"`.  
+- Testing recommendations:  
+  - UI unit test: Mock upload API returning 400/422 with message `"Please provide the valid work item Id"` and assert snackbar displays it exactly. Also test when backend returns only `code=INVALID_WORK_ITEM_ID` and UI mapping produces the expected text.  
+  - Backend tests: For invalid work item id, assert status 400/422 and response contains stable code/message (and not generic `"Error"`). Add a separate test for “valid format but not found” if applicable to ensure it does not reuse the invalid-id message.  
+  - E2E test: Re-run the defect repro steps and assert snackbar text equals "Please provide the valid work item Id".  
+- Contract/config note: If an API gateway/middleware or frontend interceptor currently rewrites errors to a generic `"Error"`, update it to preserve validation details for 400/422.  
+- Documentation update: Document the error contract for “Upload to Jira ALM” (recommended: stable `code` + user-facing `message`) so future UI mappings don’t regress into generic messaging.
