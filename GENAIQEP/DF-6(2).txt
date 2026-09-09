@@ -1,0 +1,194 @@
+1) Description on code fix:  
+The defect DF-6 is a homepage navigation/link failure: the “Free Trial” link on `http://www.qasymphony.com/` is non-functional (non-clickable or does not navigate). The RCA indicates a UI/UX + Navigation/Link pattern where anchor links are broken or not activated (often due to incorrect/missing href/handlers, overlays intercepting clicks, or timing issues making the element present but not clickable).  
+
+The provided Selenium/TestNG code does not load the homepage and does not interact with the “Free Trial” link at all (it navigates to `https://example.com/login` and validates login). Therefore, it cannot reproduce or detect DF-6, and it provides no protection against regressions for this link. Additionally, the code’s immediate `findElement` + `click()` approach (no explicit waits) is inconsistent with the RCA pattern because it can fail or mask issues where links appear but are not truly clickable due to overlays/timing.  
+
+The fix ensures DF-6 is directly addressed in automation by:  
+- Adding a dedicated homepage test that navigates to `http://www.qasymphony.com/`, finds the “Free Trial” link, clicks it, and asserts navigation occurs (URL changes / destination verification).  
+- Adding explicit waits for visibility and clickability to align with the RCA’s “present but not activated/clickable” behavior.  
+- Adding a helper to dismiss common overlays (cookie banners/popups) that can intercept clicks and cause “link not working” symptoms (UI/UX root-cause alignment).  
+- Resolving the structural issue of duplicate `LoginTest` class (compilation/execution blocker), which can prevent tests from running and thus mask UI/navigation defects.  
+- Removing brittle hard-coded ChromeDriver path guidance so the test can reliably execute in CI and consistently detect the broken link.
+
+2) Code fix:  
+
+Existing Code:  
+java
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+public class LoginTest {
+
+    private WebDriver driver;
+
+    @BeforeMethod
+    public void setUp() {
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        driver = new ChromeDriver();
+        driver.get("https://example.com/login");
+    }
+
+    @Test
+    public void verifyLoginFunctionality() {
+        WebElement usernameField = driver.findElement(By.id("username"));
+        WebElement passwordField = driver.findElement(By.id("password"));
+        WebElement loginButton = driver.findElement(By.id("loginButton"));
+
+        usernameField.sendKeys("testUser");
+        passwordField.sendKeys("testPassword");
+        loginButton.click();
+
+        WebElement profileIcon = driver.findElement(By.id("profileIcon"));
+        Assert.assertTrue(profileIcon.isDisplayed(), "Login failed or Profile icon not displayed.");
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+}
+
+// (The same LoginTest class appears duplicated again in the provided snippet)
+
+
+New Code with Fix:  
+java
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.time.Duration;
+import java.util.Set;
+
+public class HomePageFreeTrialLinkTest { // CHANGED: dedicated test class; avoids duplicate LoginTest issue
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    @BeforeMethod
+    public void setUp() {
+        // CHANGED: do not hard-code chromedriver path; externalize or use driver manager in real setup
+        // System.setProperty("webdriver.chrome.driver", System.getProperty("chromeDriverPath"));
+
+        driver = new ChromeDriver();
+        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+        driver.get("http://www.qasymphony.com/"); // CHANGED: navigate to defect URL for DF-6
+    }
+
+    @Test
+    public void verifyFreeTrialLinkNavigates() {
+        // CHANGED: dismiss overlays that can intercept clicks (UI/UX RCA)
+        dismissCookieOrOverlayIfPresent();
+
+        // CHANGED: locate "Free Trial" link on homepage
+        By freeTrialLink = By.linkText("Free Trial");
+
+        WebElement link = wait.until(ExpectedConditions.visibilityOfElementLocated(freeTrialLink));
+
+        // CHANGED: scroll into view to avoid "not clickable at point" issues
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", link);
+
+        // CHANGED: wait for clickability to match "non-activated link" RCA pattern
+        wait.until(ExpectedConditions.elementToBeClickable(link));
+
+        String originalUrl = driver.getCurrentUrl();
+        String originalWindow = driver.getWindowHandle();
+        Set<String> oldWindows = driver.getWindowHandles();
+
+        link.click();
+
+        // CHANGED: handle optional new tab/window behavior
+        wait.until(d -> d.getWindowHandles().size() >= oldWindows.size());
+        if (driver.getWindowHandles().size() > oldWindows.size()) {
+            for (String h : driver.getWindowHandles()) {
+                if (!oldWindows.contains(h)) {
+                    driver.switchTo().window(h);
+                    break;
+                }
+            }
+        } else {
+            driver.switchTo().window(originalWindow);
+        }
+
+        // CHANGED: assert navigation occurs (click should change URL)
+        wait.until(d -> !d.getCurrentUrl().equals(originalUrl));
+
+        String destinationUrl = driver.getCurrentUrl();
+        Assert.assertNotEquals(destinationUrl, originalUrl,
+                "Free Trial click did not navigate away from homepage.");
+
+        // Optional destination assertion if stable destination is known:
+        // Assert.assertTrue(destinationUrl.toLowerCase().contains("trial") || destinationUrl.toLowerCase().contains("free"),
+        //         "Free Trial link navigated to unexpected URL: " + destinationUrl);
+    }
+
+    private void dismissCookieOrOverlayIfPresent() {
+        // CHANGED: best-effort overlay dismissal to prevent click interception
+        By[] possibleDismissButtons = new By[] {
+                By.cssSelector("button[id*='accept']"),
+                By.cssSelector("button[class*='accept']"),
+                By.cssSelector("button[aria-label*='accept']"),
+                By.cssSelector("button[aria-label*='close']"),
+                By.cssSelector(".cookie button"),
+                By.cssSelector(".cookies button")
+        };
+
+        for (By selector : possibleDismissButtons) {
+            try {
+                WebElement btn = new WebDriverWait(driver, Duration.ofSeconds(2))
+                        .until(ExpectedConditions.elementToBeClickable(selector));
+                btn.click();
+                return;
+            } catch (Exception ignored) {
+                // try next selector
+            }
+        }
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+}
+
+
+Changes Made:  
+- Added a dedicated homepage test that loads `http://www.qasymphony.com/` and validates the “Free Trial” link click results in navigation (directly targets DF-6).  
+- Avoided the duplicate `LoginTest` class problem by introducing a single, properly named test class (prevents compilation/execution blockage that could mask the defect).  
+- Implemented explicit waits for visibility and clickability to address the RCA’s “broken/non-activated link” symptoms (timing/interaction issues).  
+- Added scroll into view and overlay dismissal to reduce click interception (UI/UX-related root cause pattern).  
+- Added navigation assertion (URL must change) to ensure the test fails when the link does nothing (the DF-6 failure mode).  
+- Removed reliance on a hard-coded chromedriver path (improves reliability so the defect can be caught in CI).
+
+3) Other Relevant details:  
+- Testing recommendations
+  - Validate behavior under both `http://` and any `https://` redirect; ensure assertion tolerates redirects while still requiring navigation.  
+  - If multiple “Free Trial” links exist (header + hero), refine locator to the intended one (e.g., restrict to header nav container).  
+  - On failure, capture screenshot, page source, and console logs to distinguish broken href vs click interception/overlay.  
+  - Confirm whether the link opens in the same tab or a new tab across browsers; keep window-handling logic if inconsistent.
+
+- Configuration changes if needed
+  - Use WebDriverManager or CI-managed browser drivers; if using `System.setProperty`, externalize via environment variable/property rather than hard-coding.  
+  - Externalize base URL (e.g., `BASE_URL=http://www.qasymphony.com/`) for environment flexibility.
+
+- Documentation updates
+  - Update automation README to document required browser/driver management and expected “Free Trial” destination criteria (URL pattern or a stable destination element) to prevent future false failures.
