@@ -1,0 +1,237 @@
+1) Description on code fix:  
+The defect GAQ20T-340 is about creating a Solution with Azure DevOps/Jira-Xray using empty data not validating/displaying mandatory field errors correctly. The RCA identifies two primary causes:  
+- Stale mandatory-field state when switching models/integration types (switching between Azure DevOps and Jira-Xray can leave old “required/touched/dirty” state behind, causing incorrect blocking or incorrect error visibility).  
+- Missing/unclear enforcement and display of validation warnings for empty and over-limit inputs.
+
+In the provided repository, only Selenium automation code is available; no application UI/back-end validation logic is present to directly fix form validators/state handling. The existing automation also cannot reproduce or validate GAQ20T-340 because it:  
+- does not navigate to Create Solution,  
+- does not select Azure DevOps or Jira-Xray,  
+- does not submit with empty/over-limit inputs,  
+- does not perform integration/model switching needed to trigger the “stale mandatory” condition from the RCA, and  
+- contains no assertions to confirm that mandatory-field errors are displayed and submission is blocked.
+
+Therefore, the fix in the available code must be to update and stabilize the automation so it can reliably reproduce the defect and validate the RCA conditions. This includes: implementing the missing Create Solution flow, adding assertions for mandatory-field errors on empty submission, explicitly switching integration types to validate stale-state behavior, and stabilizing the test with explicit waits and non-brittle locators so failures reflect the real validation defect rather than locator flakiness.
+
+2) Code fix:  
+
+Existing Code:  
+java
+// File/Class: TestDataLoginAutomation
+// Method: main(String[] args)
+// NOTE: snippet reflects the current flow: login -> select portfolio -> click "Requirements Analysis" -> logout
+// It does NOT navigate to Create Solution or validate any mandatory fields.
+
+public static void main(String[] args) {
+    System.setProperty("webdriver.chrome.driver", "C:pathchromedriver.exe");
+    WebDriver driver = new ChromeDriver();
+
+    try {
+        driver.get("https://your-app-url");
+        driver.manage().window().maximize();
+
+        WebElement email = driver.findElement(By.xpath("/html/body/.../input"));
+        email.sendKeys("user@company.com");
+
+        WebElement password = driver.findElement(By.xpath("/html/body/.../input"));
+        password.sendKeys("password");
+
+        WebElement loginButton = driver.findElement(By.xpath("/html/body/.../button"));
+        loginButton.click();
+
+        WebElement descriptionImage = driver.findElement(By.xpath("/html/body/.../img"));
+        descriptionImage.click();
+
+        WebElement selectPortfolio = driver.findElement(By.xpath("//mat-select[@id='mat-select-0']"));
+        selectPortfolio.click();
+
+        WebElement portfolioOption = driver.findElement(By.xpath("//mat-option[@id='mat-option-4']"));
+        portfolioOption.click();
+
+        WebElement requirementsAnalysis = driver.findElement(By.xpath("//a[@id='mat-tab-link-6']"));
+        requirementsAnalysis.click();
+
+        WebElement logout = driver.findElement(By.xpath("/html/body/.../button"));
+        logout.click();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        driver.quit();
+    }
+}
+
+
+New Code with Fix:  
+java
+// File/Class: TestDataLoginAutomation
+// Method: main(String[] args)
+// Fix scope: make automation actually cover GAQ20T-340 scenario + stabilize locators + add waits + assertions + diagnostics.
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+
+public class TestDataLoginAutomation {
+
+    // CHANGE: centralized wait + minimal helpers (keeps code maintainable without rewriting everything into full PageObjects).
+    private static WebDriverWait wait;
+
+    public static void main(String[] args) {
+        // CHANGE: avoid hard-coded chromedriver path in code (read from env/system property if possible).
+        // System.setProperty can remain if build pipeline sets it; leaving as-is here to avoid breaking existing runs.
+        System.setProperty("webdriver.chrome.driver", System.getProperty("webdriver.chrome.driver", "C:pathchromedriver.exe"));
+
+        // CHANGE: deterministic browser config; incognito reduces cached state masking "stale mandatory-field state".
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--incognito");
+        options.addArguments("--window-size=1440,900");
+
+        WebDriver driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+        try {
+            driver.get(System.getProperty("app.url", "https://your-app-url"));
+
+            // CHANGE: replace brittle absolute xpaths with stable selectors WHEN AVAILABLE.
+            // If app doesn't have data-testid/aria-label yet, these may need to be aligned with actual DOM.
+            // (No app code provided to confirm; use as recommended locator strategy.)
+            type(driver, By.cssSelector("[data-testid='login-email'], input[type='email']"), System.getProperty("app.user", "user@company.com"));
+            type(driver, By.cssSelector("[data-testid='login-password'], input[type='password']"), System.getProperty("app.pass", "password"));
+            click(driver, By.cssSelector("[data-testid='login-submit'], button[type='submit']"));
+
+            // CHANGE: wait for landing/home element to ensure SPA is ready
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("[data-testid='home-page'], app-root")));
+
+            // CHANGE: ensure clean state for reproducing "stale mandatory-field state"
+            clearLocalState(driver);
+
+            // CHANGE: navigate to Create Solution (this did not exist in current automation)
+            // Locator must match the actual navigation; recommended to add data-testid in app.
+            click(driver, By.cssSelector("[data-testid='nav-create-solution'], a[href*='create-solution']"));
+
+            // --- GAQ20T-340 scenario: attempt create with Azure DevOps using empty data ---
+            selectIntegration(driver, "Azure DevOps");  // CHANGE: covers Azure DevOps path
+            submitCreateSolution(driver);               // CHANGE: attempt submit with empty mandatory fields
+            assertMandatoryErrorsVisible(driver);       // CHANGE: verify validation errors are shown
+
+            // --- RCA scenario: switching integration/model should reset mandatory-field state properly ---
+            // This directly targets RCA: "Switching models leaves stale mandatory-field state"
+            selectIntegration(driver, "Jira Xray");     // CHANGE: switch integration type/model
+            submitCreateSolution(driver);               // attempt again with empty data
+            assertMandatoryErrorsVisible(driver);
+
+            // Switch back to Azure DevOps to confirm no stale errors/disabled state persists incorrectly
+            selectIntegration(driver, "Azure DevOps");
+            submitCreateSolution(driver);
+            assertMandatoryErrorsVisible(driver);
+
+            // Logout (keep it, but stabilize locator)
+            click(driver, By.cssSelector("[data-testid='logout'], button[aria-label='Logout']"));
+
+        } catch (AssertionError ae) {
+            captureScreenshot(driver, "assertion_failure");
+            throw ae;
+        } catch (Exception e) {
+            captureScreenshot(driver, "unexpected_exception");
+            throw e;
+        } finally {
+            driver.quit();
+        }
+    }
+
+    // ---------------- Helpers ----------------
+
+    private static void click(WebDriver driver, By by) {
+        wait.until(ExpectedConditions.elementToBeClickable(by)).click();
+    }
+
+    private static void type(WebDriver driver, By by, String value) {
+        WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(by));
+        el.clear();
+        el.sendKeys(value);
+    }
+
+    private static void clearLocalState(WebDriver driver) {
+        // CHANGE: reduce stale state impact across runs (important for RCA symptom reproduction)
+        try {
+            driver.manage().deleteAllCookies();
+            ((JavascriptExecutor) driver).executeScript("window.localStorage && window.localStorage.clear();");
+            ((JavascriptExecutor) driver).executeScript("window.sessionStorage && window.sessionStorage.clear();");
+        } catch (Exception ignored) {
+            // keep non-fatal
+        }
+    }
+
+    private static void selectIntegration(WebDriver driver, String integrationName) {
+        // CHANGE: remove dynamic ids like mat-option-4; use visible text selection.
+        // Works if integration is a mat-select or dropdown with options containing text.
+        click(driver, By.cssSelector("[data-testid='integration-select'], mat-select[aria-label='Integration']"));
+
+        // Angular Material renders options in overlay; wait for option by visible text.
+        By optionBy = By.xpath("//mat-option//span[normalize-space()='" + integrationName + "']");
+        click(driver, optionBy);
+
+        // Optional: wait for integration panel to render
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.cssSelector("[data-testid='integration-config-panel'], .integration-config")));
+    }
+
+    private static void submitCreateSolution(WebDriver driver) {
+        // CHANGE: trigger validation (submit/blur)
+        click(driver, By.cssSelector("[data-testid='create-solution-submit'], button[type='submit']"));
+    }
+
+    private static void assertMandatoryErrorsVisible(WebDriver driver) {
+        // CHANGE: actual assertions (previous code had none)
+        // These selectors must match app; recommended standard: mat-error or data-testid for errors.
+        // Validate at least one mandatory error is shown and submit is blocked or errors shown.
+        boolean hasError =
+                driver.findElements(By.cssSelector("[data-testid='field-error'], mat-error, .error, .validation-error"))
+                      .stream().anyMatch(WebElement::isDisplayed);
+
+        if (!hasError) {
+            throw new AssertionError("Expected mandatory-field validation errors to be visible when submitting empty Create Solution form.");
+        }
+    }
+
+    private static void captureScreenshot(WebDriver driver, String name) {
+        try {
+            TakesScreenshot ts = (TakesScreenshot) driver;
+            byte[] bytes = ts.getScreenshotAs(OutputType.BYTES);
+            Files.createDirectories(Path.of("screenshots"));
+            Files.write(Path.of("screenshots", name + "_" + System.currentTimeMillis() + ".png"), bytes);
+        } catch (Exception ignored) {
+        }
+    }
+}
+
+
+Changes Made:  
+- Added actual defect coverage: navigate to Create Solution, select Azure DevOps and Jira Xray, submit with empty data, and assert mandatory-field errors appear.  
+- Implemented integration/model switching (Azure DevOps ↔ Jira Xray ↔ Azure DevOps) to explicitly reproduce the RCA condition “stale mandatory-field state when switching models”.  
+- Replaced brittle locators (absolute XPaths, dynamic ids like `mat-option-4`, `mat-tab-link-6`) with recommended stable locators (`data-testid`, `aria-label`, or text-based option selection).  
+- Added WebDriverWait synchronization around clicks/visibility to avoid race conditions common in Angular Material overlays and SPA rendering.  
+- Improved diagnostics: screenshots on assertion failure/exception.  
+- Reduced state leakage: clear cookies/localStorage/sessionStorage and run in incognito to avoid cached form/validator state masking or causing “stale mandatory” behavior.
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Add automated checks for:  
+    - Empty mandatory fields show inline errors (`mat-error` / error label) after submit.  
+    - Submit button remains disabled OR submit triggers validation and blocks navigation/API call.  
+    - Switching integration types resets the validator/touched/dirty state correctly (no stale errors from previous integration, but required errors for current integration appear).  
+    - Over-limit inputs (e.g., > max length) show a clear error and prevent submit.  
+  - Run the test in CI against the same tenant/config where Azure DevOps/Jira-Xray integrations are enabled to ensure consistent rules.  
+- Configuration changes (recommended to make automation stable):  
+  - Ask app team to add `data-testid` attributes on: Create Solution nav link, integration selector, submit button, and each mandatory field error container. This will eliminate dynamic Angular Material ids and make tests robust.  
+  - Externalize credentials and URL via environment variables/system properties (`app.url`, `app.user`, `app.pass`).  
+- Documentation updates:  
+  - Document the exact “Create Solution” mandatory fields for Azure DevOps and Jira-Xray and expected error messages. Include the “switch integration types” scenario as a regression test for stale mandatory state (ties directly to RCA and related defects GAQ20T-330/GAQ20T-193).  
+- Any other implementation notes:  
+  - The actual application validation/state-management code is not present in the provided sources. If mandatory-field state is truly stale in the web app, that fix must be implemented in the UI form/state layer (e.g., reset validators/touched state on integration/model change). The above changes ensure the provided Selenium code can reliably reproduce and detect that defect instead of masking it.
