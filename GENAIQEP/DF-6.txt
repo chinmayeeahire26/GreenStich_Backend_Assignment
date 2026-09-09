@@ -1,0 +1,22 @@
+I don’t have enough context to know what “Prompt data not found in the response” refers to, but it usually means your client expected the API response to include some field (often the original prompt/messages), and it wasn’t there.
+
+### What to check quickly
+1. You won’t get your prompt echoed back by default
+   - Many APIs do not return the full prompt/messages you sent, unless you log it yourself.
+2. You might be reading the wrong field
+   - For Chat Completions–style responses, the generated text is typically in:
+     - `choices[0].message.content`
+   - For Responses API–style responses, it’s often in:
+     - `output_text` (or within `output[*].content[*].text`, depending on SDK)
+3. Streaming vs non-streaming mismatch
+   - If you stream, the “final” object structure differs from the incremental chunks; you must accumulate deltas.
+4. Your code expects `prompt` in the response
+   - Some libraries/examples store `prompt` locally; it’s not returned.
+
+### Tell me which you’re using and paste the response
+To diagnose precisely, please paste:
+- The request you send (minus secrets)
+- The raw JSON response you receive
+- Which SDK/API style: Responses API or Chat Completions, and whether streaming is enabled
+
+Then I can point to the exact path where your “prompt data” or generated output should be read—or confirm it won’t be present and how to fix your logging.
