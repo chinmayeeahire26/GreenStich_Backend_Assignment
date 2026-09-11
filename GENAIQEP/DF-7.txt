@@ -1,0 +1,23 @@
+I don’t have enough context to tell what “Prompt data not found in the response” refers to—it’s usually an error from a tool/API or a test harness that expected a specific field (often `prompt`, `prompt_data`, or similar) but didn’t find it in the model’s output.
+
+To help you fix it, please paste one of these:
+
+1) The request you sent (headers + body / JSON)  
+2) The response you received (raw JSON/text)  
+3) The name of the SDK/tool/framework (e.g., OpenAI Responses API, Chat Completions, LangChain, etc.) and what field it expects
+
+In the meantime, common causes and fixes:
+
+- Wrong response format: Your code expects JSON with a specific key, but the model returned plain text.  
+  - Fix: enforce JSON output (e.g., “Respond with valid JSON containing keys …”) or parse text correctly.
+
+- Wrong field path: You’re reading the wrong property (e.g., expecting `response.prompt_data` but actual is `response.output[0].content[0].text`).  
+  - Fix: log the full response and update the extractor.
+
+- Streaming vs non-streaming mismatch: Your parser expects a final consolidated object but you’re handling streamed chunks.  
+  - Fix: aggregate stream chunks before parsing.
+
+- Middleware/test harness expectation: Some evaluators require you to echo back “prompt data” (like an ID) in your response.  
+  - Fix: include the required field exactly as specified.
+
+If you share the raw request/response, I can point to the exact missing field and the correct parsing path.
