@@ -1,0 +1,296 @@
+1) Description on code fix:  
+The reported defect (bugId 11593) is that in new production the default dropdown option “All Organizations” is not visible on the LLM creation and Storage Account creation pages. The provided repository content is Selenium/NUnit automation only and does not include the actual application frontend/backend code that populates the Organizations dropdown. Therefore, the only direct, actionable “code fix” possible within the provided code is to add/adjust automated coverage so this defect is reliably detected (and diagnosable) in the environments where RCA indicates it occurs.
+
+This fix directly aligns with the RCA in two ways:  
+- RCA: Configuration mismatch (env/role/feature flags). The existing tests are configuration-blind (hard-coded `google.com` / `example.com`). The fix introduces environment-driven configuration (base URL + credentials) so the same tests can run against new prod and verify the behavior that differs due to configuration/role/flag mismatches.  
+- RCA: Code issue in dropdown population (data not fetched / async population). The existing tests never navigate to the affected create pages and never validate dropdown contents or default selection. The fix adds two UI tests that navigate to LLM Create and Storage Account Create, explicitly wait for the dropdown’s options to populate, and then assert that “All Organizations” exists and is selected by default. This catches both “option filtered/missing” and “options never loaded” failure modes.
+
+Additionally, the fix corrects test reliability/diagnostics gaps that can mask async population problems in prod: it removes mixed implicit/explicit waits, adds explicit waiting for option population, and captures screenshot/HTML on failure to aid triage (e.g., identifying whether a prod-only permission/feature flag/API failure is preventing the option from showing).
+
+2) Code fix:  
+
+Existing Code:  
+csharp
+// File/Class: AutomationTests.LoginTests (Setup)
+[SetUp]
+public void Setup()
+{
+    driver = new ChromeDriver();
+    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+}
+
+// File/Class: AutomationTests.LoginTests (Login_WithValidCredentials_ShouldSucceed)
+[Test]
+public void Login_WithValidCredentials_ShouldSucceed()
+{
+    driver.Navigate().GoToUrl("https://example.com/login");
+
+    driver.FindElement(By.Id("username")).SendKeys("validUser");
+    driver.FindElement(By.Id("password")).SendKeys("validPassword");
+    driver.FindElement(By.Id("loginButton")).Click();
+
+    var dashboard = wait.Until(d => d.FindElement(By.Id("dashboard")));
+    Assert.IsTrue(dashboard.Displayed);
+}
+
+// File/Class: SeleniumSample.GoogleSearchTests
+[Test]
+public void GoogleSearch_ShouldDisplayResults()
+{
+    try
+    {
+        driver.Navigate().GoToUrl("https://www.google.com");
+        var searchBox = driver.FindElement(By.Name("q"));
+        searchBox.SendKeys("Selenium NUnit");
+        searchBox.Submit();
+
+        wait.Until(d => d.Title.Contains("Selenium NUnit"));
+        Assert.IsTrue(driver.Title.Contains("Selenium NUnit"));
+    }
+    catch (Exception e)
+    {
+        Assert.Fail("Test failed with exception: " + e.Message);
+    }
+}
+
+
+New Code with Fix:  
+csharp
+using System;
+using System.IO;
+using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+
+namespace AutomationTests
+{
+    // NEW: Centralized test settings (env-driven) to address RCA "Configuration mismatch"
+    internal static class TestSettings
+    {
+        public static string BaseUrl =>
+            Environment.GetEnvironmentVariable("APP_BASE_URL")
+            ?? throw new InvalidOperationException("APP_BASE_URL is not set (e.g., https://newprod.company.com).");
+
+        public static string Username =>
+            Environment.GetEnvironmentVariable("APP_USERNAME")
+            ?? throw new InvalidOperationException("APP_USERNAME is not set.");
+
+        public static string Password =>
+            Environment.GetEnvironmentVariable("APP_PASSWORD")
+            ?? throw new InvalidOperationException("APP_PASSWORD is not set.");
+
+        // NEW: App-relative routes (update to real routes in your app)
+        public static string LoginPath => "/login";
+        public static string LlmCreatePath => "/llm/create";
+        public static string StorageAccountCreatePath => "/storage-accounts/create";
+    }
+
+    [TestFixture]
+    public class LoginTests
+    {
+        private IWebDriver driver;
+        private WebDriverWait wait;
+
+        [SetUp]
+        public void Setup()
+        {
+            var options = new ChromeOptions();
+            // Optional for CI stability:
+            // options.AddArgument("--headless=new");
+            // options.AddArgument("--window-size=1920,1080");
+
+            driver = new ChromeDriver(options);
+
+            // FIX: Remove implicit wait to avoid mixing wait strategies (Selenium anti-pattern)
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.Zero; // <-- CHANGED
+
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30)); // <-- CHANGED (more realistic for prod)
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            try
+            {
+                // NEW: Capture artifacts for RCA-friendly debugging (dropdown/API/permission failures)
+                var artifactDir = Path.Combine(TestContext.CurrentContext.WorkDirectory, "artifacts");
+                Directory.CreateDirectory(artifactDir);
+
+                var testName = TestContext.CurrentContext.Test.Name;
+                var screenshotPath = Path.Combine(artifactDir, $"{testName}.png");
+                var htmlPath = Path.Combine(artifactDir, $"{testName}.html");
+
+                if (driver is ITakesScreenshot ss)
+                {
+                    ss.GetScreenshot().SaveAsFile(screenshotPath);
+                    TestContext.AddTestAttachment(screenshotPath);
+                }
+
+                File.WriteAllText(htmlPath, driver.PageSource);
+                TestContext.AddTestAttachment(htmlPath);
+            }
+            catch
+            {
+                // Don't fail teardown
+            }
+            finally
+            {
+                driver?.Quit();
+            }
+        }
+
+        // NEW: Login helper uses env config (addresses RCA config mismatch)
+        private void Login()
+        {
+            driver.Navigate().GoToUrl(TestSettings.BaseUrl + TestSettings.LoginPath);
+
+            wait.Until(d => d.FindElement(By.Id("username"))).SendKeys(TestSettings.Username);
+            driver.FindElement(By.Id("password")).SendKeys(TestSettings.Password);
+            driver.FindElement(By.Id("loginButton")).Click();
+
+            wait.Until(d => d.FindElement(By.Id("dashboard"))); // adjust to your app
+        }
+
+        [Test]
+        public void LlmCreate_OrganizationsDropdown_ShouldContain_AllOrganizations_AndBeDefault()
+        {
+            Login();
+
+            driver.Navigate().GoToUrl(TestSettings.BaseUrl + TestSettings.LlmCreatePath);
+
+            // NOTE: Update selector to your real org dropdown locator
+            var orgSelect = wait.Until(d => d.FindElement(By.Id("organizationDropdown")));
+
+            // FIX: Wait for async option population, not just visibility
+            wait.Until(_ =>
+            {
+                var select = new SelectElement(orgSelect);
+                return select.Options.Count > 0;
+            });
+
+            var orgDropdown = new SelectElement(orgSelect);
+
+            // FIX: Assert "All Organizations" exists (catches missing option)
+            Assert.That(
+                orgDropdown.Options.Exists(o => o.Text.Trim().Equals("All Organizations", StringComparison.OrdinalIgnoreCase)),
+                Is.True,
+                "Expected 'All Organizations' option to be present in Organizations dropdown on LLM Create page."
+            );
+
+            // FIX: Assert it is the default selection (acceptance criteria)
+            Assert.That(
+                orgDropdown.SelectedOption.Text.Trim(),
+                Is.EqualTo("All Organizations"),
+                "Expected default selected organization to be 'All Organizations' on LLM Create page."
+            );
+        }
+
+        [Test]
+        public void StorageAccountCreate_OrganizationsDropdown_ShouldContain_AllOrganizations_AndBeDefault()
+        {
+            Login();
+
+            driver.Navigate().GoToUrl(TestSettings.BaseUrl + TestSettings.StorageAccountCreatePath);
+
+            // NOTE: Update selector to your real org dropdown locator
+            var orgSelect = wait.Until(d => d.FindElement(By.Id("organizationDropdown")));
+
+            // FIX: Wait for async option population
+            wait.Until(_ =>
+            {
+                var select = new SelectElement(orgSelect);
+                return select.Options.Count > 0;
+            });
+
+            var orgDropdown = new SelectElement(orgSelect);
+
+            Assert.That(
+                orgDropdown.Options.Exists(o => o.Text.Trim().Equals("All Organizations", StringComparison.OrdinalIgnoreCase)),
+                Is.True,
+                "Expected 'All Organizations' option to be present in Organizations dropdown on Storage Account Create page."
+            );
+
+            Assert.That(
+                orgDropdown.SelectedOption.Text.Trim(),
+                Is.EqualTo("All Organizations"),
+                "Expected default selected organization to be 'All Organizations' on Storage Account Create page."
+            );
+        }
+    }
+
+    internal static class SelectElementExtensions
+    {
+        // NEW: small helper for readability
+        public static bool Exists(this System.Collections.ObjectModel.ReadOnlyCollection<IWebElement> options, Func<IWebElement, bool> predicate)
+        {
+            foreach (var o in options)
+                if (predicate(o)) return true;
+            return false;
+        }
+    }
+}
+
+namespace SeleniumSample
+{
+    [TestFixture]
+    public class GoogleSearchTests
+    {
+        private IWebDriver driver;
+        private WebDriverWait wait;
+
+        [SetUp]
+        public void Setup()
+        {
+            driver = new ChromeDriver();
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.Zero; // <-- CHANGED
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30)); // <-- CHANGED
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            driver?.Quit();
+        }
+
+        [Test]
+        public void GoogleSearch_ShouldDisplayResults()
+        {
+            // FIX: Remove broad try/catch that hides stack traces; let NUnit report real failures
+            driver.Navigate().GoToUrl("https://www.google.com");
+            var searchBox = wait.Until(d => d.FindElement(By.Name("q")));
+            searchBox.SendKeys("Selenium NUnit");
+            searchBox.Submit();
+
+            wait.Until(d => d.Title.Contains("Selenium NUnit"));
+            Assert.That(driver.Title, Does.Contain("Selenium NUnit"));
+        }
+    }
+}
+
+
+Changes Made:  
+- Removed ImplicitWait and used explicit waits only (`ImplicitWait = TimeSpan.Zero`) to avoid masking timing/async dropdown-load issues.  
+- Added environment-driven configuration (`APP_BASE_URL`, `APP_USERNAME`, `APP_PASSWORD`) so tests can target new prod and validate config-specific behavior (RCA configuration mismatch).  
+- Added dedicated tests for LLM Create and Storage Account Create verifying:  
+  - the Organizations dropdown options are populated,  
+  - “All Organizations” exists, and  
+  - it is the default selected option (direct acceptance criteria for bug 11593).  
+- Added explicit synchronization to wait until dropdown options are populated (`Options.Count > 0`), not merely until the element exists.  
+- Improved failure diagnostics by capturing screenshot + HTML artifacts in teardown for prod-only investigation.  
+- Removed broad exception handling that suppressed stack traces, making failures more actionable.
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Execute the two new tests against new prod (where defect occurs) and at least one baseline env (old prod/stage) to confirm the issue is environment/config related.  
+  - If the organization dropdown is not a native `<select>` (common in React/Angular), replace `SelectElement` usage with open-menu + locate option elements by visible text, but keep the same assertions and “wait for options to load” logic.  
+  - Add role-based coverage if “All Organizations” depends on RBAC (run with an admin user expected to see it).  
+- Configuration changes if needed (per RCA):  
+  - Verify new prod feature flags/RBAC claims/tenant configuration that governs inclusion of the synthetic “All Organizations” option match the working environment.  
+  - Verify the backend API used to populate organizations returns/permits “All Organizations” (or the UI prepends it) in new prod.  
+  - Provide CI/CD secrets/environment variables: `APP_BASE_URL`, `APP_USERNAME`, `APP_PASSWORD`.  
+- Documentation updates:  
+  - Document the required env vars and update the placeholder routes/locators (`/llm/create`, `/storage-accounts/create`, `organizationDropdown`) to the application’s actual values.  
+- Implementation notes:  
+  - The product code that actually populates the dropdown is not present in the provided repository; the above fix ensures the defect is caught and diagnosed early, consistent with the RCA categories (configuration mismatch vs dropdown population failure).
