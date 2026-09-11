@@ -1,0 +1,47 @@
+1) Description on code fix:  
+The defect GAQ20T-161 requires that when a user attempts to create a “Solution” with a name that already exists, the system must return and propagate an API error that the UI can reliably map to the alert text “Solution already exists”.
+
+Per the RCA, the fix must address two concrete problem areas:
+- Duplicate-name negative path not returning expected error response: The create-solution API path likely does not properly treat a duplicate-name response (commonly HTTP 409 Conflict and/or an error code such as `DuplicateName` / `AlreadyExists`) as an error that should be surfaced. Typical failure patterns include swallowing exceptions, treating non-2xx responses as success, or throwing a generic error that loses the backend’s duplicate-name indicator/message.
+- UI/API error message mapping inconsistent: Even if the backend returns a duplicate-name error, the UI (or shared error-mapping layer) may parse the wrong payload field (e.g., expecting `message` instead of `error.message`) or may not special-case 409/duplicate codes, causing the required alert “Solution already exists” to not appear.
+
+However, the provided context explicitly states the actual implementation code is not present (the method `loginToIntune` is referenced but not included, and the create-solution and error-mapping code is also missing/unknown). Without the concrete code, an accurate, actionable “before vs after” patch cannot be produced without inventing code that wasn’t provided. The correct fix must be applied in the create-solution API client/service and the central UI/API error mapping where the duplicate-name condition is currently being lost or inconsistently mapped.
+
+2) Code fix:  
+
+Relevant Code NOT Found  
+- The prompt/context does not include the actual source code for:
+  - The create-solution API call (e.g., `createSolution` / `postSolution` / controller/service method).
+  - The error handling / error-mapping layer (e.g., `handleApiError`, `mapErrorToAlert`, toast/alert mapper).
+  - The `loginToIntune` method implementation (explicitly noted as placeholder / not provided).
+- Because the required “Existing Code vs New Code with Fix” comparison must be based on real code that was provided, producing code snippets here would be speculative and could be incorrect for your codebase.
+
+What code is needed to provide an exact before/after patch:  
+- The method/function that performs the “create solution” request (frontend API client or backend controller/service).  
+- The centralized error handling/mapping function that turns API errors into UI alerts/toasts.  
+- The backend duplicate-name error contract (status code and payload shape) or a captured example of the duplicate-name response.
+
+Required implementation behavior once code is available (to directly satisfy GAQ20T-161 + RCA):  
+- Ensure the create-solution path does not swallow non-2xx responses and preserves:
+  - HTTP status (especially 409 Conflict) and
+  - backend error payload (including stable fields like `code` and `message`).  
+- Ensure the UI/shared error mapper explicitly maps:
+  - `409` (and/or `code == "DuplicateName"/"AlreadyExists"`)  
+  → alert text exactly “Solution already exists”.
+
+3) Other Relevant details:  
+- Testing recommendations:
+  - API/service test:  
+    1) Create solution “X” → expect success (200/201).  
+    2) Create solution “X” again → expect 409 (or equivalent) and payload containing a stable duplicate indicator (`code: DuplicateName/AlreadyExists`) and message “Solution already exists”.
+  - UI integration test:  
+    - Mock duplicate response (409 + expected payload) and verify the UI displays “Solution already exists” (exact string match as per requirement).
+  - Regression tests for error mapping:  
+    - Validate 400 validation errors still show correct field/validation messages.  
+    - Validate 401/403 auth errors still map correctly (to ensure duplicate mapping changes don’t break auth/error routing).
+- Implementation notes:
+  - Centralize error parsing so all API calls interpret error payload shape consistently (avoid per-screen parsing differences that cause inconsistent mapping).
+  - Prefer mapping based on stable identifiers (HTTP 409 and/or `error.code`) rather than brittle free-text matching.
+- Documentation updates:
+  - Document the duplicate-name error contract (status + JSON schema) so both backend and frontend remain aligned.
+  - If you maintain a shared error-code/constants list, add an entry for duplicate solution name mapping to “Solution already exists”.
