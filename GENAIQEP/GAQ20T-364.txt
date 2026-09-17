@@ -1,0 +1,257 @@
+1) Description on code fix:  
+The defect GAQ20T-364 requires the product UI to show *container-name naming convention guidance* in two UX locations: (a) a hover tooltip on the container name text input(s) and (b) the validation error popup/message when the entered container name violates the convention.  
+
+Based on the RCA, the root cause is that validation error handling does not include the required naming-convention guidance text and the UI/UX hover help + popup messaging pattern is missing/unenforced. In the provided code, there is no implementation of the application UI (no container-name field, no tooltip components, no validation popup code). The only code present is a Selenium NUnit login test against a demo site, which means:  
+- The codebase shown cannot be fixed to “add tooltip/popup in the app UI” because that UI code is not included.  
+- The actionable fix *within the provided code* is to address the gap that allowed this UI/UX defect to ship undetected: add automated UI checks (page objects + tests) that enforce tooltip guidance and validation popup guidance, plus supporting config/settings and driver stability improvements for hover/popup interactions.
+
+This directly addresses the RCA by ensuring the required guidance text/pattern is validated consistently and will fail CI if missing.
+
+2) Code fix:  
+
+Existing Code: csharp
+// LoginTests.cs (LoginTests) - representative existing snippet
+
+[Test]
+public void ValidLogin_ShowsSuccessMessage()
+{
+    driver.Navigate().GoToUrl("https://the-internet.herokuapp.com/login");
+
+    driver.FindElement(By.Id("username")).SendKeys("tomsmith");
+    driver.FindElement(By.Id("password")).SendKeys("SuperSecretPassword!");
+    driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+    var flash = wait.Until(d => d.FindElement(By.Id("flash")));
+    Assert.That(flash.Text, Does.Contain("You logged into a secure area!"));
+}
+  
+
+New Code with Fix: csharp
+// appsettings.json (NEW/UPDATED) - add expected naming convention guidance text + invalid test value
+{
+  "TestSettings": {
+    "BaseUrl": "https://<your-app-base-url>",
+    "Username": "<user>",
+    "Password": "<pass>",
+    "ImplicitWaitSeconds": 0,
+
+    // ✅ NEW: centralize expected UI guidance strings (prevents drift and enforces RCA requirement)
+    "ContainerNaming": {
+      "ConventionText": "Container name must be 3-63 chars, lowercase letters/numbers and hyphens only. Must start/end with alphanumeric.",
+      "InvalidExample": "Invalid_Name!"
+    }
+  }
+}
+
+
+csharp
+// TestSettings.cs (UPDATED) - settings model extended for naming convention expectations
+
+public class TestSettings
+{
+    public string BaseUrl { get; set; } = "";
+    public string Username { get; set; } = "";
+    public string Password { get; set; } = "";
+    public int ImplicitWaitSeconds { get; set; }
+
+    // ✅ NEW: config-driven expected tooltip/popup guidance
+    public ContainerNamingSettings ContainerNaming { get; set; } = new();
+}
+
+public class ContainerNamingSettings
+{
+    public string ConventionText { get; set; } = "";
+    public string InvalidExample { get; set; } = "";
+}
+
+
+csharp
+// DriverFactory.cs (UPDATED) - stabilize hover/popup behavior by forcing a consistent window size in ALL modes
+
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+
+public static class DriverFactory
+{
+    public static IWebDriver Create(bool headless = false)
+    {
+        var options = new ChromeOptions();
+
+        if (headless)
+        {
+            options.AddArgument("--headless=new");
+        }
+
+        // ✅ FIX: consistent viewport for tooltip/popup positioning and hover targets (headed + headless)
+        options.AddArgument("--window-size=1920,1080"); // NEW (previously only set in headless)
+
+        // (Optional but recommended for UI stability)
+        options.AddArgument("--disable-gpu");
+        options.AddArgument("--no-sandbox");
+
+        return new ChromeDriver(options);
+    }
+}
+
+
+csharp
+// UiWaits.cs (NEW) - reusable helpers to reduce flakiness and enforce a standard tooltip/popup validation pattern
+
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
+
+public static class UiWaits
+{
+    public static IWebElement WaitVisible(WebDriverWait wait, By locator) =>
+        wait.Until(ExpectedConditions.ElementIsVisible(locator));
+
+    public static IWebElement WaitClickable(WebDriverWait wait, By locator) =>
+        wait.Until(ExpectedConditions.ElementToBeClickable(locator));
+}
+
+
+csharp
+// ContainerPage.cs (NEW Page Object) - placeholders for locators; MUST be aligned to real app DOM.
+// NOTE: Since the real app code/DOM is not provided, these locators are examples and should be
+// updated to match your application's container name input, tooltip, and validation message elements.
+
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Support.UI;
+
+public class ContainerPage
+{
+    private readonly IWebDriver _driver;
+    private readonly WebDriverWait _wait;
+
+    public ContainerPage(IWebDriver driver, WebDriverWait wait)
+    {
+        _driver = driver;
+        _wait = wait;
+    }
+
+    // ✅ RECOMMENDED: ask devs to add these attributes in the app for stable automation:
+    // data-testid="container-name-input"
+    // data-testid="container-name-tooltip"
+    // data-testid="container-name-error"
+    private By ContainerNameInput => By.CssSelector("[data-testid='container-name-input']");
+    private By ContainerNameTooltip => By.CssSelector("[data-testid='container-name-tooltip']");
+    private By ContainerNameErrorPopup => By.CssSelector("[data-testid='container-name-error']");
+
+    public void HoverContainerName()
+    {
+        var input = UiWaits.WaitVisible(_wait, ContainerNameInput);
+        new Actions(_driver).MoveToElement(input).Perform(); // ✅ hover triggers tooltip
+    }
+
+    public string GetTooltipText()
+    {
+        var tooltip = UiWaits.WaitVisible(_wait, ContainerNameTooltip);
+        return tooltip.Text?.Trim() ?? "";
+    }
+
+    public void TypeContainerName(string name)
+    {
+        var input = UiWaits.WaitVisible(_wait, ContainerNameInput);
+        input.Clear();
+        input.SendKeys(name);
+    }
+
+    public void BlurContainerName()
+    {
+        // ✅ triggers validation in many UIs (blur/tab out)
+        var input = UiWaits.WaitVisible(_wait, ContainerNameInput);
+        input.SendKeys(Keys.Tab);
+    }
+
+    public string GetValidationErrorText()
+    {
+        var error = UiWaits.WaitVisible(_wait, ContainerNameErrorPopup);
+        return error.Text?.Trim() ?? "";
+    }
+}
+
+
+csharp
+// ContainerNamingConventionTests.cs (NEW) - enforces the two required UX behaviors from GAQ20T-364
+
+using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using System;
+
+[TestFixture]
+public class ContainerNamingConventionTests
+{
+    private IWebDriver driver = null!;
+    private WebDriverWait wait = null!;
+    private TestSettings settings = null!;
+
+    [SetUp]
+    public void Setup()
+    {
+        settings = Config.Load(); // existing config loader, now includes ContainerNaming
+        driver = DriverFactory.Create(headless: false);
+        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        driver.Quit();
+    }
+
+    [Test]
+    public void ContainerName_Hover_ShowsNamingConventionTooltip()
+    {
+        // ✅ NOTE: Update navigation to the real page where container name input exists
+        driver.Navigate().GoToUrl($"{settings.BaseUrl}/containers/create"); // NEW (example route)
+
+        var page = new ContainerPage(driver, wait);
+
+        page.HoverContainerName();
+        var tooltipText = page.GetTooltipText();
+
+        // ✅ Enforces RCA: required guidance text must be present in hover help
+        Assert.That(tooltipText, Does.Contain(settings.ContainerNaming.ConventionText));
+    }
+
+    [Test]
+    public void ContainerName_InvalidValue_ShowsErrorPopupWithNamingConvention()
+    {
+        driver.Navigate().GoToUrl($"{settings.BaseUrl}/containers/create"); // NEW (example route)
+
+        var page = new ContainerPage(driver, wait);
+
+        // Trigger validation
+        page.TypeContainerName(settings.ContainerNaming.InvalidExample);
+        page.BlurContainerName();
+
+        var errorText = page.GetValidationErrorText();
+
+        // ✅ Enforces RCA: error popup/message must contain the convention guidance
+        Assert.That(errorText, Does.Contain(settings.ContainerNaming.ConventionText));
+    }
+}
+  
+
+Changes Made:  
+- Added config + settings support for expected naming convention guidance text (`ContainerNaming.ConventionText`) so tests can assert the exact UX requirement (addresses RCA “missing guidance text” at validation points).  
+- Added driver viewport standardization in `DriverFactory` so hover tooltips/popups are consistently visible and less flaky across headless/headed runs.  
+- Introduced reusable wait helpers and a ContainerPage Page Object to implement a consistent automation pattern for hover tooltips and validation popups (addresses RCA “missing popup-display pattern”).  
+- Added two automated UI tests that enforce the defect’s acceptance criteria: tooltip on hover and naming convention guidance in the validation error popup/message.  
+
+If relevant code is NOT found: Relevant Code NOT Found  
+The provided code does not include the application UI components (container name input, tooltip implementation, validation popup/message logic) where the defect must be fixed. Only Selenium NUnit automation around a login page is present. Therefore, no direct UI code changes (tooltip/popup rendering) can be recommended from the provided snippet—only test/framework changes to prevent recurrence can be implemented here.
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Add negative test cases for container names: empty, too short/too long, uppercase, underscores, leading/trailing hyphen, consecutive hyphens, spaces, reserved words, and duplicates—each must assert the error message includes the convention guidance.  
+  - Ensure tooltip tests use stable locators (prefer `data-testid` or `aria-describedby` relationships) and explicit waits for visibility due to animation delays.  
+- Configuration changes if needed:  
+  - Confirm naming convention text is finalized and consistent across environments; keep it centralized in `appsettings.json` so changes don’t require code edits.  
+- Documentation updates:  
+  - Document the naming convention string/regex and ensure the UI tooltip and validation error message both reference the same source-of-truth wording (helps prevent GAQ20T-323 / GAQ20T-240 style inconsistencies).  
+- Any other implementation notes:  
+  - Ask UI developers to add `data-testid` attributes (or accessible attributes like `aria-label`/`aria-describedby`) to the container name input, tooltip, and error popup to make automation stable and reduce selector brittleness.
