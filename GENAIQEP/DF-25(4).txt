@@ -1,0 +1,36 @@
+I don’t have enough context to know what “Prompt data not found in the response” refers to (it could be an API/client error, a tool/runtime message, or an app-level validation issue). Here are the most common causes and what to check quickly.
+
+## If you’re using the OpenAI API (Responses API)
+1. You didn’t send any input text
+   - Ensure you provide at least one of: `input` (string), or `input` as an array of content blocks.
+   - Example:
+     ```json
+     {
+       "model": "gpt-4.1-mini",
+       "input": "Hello"
+     }
+     ```
+
+2. You’re reading the wrong field from the response
+   - With the Responses API, the model’s text is typically in:
+     - `output_text` (convenience field in some SDKs), or
+     - `output[].content[]` items of type `output_text`.
+   - Don’t expect a `prompt` field to be echoed back.
+
+3. You’re using a Chat Completions parsing pattern on a Responses response
+   - Chat Completions: `choices[0].message.content`
+   - Responses: `output[...]...`
+   - Make sure your client code matches the endpoint you’re calling.
+
+## If you’re using a framework (LangChain/LlamaIndex/etc.)
+- This often appears when the framework expects a variable named `prompt`, `input`, or similar, but your template variables don’t match what you pass.
+- Verify template placeholders vs. keys you supply.
+
+## What I need to pinpoint it
+Please paste:
+1. The request payload you send (redact keys),
+2. The endpoint you call (Responses vs Chat Completions),
+3. The raw JSON response you get (or the exact stack trace),
+4. The snippet of code where you extract “prompt data”.
+
+With that, I can tell you exactly which field is missing/mismatched and how to fix it.
