@@ -1,0 +1,31 @@
+I don’t have enough context to know what system you’re referring to, but that message typically means the response you received didn’t include the expected field/key called “prompt data,” or it was empty/unparseable.
+
+If you tell me where you saw this (API name/library, endpoint, or paste the JSON/error), I can pinpoint the exact fix. In the meantime, here are the most common causes and checks:
+
+## Common causes
+1. Wrong response schema
+   - Your code expects something like `response.prompt_data`, but the API returns it under a different key (e.g., `input`, `prompt`, `messages`, `data`, etc.).
+
+2. You’re reading the wrong object
+   - Some SDKs return a wrapper object (e.g., `result.data[0]...`) and your code is checking the top-level object.
+
+3. Streaming response handling
+   - If you stream tokens/events, the “prompt data” may not appear until a specific event type, or your handler might be ignoring it.
+
+4. Field not requested / not enabled
+   - Some APIs only include prompt-related details if you set flags like `include_prompt=true`, `return_prompt=true`, `echo=true`, or enable logging/tracing.
+
+5. Response got truncated or parsing failed
+   - Partial JSON, invalid JSON, or timeouts can cause your parser to miss fields.
+
+## What to do next
+Please paste either:
+- the full response JSON you got, or
+- the exact error text + the code snippet where you read “prompt data”.
+
+Also tell me:
+- Which platform (OpenAI/Anthropic/Azure/etc.)
+- Whether you used streaming
+- The endpoint/method (chat/completions/responses)
+
+With that, I can show the precise path to the field you should read or how to request/include it.
