@@ -1,0 +1,9 @@
+1) Description on code fix:  
+Relevant code to the reported bug (“While creating the epic, under the Feature and story test cases are not fetched”) is not present in the provided source. The shared code is only a sample Selenium NUnit login automation and contains no Epic/Feature/Story or “fetch test cases” logic to diagnose or fix.
+
+2) Code fix:  
+Relevant Code NOT Found (No matching function/statement exists in the provided code to apply a fix.)
+
+3) Other Relevant details:
+- The provided code only automates login (valid/invalid) and does not include any UI/API interactions for “Create Epic” or fetching Feature/Story test cases.
+- To identify the real fix, share the module/service/controller/UI page object that handles: Epic creation, Feature/Story selection, and the test case retrieval call (API endpoint invocation or DB query).
