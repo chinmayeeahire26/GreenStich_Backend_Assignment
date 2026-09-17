@@ -1,0 +1,16 @@
+Relevant Code NOT Found
+
+1) Description on code fix:  
+- The provided code is Selenium automation/test code for login/logout flows, not the application’s actual logout implementation.  
+- Since the bug is in logout functionality, the fix must be applied in the app backend/frontend logout handler (e.g., session/token invalidation, cookie clearing, redirect), which is not present in the shared source.
+
+2) Code fix (side-by-side comparison):
+
+| Without Fix (current shared code) | With Fix |
+|---|---|
+| *No logout implementation code available in the provided source.* | Relevant Code NOT Found |
+
+3) Other Relevant details:  
+- The `DuoLoginAutomation` and `LoginTest` classes only click “Logout” in the UI; they don’t control or define how logout works server-side/client-side.  
+- To propose a real fix, please share the application code around logout (examples): Angular/React logout service, auth interceptor, backend `/logout` endpoint, session/JWT handling, cookie settings, redirect logic, etc.  
+- If the “logout bug” is actually a test instability (element not found, timing, wrong locator), then we can fix the Selenium code—but the bug description indicates an app defect, not a test defect.
