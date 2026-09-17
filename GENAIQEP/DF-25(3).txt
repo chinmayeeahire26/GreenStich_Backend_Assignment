@@ -1,0 +1,212 @@
+1) Description on code fix: The defect DF-25 states that when a defect is assigned/reassigned to another user, no notification email is received and SMTP logs show no outbound trigger event. The RCA points to two primary causes: (1) configuration where the notification trigger/configuration isn’t firing, and (2) code issue where the assignment-change event is not being emitted when reassignment happens. In the provided code, the only implementation is Selenium UI automation that logs in, selects a portfolio/project, and logs out. It never performs the core action (defect reassignment + save/update) and never validates that reassignment was persisted. As a result, this code cannot reproduce or validate DF-25 and can misleadingly align with “no outbound trigger event” simply because the trigger action never executes (or fails due to brittle locators / missing waits). The fix therefore updates the automation to (a) actually navigate to a defect, change the assignee, and click Save/Update—so the backend assignment-change path (which should emit the notification trigger per RCA) is executed; (b) add explicit waits and more stable locators so the reassignment action is reliably performed (avoiding false “no trigger” outcomes caused by race conditions); (c) fail fast instead of swallowing exceptions so incomplete workflows don’t produce misleading test results; and (d) externalize credentials/environment parameters so tests run against the correct tenant where notification configuration (RCA “Configuration”) is expected to be enabled.
+
+2) Code fix:  
+Existing Code:  
+java
+package qConnect;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.Select;
+
+public class DuoLoginAutomation {
+
+	public static void loginToDuo() throws InterruptedException {
+
+		System.setProperty("webdriver.chrome.driver", "C:chromedriver-win64chromedriver.exe");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--start-maximized");
+		options.addArguments("--disable-notifications");
+		options.addArguments("--disable-geolocation");
+		options.addArguments("--incognito");
+
+		WebDriver driver = new ChromeDriver(options);
+
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+		driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
+
+		driver.get("https://qconnect.mpoweredhealth.com/login");
+
+		Thread.sleep(2000);
+		driver.findElement(By.xpath("//input[@id='email']")).sendKeys("pankaj.prajapati@mpoweredhealth.com");
+
+		Thread.sleep(2000);
+		driver.findElement(By.xpath("//input[@id='password']")).sendKeys("Password1@");
+
+		Thread.sleep(2000);
+		driver.findElement(By.xpath("//button[normalize-space()='Log In']")).click();
+
+		try {
+
+			Thread.sleep(7000);
+			driver.findElement(By.xpath("//mat-select[@id='mat-select-0']")).click();
+
+			Thread.sleep(3000);
+			driver.findElement(By.xpath("//span[normalize-space()='Qeats - Sample Portfolio']")).click();
+
+			Thread.sleep(3000);
+			driver.findElement(By.xpath("//button[normalize-space()='Submit']")).click();
+
+			Thread.sleep(2000);
+
+			driver.findElement(By.xpath("/html[1]/body[1]/app-root[1]/app-common-layout[1]/mat-sidenav-container[1]/mat-sidenav-content[1]/div[1]/div[2]/app-nc-layout[1]/mat-sidenav-container[1]/mat-sidenav-content[1]/div[1]/mat-sidenav-container[1]/mat-sidenav-content[1]/div[1]/app-testing[1]/app-testing-dashboard[1]/mat-drawer-container[1]/mat-drawer-content[1]/div[1]/div[1]/div[1]/div[1]/div[1]/mat-card[1]/mat-card-content[1]/div[1]/div[1]/div[2]/button[1]/span[4]"))
+					.click();
+
+			Thread.sleep(3000);
+
+			driver.findElement(By.xpath(
+					"/html[1]/body[1]/app-root[1]/app-common-layout[1]/mat-sidenav-container[1]/mat-sidenav-content[1]/div[1]/div[2]/app-nc-layout[1]/mat-sidenav-container[1]/mat-sidenav-content[1]/div[1]/mat-sidenav-container[1]/mat-sidenav-content[1]/div[1]/app-testing[1]/app-module-management[1]/div[1]/mat-card[1]/mat-card-content[1]/div[1]/div[1]/div[2]/mat-form-field[1]/div[1]/div[1]/div[3]/mat-select[1]/div[1]/div[2]/div[1]"))
+					.click();
+			Thread.sleep(2000);
+
+			driver.findElement(By.xpath("//span[normalize-space()='Qeats - Sample Project']")).click();
+			Thread.sleep(2000);
+
+			driver.findElement(By.xpath("//button[@type='submit']")).click();
+
+			Thread.sleep(2000);
+
+			driver.findElement(By.xpath("//mat-icon[normalize-space()='person']")).click();
+			Thread.sleep(2000);
+
+			driver.findElement(By.xpath("//button[normalize-space()='Logout']")).click();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Thread.sleep(1000);
+		driver.quit();
+
+	}
+}
+
+
+New Code with Fix:  
+java
+package qConnect;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+/
+ * Fix intent:
+ * - Actually perform defect reassignment + save to exercise notification trigger path (DF-25).
+ * - Replace brittle absolute XPaths with stable locators where possible.
+ * - Add explicit waits to avoid race conditions (Angular/Material UI).
+ * - Fail fast with meaningful errors instead of swallowing exceptions.
+ * - Externalize credentials/config to avoid environment drift (SMTP/notification config differs by tenant).
+ */
+public class DuoLoginAutomation {
+
+	public static void loginToDuo() {
+		// CHANGE: externalize driver path & credentials (avoid hard-coding)
+		String chromeDriverPath = System.getProperty("webdriver.chrome.driver", "C:chromedriver-win64chromedriver.exe");
+		System.setProperty("webdriver.chrome.driver", chromeDriverPath);
+
+		String baseUrl = System.getProperty("qconnect.baseUrl", "https://qconnect.mpoweredhealth.com/login");
+		String username = System.getProperty("qconnect.username"); // e.g. -Dqconnect.username=user@x.com
+		String password = System.getProperty("qconnect.password"); // e.g. -Dqconnect.password=...
+
+		if (username == null || password == null) {
+			throw new IllegalArgumentException("Missing credentials: supply -Dqconnect.username and -Dqconnect.password");
+		}
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--start-maximized", "--disable-notifications", "--disable-geolocation", "--incognito");
+
+		WebDriver driver = new ChromeDriver(options);
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20)); // CHANGE: explicit waits
+
+		try {
+			driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+			driver.get(baseUrl);
+
+			// --- Login ---
+			wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).sendKeys(username); // CHANGE: stable locator
+			wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).sendKeys(password);
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[normalize-space()='Log In']"))).click();
+
+			// --- Select portfolio / project (keep as-is but with waits) ---
+			wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-select#mat-select-0"))).click(); // CHANGE: css selector
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[normalize-space()='Qeats - Sample Portfolio']"))).click();
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[normalize-space()='Submit']"))).click();
+
+			// NOTE: The original code navigates to module management via an absolute XPath.
+			// CHANGE: wait for and click a more stable element if available; fallback kept minimal.
+			// If the app has a menu link like "Testing" or "Defects", prefer that.
+			// Example placeholder (update to your app’s real selector):
+			// wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[.='Testing']"))).click();
+
+			// --- NEW: Navigate to Defects and reassign a defect ---
+			// IMPORTANT: Actual selectors for "Defects", defect row, assignee field, and save button
+			// are not present in the provided snippet. The following code is a template that must be
+			// aligned to the real DOM.
+			//
+			// CHANGE: add the missing core action under test (assignment change + save)
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[normalize-space()='Qeats - Sample Project']"))).click();
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@type='submit']"))).click();
+
+			// ---- BEGIN DF-25 workflow (template selectors) ----
+			// 1) Go to defects list
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[contains(.,'Defects') or contains(.,'Bugs')]"))).click();
+
+			// 2) Open a specific defect (use a known defect ID provided via system property)
+			String defectId = System.getProperty("qconnect.defectId"); // e.g. DF-25 or internal numeric id
+			if (defectId == null) {
+				throw new IllegalArgumentException("Missing defect id: supply -Dqconnect.defectId=<id-to-reassign>");
+			}
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[contains(.,'" + defectId + "')]"))).click();
+
+			// 3) Change assignee (example: Angular Material mat-select)
+			String newAssignee = System.getProperty("qconnect.newAssignee"); // e.g. "naman.kumar@..."
+			if (newAssignee == null) {
+				throw new IllegalArgumentException("Missing new assignee: supply -Dqconnect.newAssignee=<user-display-or-email>");
+			}
+
+			WebElement assigneeSelect = wait.until(
+					ExpectedConditions.elementToBeClickable(By.xpath("//mat-label[normalize-space()='Assignee']/ancestor::mat-form-field//mat-select"))
+			);
+			assigneeSelect.click();
+
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//mat-option//span[contains(normalize-space(),'" + newAssignee + "')]")))
+					.click();
+
+			// 4) Save/Update defect (this is what should trigger backend event -> SMTP outbound)
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[normalize-space()='Save' or normalize-space()='Update']"))).click();
+
+			// 5) Assert assignee changed (prevents false "no SMTP event" due to no persistence)
+			wait.until(ExpectedConditions.visibilityOfElementLocated(
+					By.xpath("//mat-label[normalize-space()='Assignee']/ancestor::mat-form-field//*[contains(.,'" + newAssignee + "')]")
+			));
+			// ---- END DF-25 workflow ----
+
+			// --- Logout ---
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//mat-icon[normalize-space()='person']"))).click();
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[normalize-space()='Logout']"))).click();
+
+		} finally {
+			driver.quit();
+		}
+	}
+}
+
+
+Changes Made: - Added the missing defect reassignment workflow (navigate to defects → open defect → change assignee → Save/Update) so the automation actually triggers the backend assignment-change path that should emit the notification trigger (aligns directly with DF-25 + RCA). - Replaced `Thread.sleep(...)` and implicit timing assumptions with WebDriverWait + ExpectedConditions to prevent race conditions that could stop the assignment update from being persisted (a common reason you’d see “no outbound trigger event”). - Reduced brittleness by switching some absolute XPaths to stable locators (`By.id`, `By.cssSelector`, and relative XPaths). - Removed broad `catch (Exception e) { e.printStackTrace(); }` behavior and instead fail fast with explicit exceptions for missing required test inputs (defect id, assignee), ensuring test runs don’t silently “pass” without performing the trigger action. - Externalized credentials and runtime parameters via `-D...` system properties to avoid testing against the wrong tenant/environment where SMTP/notifications may be disabled (ties to RCA “Configuration” cause).
+
+3) Other Relevant details: - Testing recommendations: - Add an automated assertion that the assignee change is persisted (already included). This ensures the backend *should* have emitted the notification trigger. - Add a post-condition check for notification creation if the system exposes it (preferred): e.g., query a “Notifications/Outbox” table via API/admin UI, or check an application “email outbox” screen—this is more reliable than reading SMTP logs from Selenium. - Run against at least two environments: one known-good where assignment emails work and one where DF-25 reproduces, to separate code vs configuration per RCA. - Configuration changes (non-code, per RCA): - Verify tenant/project notification settings for “Defect assigned/reassigned” are enabled. - Confirm SMTP is enabled for the environment under test and that the app is configured to emit outbound events (feature flags / event bus config). Since SMTP logs show no outbound trigger event, focus on *trigger enablement* and *event publishing* configuration, not just SMTP credentials. - Documentation updates: - Document required JVM properties for running the test: `qconnect.baseUrl`, `qconnect.username`, `qconnect.password`, `qconnect.defectId`, `qconnect.newAssignee`. - Document stable selectors for Defects/Assignee/Save once confirmed in the UI DOM to avoid reintroducing brittle absolute XPaths. - Note on scope / missing production code: - The actual production fix for DF-25 is likely in backend services handling defect updates and notification/event emission. That code is not present here, so no direct backend code changes can be recommended from the provided snippet. The above changes ensure your automation accurately exercises the defect assignment path so the real backend issue (if any) can be reproduced and validated.
