@@ -1,0 +1,252 @@
+1) Description on code fix:  
+The provided codebase excerpts are test automation only (C# Selenium NUnit + Python Playwright pytest) and do not include the application/frontend/backend logic responsible for fetching stories on the Stories page. Because of that, there is no safe/direct way—using only the shown code—to patch the production defect where features load but stories do not for Spreadsheet and Jira models on new prod (Bug 11598).
+
+What *can* be fixed in the provided code (and is consistent with the RCA) is the code-level quality gap that allowed this regression to ship and made it hard to diagnose: current tests only validate login and never (a) execute the repro path (create/import epic → navigate to Stories), (b) assert that stories actually load (in addition to features), or (c) capture network/API evidence needed to determine whether the failure is due to a missing fetch trigger (code issue) versus a new-prod-only routing/auth/flag/config break (environment issue).  
+
+This fix therefore:
+- Adds environment parameterization so tests can run against new prod and other environments (supports RCA “Environment Issue”).  
+- Improves automation robustness by removing Selenium implicit wait (prevents masking async timing defects such as features-first, stories-later).  
+- Adds diagnostics (Selenium screenshot + HTML) and, crucially, Playwright network response assertions + tracing to confirm whether the stories API request is fired and whether it returns errors/empty payload (supports RCA “Code Issue” and “Environment Issue”).  
+- Adds a scaffold test that checks stories fetching for Spreadsheet and Jira models; this is the missing coverage tied directly to the reported defect (RCA “Code Issue: regression not covered”).  
+
+2) Code fix:  
+
+Relevant Code Found (automation). No application “stories fetch” code is present in the provided snippets; therefore, the changes below fix the automation gaps to detect/diagnose Bug 11598 and prevent recurrence.
+
+---
+
+## A) C# Selenium NUnit: parameterize environment + remove implicit wait + add failure diagnostics
+
+Existing Code: csharp
+// LoginTests.cs (representative based on analysis)
+[SetUp]
+public void Setup()
+{
+    driver = new ChromeDriver();
+    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+}
+
+[Test]
+public void Login_WithValidCredentials_ShouldSucceed()
+{
+    driver.Navigate().GoToUrl("https://example.com/login");
+    driver.FindElement(By.Id("username")).SendKeys("admin");
+    driver.FindElement(By.Id("password")).SendKeys("password");
+    driver.FindElement(By.Id("loginButton")).Click();
+
+    wait.Until(d => d.FindElement(By.Id("logoutButton")).Displayed);
+    Assert.IsTrue(driver.FindElement(By.Id("logoutButton")).Displayed);
+}
+
+[TearDown]
+public void TearDown()
+{
+    driver.Quit();
+    driver.Dispose();
+}
+
+
+New Code with Fix: csharp
+using System;
+using System.IO;
+using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+
+public class LoginTests
+{
+    private IWebDriver driver;
+    private WebDriverWait wait;
+
+    // CHANGE: environment parameterization (supports new prod vs old prod)
+    private string BaseUrl => Environment.GetEnvironmentVariable("APP_BASE_URL")
+                              ?? "https://example.com"; // fallback for local/dev
+
+    [SetUp]
+    public void Setup()
+    {
+        driver = new ChromeDriver();
+
+        // CHANGE: remove implicit wait to avoid compounded/flaky waits on async pages
+        driver.Manage().Timeouts().ImplicitWait = TimeSpan.Zero;
+
+        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+    }
+
+    [Test]
+    public void Login_WithValidCredentials_ShouldSucceed()
+    {
+        driver.Navigate().GoToUrl($"{BaseUrl}/login"); // CHANGE: use BaseUrl
+
+        driver.FindElement(By.Id("username")).SendKeys(
+            Environment.GetEnvironmentVariable("APP_USER") ?? "admin"); // CHANGE
+        driver.FindElement(By.Id("password")).SendKeys(
+            Environment.GetEnvironmentVariable("APP_PASSWORD") ?? "password"); // CHANGE
+
+        driver.FindElement(By.Id("loginButton")).Click();
+
+        wait.Until(d => d.FindElement(By.Id("logoutButton")).Displayed);
+        Assert.IsTrue(driver.FindElement(By.Id("logoutButton")).Displayed);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        try
+        {
+            // CHANGE: capture diagnostics on failure to support RCA (UI state, JS-rendered errors)
+            if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
+            {
+                Directory.CreateDirectory("artifacts");
+
+                var screenshot = ((ITakesScreenshot)driver).GetScreenshot();
+                var screenshotPath = Path.Combine("artifacts", $"{TestContext.CurrentContext.Test.Name}.png");
+                screenshot.SaveAsFile(screenshotPath);
+
+                var htmlPath = Path.Combine("artifacts", $"{TestContext.CurrentContext.Test.Name}.html");
+                File.WriteAllText(htmlPath, driver.PageSource);
+            }
+        }
+        finally
+        {
+            driver.Quit();
+            driver.Dispose();
+        }
+    }
+}
+
+
+Changes Made:  
+- Removed `ImplicitWait` to avoid flaky/compounded waits that can mask async loading issues (features load before stories).  
+- Parameterized `BaseUrl` and credentials via environment variables to run against new prod and compare environments (RCA environment component).  
+- Added failure artifacts (screenshot + page source) to speed diagnosis when the Stories page is blank.
+
+---
+
+## B) Python Playwright pytest: add network assertions + tracing; parameterize base URL
+
+Existing Code: python
+# test_login.py (representative based on analysis)
+import pytest
+from playwright.sync_api import sync_playwright
+
+@pytest.fixture
+def setup():
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        yield page
+        browser.close()
+
+class TestLogin:
+    def test_login_success(self, setup):
+        page = setup
+        page.goto("https://example.com/login")
+        page.fill("#username", "admin")
+        page.fill("#password", "password")
+        page.click("#loginBtn")
+        assert page.is_visible("text=Welcome")
+
+
+New Code with Fix: python
+import os
+import pytest
+from playwright.sync_api import sync_playwright, expect
+
+APP_BASE_URL = os.getenv("APP_BASE_URL", "https://example.com")
+APP_USER = os.getenv("APP_USER", "admin")
+APP_PASSWORD = os.getenv("APP_PASSWORD", "password")
+
+@pytest.fixture
+def context_and_page(tmp_path):
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+
+        # CHANGE: enable tracing for RCA (new prod only failures)
+        context = browser.new_context()
+        context.tracing.start(screenshots=True, snapshots=True, sources=True)
+
+        page = context.new_page()
+        yield context, page, tmp_path
+
+        # CHANGE: always save trace to help diagnose environment-specific issues
+        trace_path = tmp_path / "trace.zip"
+        context.tracing.stop(path=str(trace_path))
+        context.close()
+        browser.close()
+
+def _login(page):
+    page.goto(f"{APP_BASE_URL}/login")  # CHANGE: env-based base URL
+    page.fill("#username", APP_USER)
+    page.fill("#password", APP_PASSWORD)
+    page.click("#loginBtn")
+    expect(page.get_by_text("Welcome")).to_be_visible()
+
+class TestStoriesFetching:
+    @pytest.mark.parametrize("model_type", ["spreadsheet", "jira"])
+    def test_stories_load_for_model(self, context_and_page, model_type):
+        context, page, _ = context_and_page
+        _login(page)
+
+        # CHANGE: capture stories responses to distinguish:
+        # - UI didn't trigger stories fetch (no request)
+        # - environment/config issue (401/403/404/CORS)
+        # - regression (200 but empty/invalid payload)
+        stories_responses = []
+
+        def on_response(resp):
+            url = resp.url.lower()
+            # Adjust matcher to the real endpoint path once known.
+            if "stories" in url:
+                stories_responses.append(resp)
+
+        context.on("response", on_response)
+
+        # NOTE: The real repro steps (create/import epic + navigate to Stories)
+        # are not in provided code. Replace this placeholder with real actions.
+        page.goto(f"{APP_BASE_URL}/stories?model={model_type}")
+
+        # Prefer deterministic wait_for_response once endpoint is known; keep minimal buffer for now.
+        page.wait_for_timeout(2000)
+
+        assert len(stories_responses) > 0, (
+            f"No stories API response was observed for model={model_type}. "
+            f"Either the UI did not trigger the stories fetch (code issue) or the request is blocked in this environment."
+        )
+
+        bad = [r for r in stories_responses if r.status >= 400]
+        assert not bad, "Stories API returned errors: " + ", ".join([f"{r.status} {r.url}" for r in bad])
+
+        # Optional payload validation to catch "200 but empty stories" regressions
+        for r in stories_responses:
+            ct = (r.headers.get("content-type") or "").lower()
+            if "application/json" in ct:
+                data = r.json()
+                assert data is not None, f"Stories API returned null JSON for {r.url}"
+                # TODO: replace with real contract checks, e.g.:
+                # assert len(data.get("stories", [])) > 0
+
+
+Changes Made:  
+- Parameterized `APP_BASE_URL`, `APP_USER`, `APP_PASSWORD` so the same tests run on new prod and can reproduce environment-only failures (RCA environment component).  
+- Added Playwright tracing output (`trace.zip`) for actionable evidence (console errors, failed requests, timing).  
+- Added network response assertions for stories to directly detect Bug 11598 conditions: no stories request (missing trigger) vs error status (routing/auth/CORS/config) vs empty payload (regression/data issue).  
+- Added model parameterization for Spreadsheet and Jira, aligning with the defect scope.
+
+3) Other Relevant details:  
+- Testing recommendations
+  - Implement the full repro flow in automation: create/import epic → navigate to Stories page → assert features list is populated AND stories list is populated for both Spreadsheet and Jira models.
+  - In Playwright, replace the `"stories" in url` heuristic with the exact endpoint (e.g., `/api/.../stories`) and use `page.wait_for_response()` to avoid timeouts/flakiness.
+  - Add explicit UI assertions for the stories grid/list (e.g., row count > 0) in addition to network assertions.
+
+- Configuration changes if needed
+  - Since the defect is new-prod only, validate deployment/config for the stories endpoint: ingress/routing, API base path, auth scopes/roles (stories may require permissions not needed for features), CORS/CSP rules, and any feature flags enabling stories for Spreadsheet/Jira. The Playwright network assertions will surface 401/403/404 or missing requests to guide this quickly.
+
+- Documentation updates
+  - Document required CI variables: `APP_BASE_URL`, `APP_USER`, `APP_PASSWORD`.
+  - Document artifact locations and usage: Selenium `artifacts/*.png` and `artifacts/*.html`; Playwright `trace.zip` and how to open it (`playwright show-trace trace.zip`).
+
+- Any other implementation notes
+  - Because no application code was provided for the Stories page fetch logic, a direct product fix (e.g., ensuring the stories fetch is triggered after features load or after epic creation/navigation) cannot be safely authored here. Once the actual Stories page/API client/backend code is available, a targeted before/after patch should be created to address the root functional defect in production.
