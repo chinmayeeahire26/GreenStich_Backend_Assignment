@@ -1,0 +1,180 @@
+1) Description on code fix: The reported defect (DF-25) is: when a defect is assigned to another user, no notification email is received and SMTP logs show no outbound trigger event. Per the RCA, there are two plausible root causes:  
+- Configuration: notification trigger/rule or SMTP/outbound pipeline is not enabled, so the system never queues/publishes an outbound email event.  
+- Code issue: the defect assignment write-path does not publish/queue the “assigned” notification event, so no outbound trigger is generated.
+
+The provided code, however, is only `SeleniumAutomation.GoogleSearchTest`, which is a Selenium/NUnit UI test that navigates to Google and asserts a title. It contains no qConnect application logic for defect assignment, no notification publisher/handler, and no SMTP/outbound integration. Therefore, there is no production code here that can be changed to directly fix DF-25 (no place to add/repair the assignment-event publish, no SMTP trigger configuration, etc.).
+
+The only actionable “fix” within this repository/snippet is to address the coverage gap that allows DF-25 to escape: add/replace the test so it exercises the actual qConnect defect assignment flow and asserts the creation of an outbound notification trigger/event (or equivalent artifact such as an outbox record or MailHog message). This aligns with the RCA by ensuring that:  
+- If configuration disables the trigger/rule, the test fails because no outbound artifact appears.  
+- If the assignment path does not publish the event, the test fails for the same reason.  
+
+2) Code fix: Relevant Code NOT Found  
+The provided code (`SeleniumAutomation.GoogleSearchTest` with `Setup`, `SearchGoogleAndVerifyTitle`, `TearDown`) does not include any of the following required to implement the real DF-25 production fix:
+- Defect assignment service/controller logic
+- Domain event publishing for assignment changes
+- Notification outbox/dispatcher/handler logic
+- SMTP client/transport integration or configuration validation
+
+Because that logic is not present, no accurate before/after production code comparison can be provided that would fix DF-25.
+
+That said, a test-level fix (coverage addition) is relevant and can be applied to this code to detect DF-25. Below is the before/after comparison for replacing the unrelated Google test with a qConnect assignment-notification verification skeleton.
+
+Existing Code: csharp
+using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using System;
+
+namespace SeleniumAutomation
+{
+    public class GoogleSearchTest
+    {
+        private IWebDriver driver;
+        private WebDriverWait wait;
+
+        [SetUp]
+        public void Setup()
+        {
+            driver = new ChromeDriver();
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+        }
+
+        [Test]
+        public void SearchGoogleAndVerifyTitle()
+        {
+            try
+            {
+                driver.Navigate().GoToUrl("https://www.google.com");
+
+                IWebElement searchBox = wait.Until(d => d.FindElement(By.Name("q")));
+                searchBox.SendKeys("Selenium C#");
+                searchBox.SendKeys(Keys.Enter);
+
+                wait.Until(d => d.Title.ToLower().Contains("selenium c#"));
+
+                Assert.IsTrue(driver.Title.ToLower().Contains("selenium c#"),
+                    "Page title does not contain the search term!");
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail("Test failed due to exception: " + ex.Message);
+            }
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            driver.Quit();
+        }
+    }
+}
+
+
+New Code with Fix: csharp
+using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using System;
+
+namespace SeleniumAutomation
+{
+    public class DefectAssignmentNotificationTest
+    {
+        private IWebDriver driver;
+        private WebDriverWait wait;
+
+        // CHANGE: configurable qConnect target + creds (so this test can run in CI/envs)
+        private string baseUrl;
+        private string username;
+        private string password;
+
+        [SetUp]
+        public void Setup()
+        {
+            driver = new ChromeDriver();
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20)); // CHANGE: slightly higher timeout
+
+            // CHANGE: read AUT settings from environment variables (or runsettings)
+            baseUrl = Environment.GetEnvironmentVariable("QCONNECT_BASE_URL");
+            username = Environment.GetEnvironmentVariable("QCONNECT_USERNAME");
+            password = Environment.GetEnvironmentVariable("QCONNECT_PASSWORD");
+
+            Assert.That(baseUrl, Is.Not.Null.And.Not.Empty, "QCONNECT_BASE_URL must be set");
+            Assert.That(username, Is.Not.Null.And.Not.Empty, "QCONNECT_USERNAME must be set");
+            Assert.That(password, Is.Not.Null.And.Not.Empty, "QCONNECT_PASSWORD must be set");
+        }
+
+        [Test]
+        public void AssigningDefect_ShouldCreateOutboundNotificationTrigger()
+        {
+            // NOTE: Skeleton only—qConnect selectors/routes are not available in the provided context.
+            // The intent is to validate the RCA symptom: an outbound notification trigger/event must appear.
+
+            driver.Navigate().GoToUrl($"{baseUrl}/login"); // CHANGE: go to qConnect, not Google
+
+            // CHANGE: login placeholders (update selectors for real qConnect UI)
+            wait.Until(d => d.FindElement(By.Id("username"))).SendKeys(username);
+            driver.FindElement(By.Id("password")).SendKeys(password);
+            driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+            // CHANGE: navigate to a defect and reassign it (placeholders)
+            driver.Navigate().GoToUrl($"{baseUrl}/defects/DF-25"); // placeholder route/id
+            wait.Until(d => d.FindElement(By.Id("assigneeDropdown"))).Click();
+            wait.Until(d => d.FindElement(By.CssSelector("[data-user='otherUser']"))).Click(); // placeholder
+            driver.FindElement(By.Id("saveDefectButton")).Click();
+
+            // CHANGE: assert a notification side-effect exists (placeholder indicator).
+            // Replace with a reliable artifact in your system:
+            // - notification outbox entry (API/admin UI),
+            // - outbound event log record,
+            // - MailHog/Mailpit message existence,
+            // - event bus publish observed by test consumer.
+            var toast = wait.Until(d => d.FindElement(By.CssSelector(".toast-success")));
+            Assert.That(toast.Text, Does.Contain("Notification queued")
+                .Or.Contain("Email notification scheduled"),
+                "Expected an outbound notification trigger after assignment, but none was observed.");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            // CHANGE: defensive cleanup
+            driver?.Quit();
+            driver?.Dispose();
+        }
+    }
+}
+
+
+Changes Made:  
+- Replaced the unrelated Google search test with a qConnect defect assignment test entry point.  
+- Added environment-driven configuration (`QCONNECT_BASE_URL`, `QCONNECT_USERNAME`, `QCONNECT_PASSWORD`) to run against real environments implicated in DF-25.  
+- Added an assertion for a notification side-effect (placeholder) to detect “no outbound trigger event,” matching DF-25 symptoms and RCA focus.  
+- Removed the broad try/catch that masks stack traces; failures now preserve diagnostic detail for debugging missing triggers.  
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Replace the placeholder “toast” assertion with a hard assertion on the real outbound trigger artifact:
+    - Query a notification outbox/event store via API/DB and assert an entry exists for the defect assignment action (preferred).
+    - Use MailHog/Mailpit in test environments and assert an email was captured after assignment.
+    - If event-driven: attach a test consumer to assert the publish of `DefectAssigneeChanged` (or equivalent).  
+  - Add a regression test that verifies: assignment → outbox/event created → dispatcher processes → SMTP send attempt logged.  
+  - Add a configuration-guard test: when notifications are disabled, verify no trigger is created (prevents silent config regressions).
+
+- Configuration changes if needed (per RCA “Configuration”):  
+  - Confirm project/tenant notification rules include “Defect Assigned” and are enabled.  
+  - Confirm notification feature flags are enabled (e.g., `NotificationsEnabled`, `EmailNotificationsEnabled`).  
+  - Confirm outbound pipeline is operational:
+    - SMTP host/port/credentials/from address/TLS  
+    - Background worker/job that drains outbox is enabled and running  
+    - Event bus/broker endpoint reachable if used  
+  - Add a healthcheck/startup validation that surfaces “notification triggers disabled” or “SMTP not configured,” since DF-25 shows no outbound trigger event.
+
+- Documentation updates:  
+  - Document the expected event/trigger generated on assignment (name, payload, where stored/observed).  
+  - Provide an operational runbook: how to verify assignment generates an outbox/event record and how to verify SMTP dispatch.
+
+- Implementation notes:  
+  - To implement the actual production fix (ensure defect assignment publishes/queues the notification event), the qConnect source modules for defect assignment + notification publishing/dispatch must be reviewed. They are not present in the provided snippet, so only test coverage + configuration validation can be made actionable here.
