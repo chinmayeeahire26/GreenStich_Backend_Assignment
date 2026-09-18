@@ -1,0 +1,98 @@
+1) Description on code fix:  
+The defect DF-25 is: *when a defect is assigned to another user, no notification email is received, and SMTP logs show no outbound trigger event.* This symptom strongly indicates the notification workflow is not being initiated at all (no trigger/event queued/published), aligning with the RCA possibilities: (1) configuration disables/misconfigures assignment notifications, and/or (2) code fails to publish an “assignment” event into the notification/email subsystem.
+
+After reviewing the provided repository context, the codebase is a Selenium NUnit UI automation project that tests login against `https://the-internet.herokuapp.com`. It contains no implementation for qConnect defect assignment, notification trigger publishing, eventing/outbox, or SMTP/email sending. Therefore, a direct code fix for DF-25 cannot be made here, because the relevant application code (qConnect backend and its notification/email configuration) is not present.
+
+What *can* be fixed in this repo—consistent with the RCA “Configuration” risk—is to harden the test harness configuration loading so that future E2E tests for assignment/notifications don’t silently run with missing/incorrect settings (a common reason notification features appear “not triggered” in certain environments). This is not the product fix for DF-25, but it is the only actionable code change available within this repository, and it supports preventing/diagnosing RCA-class issues earlier.
+
+2) Code fix:  
+Relevant Code NOT Found  
+- No code exists for defect assignment (controller/service/handler), notification trigger creation (domain event/outbox/queue), notification subscriptions, or SMTP/email adapters.  
+- `appsettings.json`, `TestSettings.cs`, and the automation tests do not contain notification/SMTP enablement or any assignment workflow steps.  
+- Therefore, DF-25 cannot be directly fixed within this repository; the true fix must be in the qConnect application code/configuration where assignment events are created and routed to the email subsystem.
+
+The following test-harness-level code hardening is relevant and implementable here:
+
+Existing Code: csharp
+// Config.cs
+public static class Config
+{
+    public static TestSettings Load()
+    {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
+
+        var settings = new TestSettings();
+        config.Bind(settings);
+        return settings;
+    }
+}
+
+
+New Code with Fix: csharp
+// Config.cs
+using Microsoft.Extensions.Configuration;
+using System;
+
+public static class Config
+{
+    public static TestSettings Load()
+    {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
+            .AddEnvironmentVariables(prefix: "E2E_") 
+            // CHANGE: allow CI/runtime overrides; helps avoid config drift where features may be "disabled" in CI/env
+            .Build();
+
+        var settings = new TestSettings();
+        config.Bind(settings);
+
+        // CHANGE: fail fast so missing settings don't silently default and mask environment misconfiguration
+        Validate(settings);
+
+        return settings;
+    }
+
+    private static void Validate(TestSettings settings)
+    {
+        if (settings == null) throw new InvalidOperationException("TestSettings not loaded.");
+
+        if (string.IsNullOrWhiteSpace(settings.BaseUrl))
+            throw new InvalidOperationException("Missing required setting: BaseUrl");
+
+        if (settings.Credentials == null ||
+            string.IsNullOrWhiteSpace(settings.Credentials.Username) ||
+            string.IsNullOrWhiteSpace(settings.Credentials.Password))
+            throw new InvalidOperationException("Missing required setting: Credentials.Username/Password");
+
+        // NOTE: When qConnect assignment/email tests are added, extend validation for:
+        // - Notification/SMTP enablement flags
+        // - Test SMTP sink URL (MailHog/Papercut) or notification API credentials
+    }
+}
+
+
+Changes Made:  
+- Added environment variable overrides (`AddEnvironmentVariables(prefix: "E2E_")`) to prevent CI/environment config drift (supports RCA “Configuration” angle).  
+- Added explicit validation (`Validate(settings)`) to fail fast on missing critical configuration, avoiding silent defaults that can hide misconfiguration.
+
+3) Other Relevant details:  
+- Testing recommendations (required to detect/prevent DF-25):  
+  - Add an E2E test for qConnect (not herokuapp) that performs: open defect → assign to another user → assert a notification trigger was created (outbox/event/queue/notification table).  
+  - Assert trigger creation first (matches “no outbound trigger event logged”); only then optionally assert email delivery via a test SMTP sink (MailHog/Papercut).  
+  - Capture correlation IDs / server logs during the assignment call to confirm whether the backend publishes the expected `DefectAssigned` event.
+
+- Configuration changes if needed (in qConnect, not in this repo, per RCA):  
+  - Verify assignment notifications are enabled (feature flags / notification rules / event-to-template mappings).  
+  - Verify SMTP/outbound notification configuration is present and correct (host/port/from address, recipients resolution rules, templates).  
+  - Verify environment-specific overrides are not disabling assignment notifications in the affected environment.
+
+- Documentation updates:  
+  - Document notification enablement flags and defaults (especially if disabled by default).  
+  - Document how to verify “outbound trigger event” creation (where it is stored/logged: outbox table, queue, event bus topic, etc.).
+
+- Implementation note to produce the *actual* DF-25 fix:  
+  - The qConnect backend/source where defect assignment is handled and where notification triggers are published/subscribed must be provided. Without that, a concrete before/after patch that ensures the assignment event is published and enqueued for email cannot be authored in this repository.
