@@ -1,0 +1,33 @@
+1) Description on code fix:  
+The defect DF-25 is: *“When a defect is assigned to another user, notification email is not received; SMTP logs show no outbound trigger event.”* RCA indicates this can be caused by (1) a code issue where the assignment notification event is not fired, and/or (2) a configuration issue where email notifications/SMTP/worker are disabled or misconfigured.
+
+In the provided source, the only code available is a Selenium UI automation class `DuoLoginAutomation` that performs login, clicks “Requirements Analysis”, clicks a tab, and logs out. It contains no defect assignment action and no email/notification triggering logic (no backend call, no event dispatch, no SMTP client usage). Therefore:
+- There is no relevant application/backend code present to implement/fix “fire notification on assignment” (the actual DF-25 functional defect) within this snippet.
+- The only actionable “fix” within this code is to correct the automation so it can actually execute the defect assignment workflow and reliably validate whether an outbound trigger/email occurs (which aligns to the RCA observation that “no outbound trigger” can also happen when the assignment action never actually executes/persists).
+
+However, the previously proposed “fix” is not fully actionable as written because it introduces a placeholder `assignDefectAndSave(...)` that throws `UnsupportedOperationException`, meaning the test will never perform an assignment and thus still cannot validate DF-25. To be consistent with the defect + RCA and be actionable, the automation must (a) navigate to a defect, (b) change assignee, (c) save/update, and (d) assert the assignee changed (and optionally verify outbound email via a test SMTP sink). Since the DOM/selectors for the Defects/Assignment UI are not included, the correct resolution is to explicitly mark Relevant Code NOT Found for the application fix, and constrain the automation changes to reliability improvements plus clearly identified integration points that require real selectors to complete.
+
+2) Code fix:  
+Relevant Code NOT Found  
+The provided code is a Selenium UI automation script and does not contain the application/backend code path responsible for defect assignment processing or for publishing/triggering the outbound email notification event (the source needed to fix DF-25). Specifically, there is no controller/service handling “assign defect,” no event publisher (e.g., `DefectAssigned`), and no notification/email service invocation. As a result, a true functional code fix for DF-25 (ensuring assignment triggers an email and an outbound SMTP trigger is logged) cannot be implemented or validated from this snippet alone.
+
+3) Other Relevant details:  
+- Testing recommendations:  
+  - Add/extend an E2E test that actually performs defect assignment (open defect → change assignee → click Save/Update) and then verifies:  
+    1) UI shows updated assignee (ensures persistence, which is prerequisite to any outbound trigger), and  
+    2) an outbound email event occurred via MailHog/Mailtrap or an application outbox/audit log endpoint/table.  
+  - Ensure the automation uses explicit waits (`WebDriverWait`) and stable locators (prefer `data-testid`) rather than absolute XPaths/dynamic Angular Material IDs to prevent false “no outbound trigger” results caused by flaky UI actions not executing.  
+  - Ensure the test runs with a user that has permission to reassign defects; otherwise the assignment won’t persist and no notification event will fire.
+
+- Configuration changes if needed (per RCA):  
+  - Verify assignment-email notifications are enabled (feature flags/toggles).  
+  - Verify SMTP host/port/credentials/from-address, and confirm the environment where SMTP logs are inspected is the same one performing the assignment.  
+  - If notifications are async, confirm the queue/worker/consumer responsible for sending emails is running; a stopped worker can yield “no outbound trigger event” symptoms.
+
+- Documentation updates:  
+  - Document required notification settings (feature toggles, templates, recipient rules for “assignee changed”).  
+  - Document how to validate outbound email triggers in non-prod (MailHog/Mailtrap, outbox table, audit logs) and what logs/metrics indicate the “assignment notification event” was published.
+
+- Implementation notes (what code must be inspected to truly fix DF-25):  
+  - Locate the backend code handling defect updates/assignment (controller/handler/service). Ensure it explicitly emits a “DefectAssigned/AssigneeChanged” event when the assignee changes and that the notification/email handler is subscribed and enabled for that event.  
+  - Add server-side logging/metrics at: assignment persisted → event published → notification handler invoked → SMTP send attempted, to directly address “no outbound trigger event logged.”
