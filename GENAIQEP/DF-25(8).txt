@@ -1,0 +1,35 @@
+I don’t have enough context to know what “Prompt data not found in the response” refers to, but it usually means your client code expected a field named something like `prompt` (or “prompt data”) in the API response and it wasn’t there.
+
+To help, please paste:
+1) The request you sent (URL + method + headers + body, with secrets removed)  
+2) The exact response body you received  
+3) Your parsing code (the line where it tries to read “prompt data”)
+
+In the meantime, here are the most common causes and fixes:
+
+## Common causes
+### 1) You’re parsing the wrong field
+Depending on the API/provider, the generated text is often in:
+- `choices[0].message.content` (chat-style)
+- `choices[0].text` (older completions-style)
+- `output_text` / `output[0].content[0].text` (varies by SDK)
+
+If your code is doing something like `response.prompt` or `response.data.prompt`, it will fail.
+
+### 2) You’re expecting the prompt to be echoed back
+Many APIs do not return your original prompt unless you explicitly log it on your side. They return the model output and metadata, not the prompt.
+
+### 3) You’re hitting a different endpoint/SDK shape than your code expects
+For example, using a “responses” endpoint but parsing it like a “chat completions” response (or vice versa).
+
+### 4) Error responses have a different schema
+If the API returned an error, the body may look like:
+- `{ "error": { "message": "...", ... } }`
+and your code still tries to read the normal success fields.
+
+## Quick debugging steps
+- Log the entire JSON response before parsing.
+- Check HTTP status code (200 vs 4xx/5xx).
+- Confirm which endpoint you’re calling and match parsing logic to that schema.
+
+Share the request/response and I’ll tell you exactly which field to read and how to fix your parsing.
