@@ -1,0 +1,19 @@
+I don’t have enough context to know what “Prompt data not found in the response” refers to, but it usually means your client code expected a field (often called `prompt`, `prompt_data`, or similar) in the API response and it wasn’t there—either because the API doesn’t return it, it was renamed, or you’re parsing the wrong path.
+
+To help you quickly, please paste:
+1) The API endpoint + model you’re calling  
+2) A redacted request JSON  
+3) The raw response JSON you received  
+4) The exact code line (or JSON path) where you try to read “prompt data”
+
+Common causes and fixes:
+
+- You’re expecting the API to echo your prompt back. Many APIs don’t return the original prompt by default. Fix: store the prompt client-side; don’t expect it in the response.
+- Wrong response field. For OpenAI-style responses, you typically want:
+  - Chat Completions: `response.choices[0].message.content`
+  - Responses API: `response.output[0].content[0].text` (structure can vary)
+- You’re using `stream=true`. Streaming responses arrive in chunks; the full structure isn’t present until you assemble it. Fix: accumulate deltas/events and then parse.
+- Your SDK version changed the schema. Fix: check the SDK docs/changelog and update your parsing accordingly.
+- Middleware/logging layer stripping fields. Some proxies remove request/diagnostic fields. Fix: inspect the raw HTTP response.
+
+If you share the request/response snippets, I’ll tell you exactly which field you should read and how to adjust your parsing.
